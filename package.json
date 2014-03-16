@@ -1,10 +1,14 @@
 {
-  "name": "ASQ-microformat",
+  "name": "asq-microformat",
   "version": "0.0.0",
   "description": "Microformat parser and markup generator for ASQ",
   "main": "index.js",
+  "repository" :
+  { "type" : "git"
+  , "url" : "https://github.com/ASQ-USI/ASQ-Microformat"
+  },
   "scripts": {
-    "test": "make test"
+    "test": "make test-unit"
   },
   "author": "Vasileios Triglianos",
   "license": "MIT",
@@ -30,9 +34,6 @@
     "mocha": "~1.8.2",
     "mocha-as-promised": "~1.4.0",
     "istanbul": "~0.2.6"
-  },
-  "scripts": {
-    "test": "make test-unit"
   },
   "readmeFilename": "README.md"
 }
