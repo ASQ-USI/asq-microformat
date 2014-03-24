@@ -3,9 +3,9 @@
   "version": "0.0.0",
   "description": "Microformat parser and markup generator for ASQ",
   "main": "index.js",
-  "repository" :
-  { "type" : "git"
-  , "url" : "https://github.com/ASQ-USI/ASQ-Microformat"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ASQ-USI/asq-microformat"
   },
   "scripts": {
     "test": "make test-unit"
@@ -19,7 +19,7 @@
     "jquery": "~2.1.0",
     "lodash": "~2.4.1",
     "sugar": "~1.4.1",
-    "when": "~2.8.0"
+    "when": "^2.8.0"
   },
   "devDependencies": {
     "browserify": "~2.35.1",
