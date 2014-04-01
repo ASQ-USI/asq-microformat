@@ -35,11 +35,6 @@ module.exports = function(grunt) {
         options: {
           basePath: "dusts/" ,
           wrapper: "commonjs",
-          wrapperOptions: {
-            deps: {
-              dust: "dustjs-linkedin"
-            }
-          },
           runtime: false
         }
       }
@@ -63,7 +58,7 @@ module.exports = function(grunt) {
     watch: {
       defaults: {
         files: ['lib/**/*.js', 'dusts/*.dust', 'previewer/*.js'],
-        tasks: ['build'],
+        tasks: ['devbuild'],
         options: {
           interrupt: true
         },
@@ -75,10 +70,15 @@ module.exports = function(grunt) {
   //npm tasks
   require('load-grunt-tasks')(grunt);
 
+  //load custom tasks
+  grunt.loadTasks('./tasks');
+
   // Build grunt
-  grunt.registerTask( "build", [ "dust", "browserify", "uglify" ] );
+  grunt.registerTask( "build", [ "dust", "post-dust", "browserify", "uglify" ] );
   // Default grunt
   grunt.registerTask( "default", [ "build"] );
+  // devbuild grunt
+  grunt.registerTask( "devbuild", ["dust", "post-dust", "browserify"] );
   // Dev grunt
-  grunt.registerTask( "devwatch", [ "dust", "browserify", "watch"] );
+  grunt.registerTask( "devwatch", [ "devbuild", "watch"] );
 };
