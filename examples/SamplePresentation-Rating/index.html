@@ -11,7 +11,7 @@
     <meta name="author" content="Max von Bülow, Vasileios Triglianos" />
 
     <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
-		<link href="css/bootstrap.min.presentation.css" type="text/css" rel="stylesheet">
+		<link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
     <link href="css/ASQBasicImpress.css" type="text/css" rel="stylesheet"/>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
   </head>
@@ -197,9 +197,17 @@
     </script>
 		<script src="js/jquery.js"></script>
     <script src="js/impress.js"></script>
-     <script src="js/bootstrap.min.presentation.js"></script>
-    <script>
-impress().init();
+    <script src="js/bootstrap.min.js"></script>
+    <script src="../../dist/asq.js"></script>
+    <script type="text/javascript">
+      'use strict';
+
+      //ASQ previewer
+      var asqPreviewer = require('asq');
+      asqPreviewer.init(function(err, done){
+        if (err) throw err;  
+        impress().init();
+      })
     </script>
 
   </body>
