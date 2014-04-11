@@ -1,0 +1,44 @@
+body {
+  background-color: #000;
+}
+svg.av-cor {
+  font: 24px sans-serif;
+  shape-rendering: crispEdges;
+}
+.av-cor-xAxis {
+  stroke: white;
+}
+div.av-cor-tooltip {
+  position: absolute;
+  width: 80px;
+  height: 48px;
+  padding: 8px;
+  font: 14px sans-serif;
+  background: #1D1D1D;
+  pointer-events: none;
+  left: 100px;
+  right: 100px;
+}
+.av-cor-title {
+  font: 48px sans-serif;
+  font-weight: bold;
+}
+svg.av-cor,
+div.av-cor-tooltip,
+.av-cor-title {
+  position: absolute;
+  color: white;
+  fill: white;
+  text-align: center;
+  vertical-align: center;
+}
+svg.av-cor,
+div.av-cor-tooltip {
+  border: 2px solid white;
+  background: #1D1D1D;
+}
+input.av-cor-button {
+  position: absolute;
+  width: 80px;
+  text-align: center;
+}
