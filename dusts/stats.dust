@@ -26,7 +26,7 @@
   {/activePanes.distinct-options}
   {?activePanes.correctness}
   <li>
-    <a href="#av-cor-tab-{statId}" data-toggle="tab">Correctness</a>
+    <a href="#asq-viz-tab-{statId}" data-toggle="tab">Correctness</a>
   </li>
   {/activePanes.correctness}
 </ul>
@@ -72,8 +72,8 @@
   {/activePanes.distinct-options}
   <!-- Display correctness  -->
   {?activePanes.correctness}
-  <div class="tab-pane" id="av-cor-tab-{statId}">
-    <div id="av-cor-{statId}"></div>
+  <div class="tab-pane" id="asq-viz-tab-{statId}">
+    <div class="asq-viz-graph" data-width="{width}" data-height="{height}" data-margin="{margin|js}"></div>
   </div>
   {/activePanes.correctness}
 </div>
