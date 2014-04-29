@@ -19,6 +19,10 @@
 *.rar
 *.tar
 
+# Hidden Files and Folders #
+############################
+.*
+!/.gitignore
 
 # Node.js #
 ###########
