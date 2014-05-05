@@ -6,7 +6,8 @@ module.exports = {
     "htmlId":"q-2",
     "slideHtmlId": "slide-02",
     "questionType": "text-input", 
-    "correctAnswer": null
+    "correctAnswer": null,
+    "rubrics": null
     }
   },
   stats:[]
