@@ -1,0 +1,9 @@
+{>"question-presenter"/}
+
+{<questionContent}
+  <ol>
+  {#question.questionOptions formButtonType=question.formButtonType htmlId=question.htmlId}
+    <li class="{classList}" >{text|s}</li>{~n}
+  {/question.questionOptions}
+  </ol>
+{/questionContent}

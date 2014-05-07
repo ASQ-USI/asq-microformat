@@ -28,33 +28,29 @@ function init(cb){
 function start(userType, cb){
   //parse
   var asqParser = new Parser();
-  asqParser.parse('')
-    .then(
-      function(parsedData){
-        parsedData = fakeDatabaseIds(parsedData);
+  var parsedData = asqParser.parse('')
+  parsedData = fakeDatabaseIds(parsedData);
 
-        //render
-        var asqRenderer = new MarkupGenerator()
-        return asqRenderer.render('', parsedData.questions,
-                                    { 
-                                      userType: userType,
-                                      mode: "preview"
-                                    });
-      })
-    .then(
-      function(html){
-        assessment.initCodeEditors();
-        randomize();
+  //render
+  var asqRenderer = new MarkupGenerator()
+  asqRenderer.render('', parsedData.exercises,
+                          { 
+                            userType: userType,
+                            mode: "preview"
+  }).then(
+    function(html){
+      assessment.initCodeEditors();
+      randomize();
+      if (typeof cb !== "undefined" && typeof cb == "function"){
+        cb.call(this, null, true)
+      }
+    },
+    function(err){
+        logger.error(err)
         if (typeof cb !== "undefined" && typeof cb == "function"){
-          cb.call(this, null, true)
+          cb.call(this, err)
         }
-      },
-      function(err){
-          logger.error(err)
-          if (typeof cb !== "undefined" && typeof cb == "function"){
-            cb.call(this, err)
-          }
-      });
+    });
 }
 
 function fakeDatabaseIds(data){

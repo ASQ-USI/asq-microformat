@@ -30,6 +30,7 @@ describe('AsqParser', function() {
 
     it("should return an object that matches the reference object", function(){
      var parsed = asqParser.parse(htmlMCString, {outputFormat:'Object'});      
+     console.dir(parsed.html)
       expect(parsed.questions).to.deep.equals(expectedMC.questions);
     }); 
 
