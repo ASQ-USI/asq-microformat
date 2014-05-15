@@ -1,1 +1,2 @@
-{+questionContent/}
+{! Question template, expect a question as the context !}
+{>"question-{questionType}-presenter"/} {! Inject type specific content !}

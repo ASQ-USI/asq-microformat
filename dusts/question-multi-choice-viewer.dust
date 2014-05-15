@@ -1,0 +1,10 @@
+<ol>
+  {#questionOptions}
+    <li class="{classList}" >
+      <label class="{formButtonType}">
+        <input type="{formButtonType}" name="{htmlId}" value="{$idx}"
+        {?submission} disabled{?submission[$idx]} checked{/submission[$idx]}{/submission}> {text|s}
+      </label>
+    </li>{~n}
+  {/questionOptions}
+</ol>
