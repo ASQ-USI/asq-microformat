@@ -19,10 +19,10 @@ module.exports = function(grunt) {
         dest: 'dist/asq.js',
         options: {
           debug: true,
-          alias: 'previewer/asq.js:asq,previewer/dust-runtime.js:dust' 
+          alias: 'previewer/asq.js:asq,previewer/dust-runtime.js:dust'
           ,
           external: ["cheerio","./dustfs", "../logger"],
-        }        
+        }
       }
     },
 
@@ -56,6 +56,9 @@ module.exports = function(grunt) {
 
         //watch
     watch: {
+      options:{
+        livereload: true
+      },
       defaults: {
         files: ['lib/**/*.js', 'dusts/*.dust', 'previewer/*.js'],
         tasks: ['devbuild'],
@@ -66,7 +69,7 @@ module.exports = function(grunt) {
     }
 
   });
-  
+
   //npm tasks
   require('load-grunt-tasks')(grunt);
 
