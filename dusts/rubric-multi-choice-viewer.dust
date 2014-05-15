@@ -1,0 +1,25 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <a data-toggle="collapse" href="#collapse-{_id}">{stemText}</a>
+      <span class="label label-default am-rubric-grade"></span>
+    </h4>
+  </div>
+  <div id="collapse-{_id}" class="panel-collapse collapse in">
+    <div class="panel-body">
+      <div class="input-group am-rubric-group">
+        <ul class="am-rubric-list list-group">
+        {#criteria}
+          <li class="list-group-item">
+            <div class="am-rubric-elem">
+              <input type="radio" name="collaspe-{_id}" value="{points}"/>
+              <span class="label label-default">{label}</span>
+            </div>
+            <div class="am-rubric-elem">{desc}</div>
+          </li>
+        {/criteria}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

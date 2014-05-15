@@ -2,7 +2,7 @@
 {! Autoescaping is off, only use fully trusted content !}
   {exerciseContent|s}
   <div class="progress" >
-  <div class="progress-bar" role="progressbar" style="width: 0%;"></div>
+    <div class="progress-bar" role="progressbar" style="width: 0%;"></div>
   </div>
   <h5 class="pull-right progressNum">Waiting for answers!</h5>
 </form>
