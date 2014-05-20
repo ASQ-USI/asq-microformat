@@ -14,19 +14,18 @@
   "license": "MIT",
   "dependencies": {
     "brace": "^0.2.1",
+    "browserify": "^4.1.5",
     "cheerio": "^0.15.0",
+    "dustjs-helpers": "^1.2.0",
     "dustjs-linkedin": "~2.3.5",
+    "grunt-browserify": "^2.1.0",
     "jquery": "~2.1.0",
     "lodash": "~2.4.1",
+    "node-uuid": "^1.4.1",    
     "sugar": "~1.4.1",
-    "when": "^3.1.0",
-    "node-uuid": "^1.4.1",
-    "browserify": "^4.1.5",
-    "dustjs-helpers": "^1.2.0"
-    "grunt-browserify": "^2.1.0"
+    "when": "^3.1.0"
   },
   "devDependencies": {
-    "browserify": "~2.35.1",
     "chai": "*",
     "chai-as-promised": "*",
     "ent": "^2.0.0",
