@@ -1,0 +1,5 @@
+<div id="asq-rubrics-for-{question}" class="panel-group">
+  {#rubrics question=question}
+    {>"rubric-{questionType}-viewer"/}
+  {/rubrics}
+</div>

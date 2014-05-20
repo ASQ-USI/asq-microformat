@@ -1,0 +1,29 @@
+{! Expect rated to indicate the object being rated and a optional rating !}
+{! value which will be show and the inputs will be disabled !}
+<span class="am-rating{@if cond="1<={ratin} && {ratin} <= 5"} disabled{/if}">
+      <!-- 5 stars rating -->
+      <input type="radio" id="am-rating-{rated}-5" value="5"
+            class="am-rating-input" name="am-rating-{rated}"
+            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=5} checked {/eq}{/if}>
+      <label for="am-rating-{rated}-5" class="am-rating-star"></label>
+      <!-- 4 stars rating -->
+      <input type="radio" id="am-rating-{rated}-4" value="4"
+            class="am-rating-input" name="am-rating-{rated}"
+            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=4} checked {/eq}{/if}>
+      <label for="am-rating-{rated}-4" class="am-rating-star"></label>
+      <!-- 3 stars rating -->
+      <input type="radio" id="am-rating-{rated}-3" value="3"
+            class="am-rating-input" name="am-rating-{rated}"
+            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=3} checked {/eq}{/if}>
+      <label for="am-rating-{rated}-3" class="am-rating-star"></label>
+      <!-- 2 stars rating -->
+      <input type="radio" id="am-rating-{rated}-2" value="2"
+            class="am-rating-input" name="am-rating-{rated}"
+            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=2} checked {/eq}{/if}>
+      <label for="am-rating-{rated}-2" class="am-rating-star"></label>
+      <!-- 1 star rating -->
+      <input type="radio" id="am-rating-{rated}-1" value="1"
+            class="am-rating-input" name="am-rating-{rated}"
+            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=1} checked {/eq}{/if}>
+      <label for="am-rating-{rated}-1" class="am-rating-star"></label>
+</span>

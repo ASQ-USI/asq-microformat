@@ -1,0 +1,26 @@
+ {! Assessment for an exercise which made of an answer and rubrics. !}
+<div class="am-assessment-container">
+{#exercises}
+  <div class="am-assessment-outer">
+    <div class="am-assessment">
+      <form class="am-assessment-inner">
+        {#questions}
+        <div class="am-flex-box">
+          <div class="am-flex-col">
+            {>"question-viewer"/} {! Select question template according to question type !}
+          </div>
+          <div class="am-flex-handle"></div>
+          <div class="am-flex-col">
+            {>rubric-viewer question=_id/}
+          </div>
+        </div>
+        {/questions}
+        <p class="text-right">
+          <span class="am-confidence-label">Confidence:</span> {>rating rated=_id ratin="7"/}
+          <button type="submit" class="btn btn-success">Submit</button>
+        </p>
+      </form>
+    </div>
+  </div>
+{/exercises}
+</div>

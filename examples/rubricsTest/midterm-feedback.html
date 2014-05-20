@@ -7,13 +7,13 @@
 <meta name="description" content="Introduction to Software Architecture and Design">
 <meta name="author" content="Cesare Pautasso">
 
+<link href="css/font.css" rel="stylesheet">
+<link href="css/default.css" rel="stylesheet">
+<link href="css/builder.css" rel="stylesheet">
 <link href="css/bootstrap.min.css" rel="stylesheet">
 <link href="css/ASQBasicImpress.css" rel="stylesheet">
 <link href="css/asq-visualization.min.css" rel="stylesheet">
 <link href="css/style.css" rel="stylesheet">
-<link href="css/font.css" rel="stylesheet">
-<link href="css/default.css" rel="stylesheet">
-<link href="css/builder.css" rel="stylesheet">
 
 <link rel="shortcut icon" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -46,62 +46,169 @@
   </div>
 
   <section id="s-110" class="step" data-x="1500" data-y="0">
-    <article id="q-110" class="assessment multi-choice choose-1">
-      <p class="stem"><strong>#110: </strong>
-  Component dependencies also include information on how to properly configure the environment in which the component will be deployed</p>
-      <ol class="options">
-        <li class="option" data-correct="true">true</li>
-        <li class="option">false</li>
-      </ol>
-      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment>
+    <section class="asq-exercise" id="ex-1">
+      <article id="q-110" class="asq-question multi-choice choose-1">
+        <p class="stem"><strong>#110: </strong>Component dependencies also include information on how to properly configure the environment in which the component will be deployed</p>
+        <ol class="asq-options">
+          <li class="asq-option" data-correct="true">true</li>
+          <li class="asq-option">false</li>
+        </ol>
+      </article>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-110">
         <p class="stem">Correctness</p>
-        <ol class="options">
-         <li class="option" data-asq-rubric-points="1" data-asq-rubric-label="Correct">The answer is correct</li>
-         <li class="option" data-asq-rubric-points="0" data-asq-rubric-label="Incorrect">The answer is not correct</li>
+        <ol class="asq-options">
+         <li class="asq-option" data-asq-rubric-points="1" data-asq-rubric-label="Correct">The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="0" data-asq-rubric-label="Incorrect">The answer is not correct</li>
         </ol>
       </div>
-    </article>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-110">
+        <p class="stem">Second rubric</p>
+        <ol class="asq-options">
+         <li class="asq-option" data-asq-rubric-points="5" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="3">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-110">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-110">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-110">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-110">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <article id="q-111" class="asq-question text-input custom-1">
+        <p class="stem"><strong>#111: </strong>Text Input question</p>
+      </article>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-111">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+    </section>
+    <!-- <section class="asq-exercise" id="ex-2">
+      <article id="q-1102" class="asq-question multi-choice choose-1">
+        <p class="stem"><strong>#110: </strong>Component dependencies also include information on how to properly configure the environment in which the component will be deployed</p>
+        <ol class="asq-options">
+          <li class="asq-option" data-correct="true">true</li>
+          <li class="asq-option">false</li>
+        </ol>
+      </article>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1102">
+        <p class="stem">Correctness</p>
+        <ol class="asq-options">
+         <li class="asq-option" data-asq-rubric-points="1" data-asq-rubric-label="Correct">The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="0" data-asq-rubric-label="Incorrect">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1102">
+        <p class="stem">Second rubric</p>
+        <ol class="asq-options">
+         <li class="asq-option" data-asq-rubric-points="5" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="3">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1102">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1102">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1102">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1102">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+      <article id="q-1112" class="asq-question text-input custom-1">
+        <p class="stem"><strong>#111: </strong>Text Input question</p>
+      </article>
+      <div class="asq-rubric multi-choice choose-1" data-asq-self-assessment for="q-1112">
+        <p class="stem">Rubric the Third</p>
+        <ol class="asq-options">
+         <li class="asq-option" >The answer is correct</li>
+         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
+        </ol>
+      </div>
+    </section> -->
   </section>
 
   <section class="step" id="stats-110" data-x="3000" data-y="0" data-scale="1.0" data-rotate="0">
-    <article class="stats" data-target-assessment="q-110" id="stats-q-110" data-width="800"></article>
+    <article class="asq-stats" data-target-asq-question="q-110" id="stats-q-110" data-width="800"></article>
   </section>
 
   <section id="s-11" class="step" data-x="4500" data-y="0">
-    <article id="q-11" class="assessment multi-choice choose-0-n" >
+    <article id="q-11" class="asq-question multi-choice choose-0-n" >
       <p class="stem"><strong>#11: </strong>
-  A software architect plays the following roles in a development team:
-      <ol class="options">
-        <li class="option" data-correct="true">Lead the development team</li>
-        <li class="option" data-correct="true">Plan software releases</li>
-        <li class="option" data-correct="true">Facilitate communication among all stakeholders</li>
-        <li class="option">Train developers in the latest programming languages</li>
-        <li class="option">Track progress towards milestones and manage the project budget with customers</li>
+  A software architect plays the following roles in a development team:</p>
+      <ol class="asq-options">
+        <li class="asq-option" data-correct="true">Lead the development team</li>
+        <li class="asq-option" data-correct="true">Plan software releases</li>
+        <li class="asq-option" data-correct="true">Facilitate communication among all stakeholders</li>
+        <li class="asq-option">Train developers in the latest programming languages</li>
+        <li class="asq-option">Track progress towards milestones and manage the project budget with customers</li>
       </ol>
     </article>
   </section>
 
   <section class="step" id="stats-11" data-x="6000" data-y="0" data-scale="1.0" data-rotate="0">
-    <article class="stats" data-target-assessment="q-11" id="stats-q-11" data-width="800"></article>
+    <article class="asq-stats" data-target-asq-question="q-11" id="stats-q-11" data-width="800"></article>
   </section>
 
 
   <section id="s-129" class="step" data-x="7500" data-y="0">
-    <article id="q-129" class="assessment multi-choice choose-0-n" >
+    <article id="q-129" class="asq-question multi-choice choose-0-n" >
       <p class="stem"><strong>#129: </strong>
-  There are multiple views over a software architecture model because:
-      <ol class="options">
-        <li class="option" data-correct="true">There is too much information to represent</li>
-        <li class="option" data-correct="true">There are multiple stakeholders involved</li>
-        <li class="option">Each aspect can be modeled with a different language</li>
-        <li class="option">There are different design tools that can be used</li>
-        <li class="option" data-correct="true">A single power-point slide is not big enough to contain all information</li>
+  There are multiple views over a software architecture model because:</p>
+      <ol class="asq-options">
+        <li class="asq-option" data-correct="true">There is too much information to represent</li>
+        <li class="asq-option" data-correct="true">There are multiple stakeholders involved</li>
+        <li class="asq-option">Each aspect can be modeled with a different language</li>
+        <li class="asq-option">There are different design tools that can be used</li>
+        <li class="asq-option" data-correct="true">A single power-point slide is not big enough to contain all information</li>
       </ol>
     </article>
   </section>
 
   <section class="step" id="stats-129" data-x="9000" data-y="0" data-scale="1.0" data-rotate="0">>
-    <article class="stats" data-target-assessment="q-129" id="stats-q-129" data-width="800"></article>
+    <article class="asq-stats" data-target-asq-question="q-129" id="stats-q-129" data-width="800"></article>
   </section>
 
   <div id="overview" class="step" data-x="0" data-y="0" data-scale="5"></div>
@@ -118,6 +225,8 @@
 <!--<script src="js/console.js"></script>-->
 <!-- <script src="js/main.js"></script> -->
 <script src="../../dist/asq.js"></script>
+<script src="../../dist/bootstrap.js"></script> <!-- needed for preview only -->
+<script src="../../dist/jquery.flexbox.js"></script> <!-- needed for preview only -->
     <script type="text/javascript">
       'use strict';
       //ASQ previewer

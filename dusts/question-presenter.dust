@@ -1,1 +1,3 @@
-{+questionContent/}
+{! Question template, expect a question as the context !}
+{stem|s}
+{>"question-{questionType}-presenter"/} {! Inject type specific content !}
