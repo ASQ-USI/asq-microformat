@@ -1,6 +1,7 @@
 {! Question template, expect a question as the context
   The question can also have submission, in this case, the question will be
   disabled and represent the submission !}
+{stem|s}
 {>"question-{questionType}-viewer"/} {! Inject type specific content !}
 <input type="hidden" name="question-id" value={id}>
 <p class="text-right">
