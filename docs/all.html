@@ -1,0 +1,73 @@
+<!doctype html>
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>ASQ - A sample presentation</title>
+    <meta name="description" content="This is a basic sample presentation showing the featues of ASQ" />
+    <meta name="author" content="Max von Bülow, Vasileios Triglianos" />
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,300,600,700' rel='stylesheet' type='text/css'>
+    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/ASQBasicImpress.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  </head>
+
+  <body>
+    <section class="step" id="slide01" data-x="0" data-y="0">
+      <h1>This is a sample page that features all of ASQ question types</h1>
+      <hr />
+      <article class="asq-welcome-screen"></article>
+    </section>
+    <section class="step" id="slide02" data-x="1500" data-y="0" data-z="500">
+      <h1>A sample presentation</h1>
+      <p>This is a sample presentation which demonstrates features of ASQ.</p>
+      <p>It contains the following questions:</p>
+      <ul>
+        <li>A multiple choice question with one correct answer.</li>
+        <li>A multiple choice question with multiple correct answers.</li>
+        <li>One slide with multiple choice questions.</li>
+        <li>A text input question</li>
+      </ul>
+    </section>
+
+    <section class="step" id="slide03" data-x="3000" data-y="0" data-z="1000">
+      <article class="asq-question multi-choice choose-1" id="mc-1">
+        <h3 class="stem">Lugano is located in...</h3>
+        <ol class="asq-options">
+          <li class="asq-option" data-correct="true">
+            Switzerland
+          </li>
+          <li class="asq-option">
+            Italy
+          </li>
+          <li class="asq-option">
+            France
+          </li>
+          <li class="asq-option">
+            Germany
+          </li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="step" id="slide03" data-x="4500" data-y="0" data-z="1000">
+      <article class="asq-question text-input" id="ti-1">
+        <h3 class="stem" data-correct-answer="3">What is the square root of 9?</h3>
+      </article>
+    </section>
+
+    <section class="step" id="slide03" data-x="6000" data-y="0" data-z="1000">
+      <article class="asq-question code-input" data-asq-syntax="javascript" data-asq-theme="monokai" id="ci-1">
+        <h3 class="stem">Code an infinite loop</h3>
+      </article>
+    </section>
+    <section id="overview" class="step" data-x="3000" data-y="0" data-scale="5"></section>
+    </script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+
+</html>

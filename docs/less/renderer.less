@@ -1,0 +1,125 @@
+/* Styles for the asq microformat editor */
+
+// mixins
+@import "lib/lesshat.less";
+
+#logo{
+ height: 30px;
+}
+
+header {
+  padding: 5px 10px;
+  border-bottom: 1px solid #ccc;
+  .background-image(linear-gradient(to bottom, rgb(211, 224, 237) 50%, rgb(226, 233, 240) 100%));
+
+ h4{ 
+    margin: 0;
+    display: inline-block;
+    font-weight: normal;
+    > span{
+      color: #FF0066;
+      font-family: 'HelveticaNeue-Light';
+      font-weight: 200;
+    }
+  }
+}
+
+.editor-section,
+.view-section, 
+.markup-section,
+.render-section{
+  position:relative;
+  width:100%;
+  .display(flex);
+}
+
+.editor-section{
+  margin-top: 10px;
+  padding: 0 10px;
+}
+
+#question-type-list{
+  width: 150px;
+
+  a.active{
+    background-color:rgb(235, 76, 107);
+    border-color:rgb(235, 76, 107);
+  }
+}
+
+#asq-editor{
+  margin-left: 10px;
+  width:600px;
+  height: 400px;
+}
+
+.view-section{
+  background: white;
+    &.affix{
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+  } 
+}
+
+.view-heading,
+.render-box,
+.markup-box{
+   .flex(1);
+}
+
+.view-heading{
+  margin: 0;
+  padding: 5px 0;
+  text-align: center;
+  color: #555;
+  border-bottom: 1px dashed #ccc;
+  font-weight: normal;
+  font-family: 'HelveticaNeue-Light';
+
+  > img{
+    height: 24px;
+  }
+}
+
+.render-box{
+  padding: 10px
+}
+
+#viewer-heading{
+}
+
+#presenter-heading{
+
+}
+
+#presenter-heading, #render-presenter{
+  border-left: 1px dashed #ccc;
+}
+
+.markup-box{
+  border-top: 1px dashed #ccc;
+}
+
+#markup-viewer{
+  background: #fdf6e3;
+}
+
+#markup-presenter{
+  border-left: 1px dashed #ccc;
+  background: #474949;
+}
+
+pre {
+  height:100%;
+  padding: 0; 
+  margin: 0;
+  border: none; 
+  border-radius: 0; 
+  background: none;
+
+  > code{
+    margin-top: -1.00em;
+  }
+}

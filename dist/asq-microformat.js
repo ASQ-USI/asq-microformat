@@ -31,7 +31,21 @@ module.exports = function (dust) {
 	return dust;
 };
 
-},{}],2:[function(require,module,exports){
+},{}],"Focm2+":[function(require,module,exports){
+/** @module index
+    @description Exposes the main files
+*/
+
+module.exports = {
+  assessment : require('./lib/assessment'),
+  generator  : require('./lib/markupGenerator'),
+  parser     : require('./lib/parser'),
+  templates  : require('./dusts/compiled/templates')
+}
+
+},{"./dusts/compiled/templates":1,"./lib/assessment":4,"./lib/markupGenerator":5,"./lib/parser":6}],"asq-microformat":[function(require,module,exports){
+module.exports=require('Focm2+');
+},{}],4:[function(require,module,exports){
 /** @module lib/assessment.js
     @description javascript logic for assessment widgets
 */
@@ -75,7 +89,7 @@ function initCodeEditors(){
 module.exports = {
   initCodeEditors: initCodeEditors
 }
-},{"jquery":24}],3:[function(require,module,exports){
+},{"jquery":26}],5:[function(require,module,exports){
 (function (process){
 /** @module lib/asqAssessmentMarkupGenerator
     @description Parse HTML files to extract assessment information
@@ -449,7 +463,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
 }).call(MarkupGenerator.prototype);
 
 }).call(this,require("FWaASH"))
-},{"../dusts/compiled/templates":1,"./scriptBlacklist":5,"./utils":6,"FWaASH":17,"dustjs-linkedin":21,"jquery":24,"lodash":25,"when":44}],4:[function(require,module,exports){
+},{"../dusts/compiled/templates":1,"./scriptBlacklist":7,"./utils":8,"FWaASH":19,"dustjs-linkedin":23,"jquery":26,"lodash":27,"when":42}],6:[function(require,module,exports){
 /** @module lib/parser
     @description Parse HTML files to extract assessment information
 */
@@ -1002,7 +1016,7 @@ function returnData(errors, data, logger, start){
   return errors ? { errors: errors } : data;
 }
 
-},{"./utils":6,"jquery":24,"lodash":25,"node-uuid":26}],5:[function(require,module,exports){
+},{"./utils":8,"jquery":26,"lodash":27,"node-uuid":28}],7:[function(require,module,exports){
 /** @module lib/scriptBlacklist
     @description Regexes of scripts that we want removed
 */
@@ -1014,7 +1028,7 @@ module.exports = [
  'jquery(|\\.min)\\.js' ,
  'bootstrap(|\\.min)\\.js'
  ]
-},{}],6:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /** @module lib/utils
     @description various utilitities
 */
@@ -1025,7 +1039,7 @@ module.exports = {
             && types.indexOf(({}).toString.call(window)) != -1);
   } 
 }
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -2175,7 +2189,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":8,"ieee754":9}],8:[function(require,module,exports){
+},{"base64-js":10,"ieee754":11}],10:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -2298,7 +2312,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	module.exports.fromByteArray = uint8ToBase64
 }())
 
-},{}],9:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -2384,7 +2398,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],10:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var Buffer = require('buffer').Buffer;
 var intSize = 4;
 var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
@@ -2421,7 +2435,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 
 module.exports = { hash: hash };
 
-},{"buffer":7}],11:[function(require,module,exports){
+},{"buffer":9}],13:[function(require,module,exports){
 var Buffer = require('buffer').Buffer
 var sha = require('./sha')
 var sha256 = require('./sha256')
@@ -2520,7 +2534,7 @@ each(['createCredentials'
   }
 })
 
-},{"./md5":12,"./rng":13,"./sha":14,"./sha256":15,"buffer":7}],12:[function(require,module,exports){
+},{"./md5":14,"./rng":15,"./sha":16,"./sha256":17,"buffer":9}],14:[function(require,module,exports){
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -2685,7 +2699,7 @@ module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
 
-},{"./helpers":10}],13:[function(require,module,exports){
+},{"./helpers":12}],15:[function(require,module,exports){
 // Original code adapted from Robert Kieffer.
 // details at https://github.com/broofa/node-uuid
 (function() {
@@ -2718,7 +2732,7 @@ module.exports = function md5(buf) {
 
 }())
 
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -2821,7 +2835,7 @@ module.exports = function sha1(buf) {
   return helpers.hash(buf, core_sha1, 20, true);
 };
 
-},{"./helpers":10}],15:[function(require,module,exports){
+},{"./helpers":12}],17:[function(require,module,exports){
 
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -2902,7 +2916,7 @@ module.exports = function sha256(buf) {
   return helpers.hash(buf, core_sha256, 32, true);
 };
 
-},{"./helpers":10}],16:[function(require,module,exports){
+},{"./helpers":12}],18:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -3130,7 +3144,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":17}],17:[function(require,module,exports){
+},{"FWaASH":19}],19:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -3195,7 +3209,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],18:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var indexOf = require('indexof');
 
 var Object_keys = function (obj) {
@@ -3335,7 +3349,7 @@ exports.createContext = Script.createContext = function (context) {
     return copy;
 };
 
-},{"indexof":19}],19:[function(require,module,exports){
+},{"indexof":21}],21:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -3346,7 +3360,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],20:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 var dustCompiler = (function(dust) {
 
 dust.compile = function(source, name) {
@@ -3715,7 +3729,7 @@ if (typeof exports !== 'undefined') {
   dustCompiler(getGlobal());
 }
 
-},{}],21:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 (function (process){
 /*global console */
 var dust = {};
@@ -4625,7 +4639,7 @@ if (typeof exports !== 'undefined') {
 }
 
 }).call(this,require("FWaASH"))
-},{"./server":23,"FWaASH":17}],22:[function(require,module,exports){
+},{"./server":25,"FWaASH":19}],24:[function(require,module,exports){
 (function(dust){
 
 var parser = (function(){
@@ -7254,7 +7268,7 @@ var parser = (function(){
 dust.parse = parser.parse;
 
 })(typeof exports !== 'undefined' ? exports : getGlobal());
-},{}],23:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 (function (process){
 var path = require('path'),
     parser = require('./parser'),
@@ -7277,7 +7291,7 @@ module.exports = function(dust) {
 }
 
 }).call(this,require("FWaASH"))
-},{"./compiler":20,"./parser":22,"FWaASH":17,"path":16,"vm":18}],24:[function(require,module,exports){
+},{"./compiler":22,"./parser":24,"FWaASH":19,"path":18,"vm":20}],26:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
@@ -16390,7 +16404,7 @@ return jQuery;
 
 }));
 
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -23179,7 +23193,7 @@ return jQuery;
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 (function (Buffer){
 //     uuid.js
 //
@@ -23428,7 +23442,7 @@ return jQuery;
 }).call(this);
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":7,"crypto":11}],27:[function(require,module,exports){
+},{"buffer":9,"crypto":13}],29:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -23448,7 +23462,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./async":29,"./makePromise":37,"./scheduler":38}],28:[function(require,module,exports){
+},{"./async":31,"./makePromise":39,"./scheduler":40}],30:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -23520,7 +23534,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],29:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 (function (process){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
@@ -23585,7 +23599,7 @@ define(function(require) {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":17}],30:[function(require,module,exports){
+},{"FWaASH":19}],32:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -23778,7 +23792,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],31:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -23954,7 +23968,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../timer":39}],32:[function(require,module,exports){
+},{"../timer":41}],34:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -23974,7 +23988,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24047,7 +24061,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24072,7 +24086,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24143,7 +24157,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../timer":39}],36:[function(require,module,exports){
+},{"../timer":41}],38:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24177,7 +24191,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 
-},{}],37:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24945,7 +24959,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24996,7 +25010,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"./Queue":28}],39:[function(require,module,exports){
+},{"./Queue":30}],41:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25025,362 +25039,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{}],40:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var error = require('./error');
-	var unhandledRejectionsMsg = '[promises] Unhandled rejections: ';
-	var allHandledMsg = '[promises] All previously unhandled rejections have now been handled';
-
-	function ConsoleReporter() {
-		this._previouslyReported = false;
-	}
-
-	ConsoleReporter.prototype = initDefaultLogging();
-
-	ConsoleReporter.prototype.log = function(traces) {
-		if(traces.length === 0) {
-			if(this._previouslyReported) {
-				this._previouslyReported = false;
-				this.warn(allHandledMsg);
-			}
-			return;
-		}
-
-		this._previouslyReported = true;
-		this.groupStart(unhandledRejectionsMsg + traces.length);
-		try {
-			this._log(traces);
-		} finally {
-			this.groupEnd();
-		}
-	};
-
-	ConsoleReporter.prototype._log = function(traces) {
-		for(var i=0; i<traces.length; ++i) {
-			this.warn(error.format(traces[i]));
-		}
-	};
-
-	function initDefaultLogging() {
-		var warn, groupStart, groupEnd;
-
-		if(typeof console === 'undefined') {
-			warn = consoleNotAvailable;
-		} else {
-			if(typeof console.error === 'function'
-				&& typeof console.dir === 'function') {
-				warn = function(s) {
-					console.error(s);
-				};
-
-				if(typeof console.groupCollapsed === 'function') {
-					groupStart = function(s) {
-						console.groupCollapsed(s);
-					};
-					groupEnd = function() {
-						console.groupEnd();
-					};
-				}
-			} else {
-				// IE8 has console.log and JSON, so we can make a
-				// reasonably useful warn() from those.
-				// Credit to webpro (https://github.com/webpro) for this idea
-				if (typeof console.log ==='function'
-					&& typeof JSON !== 'undefined') {
-					warn = function (x) {
-						console.log(typeof x === 'string' ? x : JSON.stringify(x));
-					};
-				}
-			}
-		}
-
-		return {
-			warn: warn,
-			groupStart: groupStart || warn,
-			groupEnd: groupEnd || consoleNotAvailable
-		};
-	}
-
-	function consoleNotAvailable() {}
-
-	return ConsoleReporter;
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"./error":43}],41:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var defaultStackJumpSeparator = 'from execution context:';
-	var defaultStackFilter = /(node|module|timers)\.js:|when([\/\\]{1,2}(lib|monitor|es6-shim)[\/\\]{1,2}|\.js)|(new\sPromise)\b|(\b(PromiseMonitor|ConsoleReporter|Scheduler|RunHandlerTask|ProgressTask|Promise|.*Handler)\.[\w_]\w\w+\b)|\b(tryCatch\w+|getHandler\w*)\b/i;
-
-	var setTimer = require('../lib/timer').set;
-	var error = require('./error');
-
-	function PromiseMonitor(reporter) {
-		this._traces = {};
-		this.traceTask = 0;
-		this.logDelay = 100;
-		this.stackFilter = defaultStackFilter;
-		this.stackJumpSeparator = defaultStackJumpSeparator;
-		this.filterDuplicateFrames = true;
-
-		this._reporter = reporter;
-
-		if(typeof reporter.configurePromiseMonitor === 'function') {
-			reporter.configurePromiseMonitor(this);
-		}
-
-		var self = this;
-		this._doLogTraces = function() {
-			self._logTraces();
-		};
-	}
-
-	PromiseMonitor.prototype.captureStack = function(host, at) {
-		return error.captureStack(host, at);
-	};
-
-	PromiseMonitor.prototype.addTrace = function(handler, extraContext) {
-		this._traces[handler.id] = {
-			error: handler.value,
-			context: handler.context,
-			extraContext: extraContext
-		};
-		this.logTraces();
-	};
-
-	PromiseMonitor.prototype.removeTrace = function(handler) {
-		if(handler.id in this._traces) {
-			delete this._traces[handler.id];
-			this.logTraces();
-		}
-	};
-
-	PromiseMonitor.prototype.fatal = function(handler) {
-		var err = new Error();
-		err.stack = this._createLongTrace(handler.value, handler.context).join('\n');
-		setTimer(function() {
-			throw err;
-		}, 0);
-	};
-
-	PromiseMonitor.prototype.logTraces = function() {
-		if(!this.traceTask) {
-			this.traceTask = setTimer(this._doLogTraces, this.logDelay);
-		}
-	};
-
-	PromiseMonitor.prototype._logTraces = function() {
-		this.traceTask = void 0;
-		this._reporter.log(this.formatTraces(this._traces));
-	};
-
-
-	PromiseMonitor.prototype.formatTraces = function(traces) {
-		var keys = Object.keys(traces);
-		var formatted = [];
-		var longTrace, t, i;
-
-		for(i=0; i<keys.length; ++i) {
-			t = traces[keys[i]];
-			longTrace = this._createLongTrace(t.error, t.context, t.extraContext);
-			formatted.push(longTrace);
-		}
-
-		return formatted;
-	};
-
-	PromiseMonitor.prototype._createLongTrace = function(e, context, extraContext) {
-		var trace = error.parse(e) || [];
-		trace = filterFrames(this.stackFilter, trace, 0);
-		this._appendContext(trace, context);
-		this._appendContext(trace, extraContext);
-		return this.filterDuplicateFrames ? this._removeDuplicates(trace) : trace;
-	};
-
-	PromiseMonitor.prototype._removeDuplicates = function(trace) {
-		var seen = {};
-		var sep = this.stackJumpSeparator;
-		var count = 0;
-		return trace.reduceRight(function(deduped, line, i) {
-			if(i === 0) {
-				deduped.unshift(line);
-			} else if(line === sep) {
-				if(count > 0) {
-					deduped.unshift(line);
-					count = 0;
-				}
-			} else if(!seen[line]) {
-				seen[line] = true;
-				deduped.unshift(line);
-				++count;
-			}
-			return deduped;
-		}, []);
-	};
-
-	PromiseMonitor.prototype._appendContext = function(trace, context) {
-		trace.push.apply(trace, this._createTrace(context));
-	};
-
-	PromiseMonitor.prototype._createTrace = function(traceChain) {
-		var trace = [];
-		var stack;
-
-		while(traceChain) {
-			stack = error.parse(traceChain);
-
-			if (stack) {
-				stack = filterFrames(this.stackFilter, stack);
-				appendStack(trace, stack, this.stackJumpSeparator);
-			}
-
-			traceChain = traceChain.parent;
-		}
-
-		return trace;
-	};
-
-	function appendStack(trace, stack, separator) {
-		if (stack.length > 1) {
-			stack[0] = separator;
-			trace.push.apply(trace, stack);
-		}
-	}
-
-	function filterFrames(stackFilter, stack) {
-		return stack.filter(function(frame) {
-			return !stackFilter.test(frame);
-		});
-	}
-
-	return PromiseMonitor;
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"../lib/timer":39,"./error":43}],42:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var PromiseMonitor = require('./PromiseMonitor');
-	var ConsoleReporter = require('./ConsoleReporter');
-
-	var promiseMonitor = new PromiseMonitor(new ConsoleReporter());
-
-	if(typeof console !== 'undefined') {
-		console.promiseMonitor = promiseMonitor;
-	}
-
-	return promiseMonitor;
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"./ConsoleReporter":40,"./PromiseMonitor":41}],43:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function() {
-
-	var parse, captureStack, format;
-
-	if(Error.captureStackTrace) {
-		// Use Error.captureStackTrace if available
-		parse = function(e) {
-			return e && e.stack && e.stack.split('\n');
-		};
-
-		format = formatAsString;
-		captureStack = Error.captureStackTrace;
-
-	} else {
-		// Otherwise, do minimal feature detection to determine
-		// how to capture and format reasonable stacks.
-		parse = function(e) {
-			var stack = e && e.stack && e.stack.split('\n');
-			if(stack && e.message) {
-				stack.unshift(e.message);
-			}
-			return stack;
-		};
-
-		(function() {
-			var e = new Error();
-			if(typeof e.stack !== 'string') {
-				format = formatAsString;
-				captureStack = captureSpiderMonkeyStack;
-			} else {
-				format = formatAsErrorWithStack;
-				captureStack = useStackDirectly;
-			}
-		}());
-	}
-
-	function captureSpiderMonkeyStack(host) {
-		try {
-			throw new Error();
-		} catch(err) {
-			host.stack = err.stack;
-		}
-	}
-
-	function useStackDirectly(host) {
-		host.stack = new Error().stack;
-	}
-
-	function formatAsString(longTrace) {
-		return join(longTrace);
-	}
-
-	function formatAsErrorWithStack(longTrace) {
-		var e = new Error();
-		e.stack = formatAsString(longTrace);
-		return e;
-	}
-
-	// About 5-10x faster than String.prototype.join o_O
-	function join(a) {
-		var sep = false;
-		var s = '';
-		for(var i=0; i< a.length; ++i) {
-			if(sep) {
-				s += '\n' + a[i];
-			} else {
-				s+= a[i];
-				sep = true;
-			}
-		}
-		return s;
-	}
-
-	return {
-		parse: parse,
-		format: format,
-		captureStack: captureStack
-	};
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],44:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 
 /**
@@ -25626,94 +25285,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./lib/Promise":27,"./lib/decorators/array":30,"./lib/decorators/flow":31,"./lib/decorators/inspect":32,"./lib/decorators/iterate":33,"./lib/decorators/progress":34,"./lib/decorators/timed":35,"./lib/decorators/with":36}],"qzqC+2":[function(require,module,exports){
-/** @module previewer/asq.js
-    @description Previewer for ASQ microformat
-*/
-'use strict';
-
-require('when/monitor/console');
-var Parser = require('../lib/parser')
-  , logger = console
-  , MarkupGenerator = require('../lib/markupGenerator')
-  , assessment = require('../lib/assessment')
-  , _ = require('lodash');
-
-function init(cb){
-  //detect if we need to render anything or the user is just chilin
-  var search = window.location.search;
-  if(search.match(/viewer/)){
-    start('viewer',cb);
-  }else if(search.match(/presenter/)){
-    start('presenter',cb);
-  }else{
-    if (typeof cb !== "undefined" && typeof cb == "function"){
-      cb.call(this, null, true)
-    }
-  }
-}
-
-
-function start(userType, cb){
-  //parse
-  var asqParser = new Parser();
-  var parsedData = asqParser.parse('')
-  parsedData = fakeDatabaseIds(parsedData);
-
-  //render
-  var asqRenderer = new MarkupGenerator()
-  asqRenderer.render('', parsedData.exercises,
-                          { 
-                            userType: userType,
-                            mode: "preview"
-  }).then(
-    function(html){
-      assessment.initCodeEditors();
-      randomize();
-      if (typeof cb !== "undefined" && typeof cb == "function"){
-        cb.call(this, null, true)
-      }
-    },
-    function(err){
-        logger.error(err)
-        if (typeof cb !== "undefined" && typeof cb == "function"){
-          cb.call(this, err)
-        }
-    });
-}
-
-function fakeDatabaseIds(data){
-  var questions = data.questions
-    , stats = data.stats
-    , id =0;
-
-  _.each(questions, function(question, index){
-    question.id = id++
-
-     // push questions mongo ids to corresponding questions
-    _.each(stats, function(stat){
-      if(stat.questionHtmlId == question.htmlId){
-        stat.questionId = question.id;
-      }
-    });
-  });
-
-  return data;
-}
-
-function randomize(){
-  $('.progress .bar').each(function(){
-    var width = Math.floor(Math.random() * (90 - 10 + 1)) + 10;
-    $(this).attr('style', 'width:' + width.toString() + '%;')
-  })
-}
-
-module.exports = {
-  init: init
-};
-},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"lodash":25,"when/monitor/console":42}],"asq":[function(require,module,exports){
-module.exports=require('qzqC+2');
-},{}],"dust":[function(require,module,exports){
+},{"./lib/Promise":29,"./lib/decorators/array":32,"./lib/decorators/flow":33,"./lib/decorators/inspect":34,"./lib/decorators/iterate":35,"./lib/decorators/progress":36,"./lib/decorators/timed":37,"./lib/decorators/with":38}],"dust":[function(require,module,exports){
 module.exports=require('RzcaG4');
 },{}],"RzcaG4":[function(require,module,exports){
 (function (process){
@@ -26379,4 +25951,4 @@ if (typeof exports !== "undefined") {
 }
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":17}]},{},["qzqC+2"])
+},{"FWaASH":19}]},{},["Focm2+"])

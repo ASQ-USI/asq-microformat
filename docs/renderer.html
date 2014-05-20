@@ -1,0 +1,67 @@
+<!doctype html>
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1024" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>ASQ - A sample presentation</title>
+    <meta name="description" content="This is a basic sample presentation showing the featues of ASQ" />
+    <meta name="author" content="Vasileios Triglianos" />
+    <link href="css/bootstrap.min.css" type="text/css" rel="stylesheet">
+    <link href="css/asq-default-theme.css" type="text/css" rel="stylesheet" />
+    <link href="css/renderer.css" type="text/css" rel="stylesheet" />
+    <link href="css/viewer-hljs.css" type="text/css" rel="stylesheet" />
+    <link href="css/presenter-hljs.css" type="text/css" rel="stylesheet" />
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+  </head>
+
+  <body>
+    <header>
+      <a href="http://asq.inf.usi.ch"><img id="logo" src="img/asq-logo.png" alt="logo"></a> <h4><span>microformat</span> editor</h4>
+    </header>
+
+    <section class="editor-section">
+      <div class="list-group" id="question-type-list">
+      </div>
+      <div id="asq-editor"></div>
+    </section>
+
+    <br>
+    <section data-spy="affix" data-offset-top="460" class="view-section">
+      <h5 class="view-heading" id="viewer-heading"><img src="img/viewers.png" alt="viewer"><br/>Viewers</h5>
+      <h5 class="view-heading" id="presenter-heading"><img src="img/presenter.png" alt="presenter"><br/>Presenter</h5>
+    </section>
+
+    <section class="render-section clearfix">
+      <div id="render-viewer" class="render-box"></div>
+      <div id="render-presenter" class="render-box"></div>
+    </section>
+
+    <section class="markup-section clearfix">
+      <div id="markup-viewer" class="markup-viewer markup-box">
+        <pre>
+          <code class="language-html" id="viewer-src"></code>
+        </pre>
+      </div>
+      <div id="markup-presenter" class="markup-presenter markup-box">
+        <pre>
+          <code class="language-html" id="presenter-src">
+          </code>
+        </pre>
+      </div>      
+    </section>
+
+
+    </script>
+    <script src="js/jquery.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/highlight.pack.js"></script>
+    <script src="../dist/asq-microformat.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../dist/asq-microformat-editor.js" type="text/javascript" charset="utf-8"></script>
+    </script>
+  </body>
+
+</html>
+

@@ -1,0 +1,92 @@
+/*------------ Typography ------------*/
+.muted{
+  font-size: 0.8em;
+  color: #666;
+  margin: 0;
+  clear:both;
+}
+
+/*------------ Welcome Screen ------------*/
+.connected-viewers-number{
+  font-size: 0.8em;
+  color: #666;
+}
+.asq-welcome-screen{
+  text-align: center;
+}
+
+/*------------ Progress ------------*/
+#progressNum{
+  margin: 15px;
+}
+
+/*------------ Tabs ------------*/
+.tab-pane{
+  overflow: hidden;
+}
+.tab-pane form, .tab-pane p{
+  margin-left: 20px;
+}
+
+/*------------ Answer ------------*/
+.answersolutions ol{
+  padding-left: 60px;
+}
+
+/*------------ Confidence ------------*/
+.asq-confidence-label {
+    font-style: italic;
+    color: #555;
+}
+
+.asq-rating-widget {
+    vertical-align: middle;
+    margin-right: 1em;
+
+    > small{
+      vertical-align: text-top;  
+    }
+}
+
+.asq-rating {
+  unicode-bidi: bidi-override;
+  direction: rtl;
+  margin-left: .2em;
+
+  &:hover{
+    .asq-rating-star{
+      &:hover{
+        &:before{
+          content: "\2605";  
+        }
+
+        ~ .asq-rating-star:before{
+          content: "\2605";   
+        }
+      }
+
+      &:before{
+        content: "\2606";
+      }
+    }
+
+    .asq-rating-input:checked + .asq-rating-star:before {
+      color: #5cb85c;
+    }
+  }
+
+  .asq-rating-star:before {
+    content: "\2606";
+  }
+}
+
+.asq-rating-star{
+    display: inline-block;
+    position: relative;
+    width: 1.1em;
+    color: #f0ad4e;
+}
+
+.asq-rating-input {
+    display: none;
+}

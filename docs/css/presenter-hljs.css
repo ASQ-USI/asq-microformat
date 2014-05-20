@@ -1,0 +1,116 @@
+/*
+
+Style with support for rainbow parens
+
+*/
+
+.markup-presenter .hljs {
+  display: block; 
+  padding: 0.5em;
+  background: #474949;
+  color: #D1D9E1;
+  font-size: 12px;
+  font-family: Monaco,Consolas,"Courier New",monospace
+}
+
+
+.markup-presenter .hljs-body,
+.markup-presenter .hljs-collection {
+   color: #D1D9E1;
+}
+
+.markup-presenter .hljs-comment,
+.markup-presenter .hljs-template_comment,
+.markup-presenter .diff .hljs-header,
+.markup-presenter .hljs-doctype,
+.markup-presenter .lisp .hljs-string,
+.markup-presenter .hljs-javadoc {
+  color: #969896;
+  font-style: italic;
+}
+
+.markup-presenter .hljs-keyword,
+.markup-presenter .clojure .hljs-attribute,
+.markup-presenter .hljs-winutils,
+.markup-presenter .javascript .hljs-title,
+.markup-presenter .hljs-addition,
+.markup-presenter .css .hljs-tag {
+  color: #cc99cc;
+}
+
+.markup-presenter .hljs-number { color: #f99157; }
+
+.markup-presenter .hljs-command,
+.markup-presenter .hljs-string,
+.markup-presenter .hljs-tag .hljs-value,
+.markup-presenter .hljs-phpdoc,
+.markup-presenter .tex .hljs-formula,
+.markup-presenter .hljs-regexp,
+.markup-presenter .hljs-hexcolor {
+  color: #8abeb7;
+}
+
+.markup-presenter .hljs-title,
+.markup-presenter .hljs-localvars,
+.markup-presenter .hljs-function .hljs-title,
+.markup-presenter .hljs-chunk,
+.markup-presenter .hljs-decorator,
+.markup-presenter .hljs-built_in,
+.markup-presenter .lisp .hljs-title,
+.markup-presenter .hljs-identifier
+{
+  color: #b5bd68;
+}
+
+.markup-presenter .hljs-class .hljs-keyword
+{
+  color: #f2777a;
+}
+
+.markup-presenter .hljs-variable,
+.markup-presenter .lisp .hljs-body,
+.markup-presenter .smalltalk .hljs-number,
+.markup-presenter .hljs-constant,
+.markup-presenter .hljs-class .hljs-title,
+.markup-presenter .hljs-parent,
+.markup-presenter .haskell .hljs-label,
+.markup-presenter .hljs-id,
+.markup-presenter .lisp .hljs-title,
+.markup-presenter .clojure .hljs-title .hljs-built_in {
+   color: #ffcc66;
+}
+
+.markup-presenter .hljs-tag .hljs-title,
+.markup-presenter .hljs-rules .hljs-property,
+.markup-presenter .django .hljs-tag .hljs-keyword,
+.markup-presenter .clojure .hljs-title .hljs-built_in {
+  font-weight: bold;
+}
+
+.markup-presenter .hljs-attribute,
+.markup-presenter .clojure .hljs-title {
+  color: #81a2be;
+}
+
+.markup-presenter .hljs-preprocessor,
+.markup-presenter .hljs-pragma,
+.markup-presenter .hljs-pi,
+.markup-presenter .hljs-shebang,
+.markup-presenter .hljs-symbol,
+.markup-presenter .hljs-symbol .hljs-string,
+.markup-presenter .diff .hljs-change,
+.markup-presenter .hljs-special,
+.markup-presenter .hljs-attr_selector,
+.markup-presenter .hljs-important,
+.markup-presenter .hljs-subst,
+.markup-presenter .hljs-cdata {
+  color: #f99157;
+}
+
+.markup-presenter .hljs-deletion {
+  color: #dc322f;
+}
+
+.markup-presenter .tex .hljs-formula {
+  background: #eee8d5;
+}

@@ -1,0 +1,109 @@
+/*
+
+Orginal Style from ethanschoonover.com/solarized (c) Jeremy Hull <sourdrums@gmail.com>
+
+*/
+
+.markup-viewer .hljs {
+  display: block;
+  padding: 0.5em;
+  background: #fdf6e3;
+  color: #657b83;
+  font-size: 12px;
+  font-family: Monaco,Consolas,"Courier New",monospace
+}
+
+.markup-viewer .hljs-comment,
+.markup-viewer .hljs-template_comment,
+.markup-viewer .diff .hljs-header,
+.markup-viewer .hljs-doctype,
+.markup-viewer .hljs-pi,
+.markup-viewer .lisp .hljs-string,
+.markup-viewer .hljs-javadoc {
+  color: #93a1a1;
+}
+
+/* Solarized Green */
+.markup-viewer .hljs-keyword,
+.markup-viewer .hljs-winutils,
+.markup-viewer .method,
+.markup-viewer .hljs-addition,
+.markup-viewer .css .hljs-tag,
+.markup-viewer .hljs-request,
+.markup-viewer .hljs-status,
+.markup-viewer .nginx .hljs-title {
+  color: #859900;
+}
+
+/* Solarized Cyan */
+.markup-viewer .hljs-number,
+.markup-viewer .hljs-command,
+.markup-viewer .hljs-string,
+.markup-viewer .hljs-tag .hljs-value,
+.markup-viewer .hljs-rules .hljs-value,
+.markup-viewer .hljs-phpdoc,
+.markup-viewer .tex .hljs-formula,
+.markup-viewer .hljs-regexp,
+.markup-viewer .hljs-hexcolor,
+.markup-viewer .hljs-link_url {
+  color: #2aa198;
+}
+
+/* Solarized Blue */
+.markup-viewer .hljs-title,
+.markup-viewer .hljs-localvars,
+.markup-viewer .hljs-chunk,
+.markup-viewer .hljs-decorator,
+.markup-viewer .hljs-built_in,
+.markup-viewer .hljs-identifier,
+.markup-viewer .vhdl .hljs-literal,
+.markup-viewer .hljs-id,
+.markup-viewer .css .hljs-function {
+  color: #268bd2;
+}
+
+/* Solarized Yellow */
+.markup-viewer .hljs-attribute,
+.markup-viewer .hljs-variable,
+.markup-viewer .lisp .hljs-body,
+.markup-viewer .smalltalk .hljs-number,
+.markup-viewer .hljs-constant,
+.markup-viewer .hljs-class .hljs-title,
+.markup-viewer .hljs-parent,
+.markup-viewer .haskell .hljs-type,
+.markup-viewer .hljs-link_reference {
+  color: #b58900;
+}
+
+/* Solarized Orange */
+.markup-viewer .hljs-preprocessor,
+.markup-viewer .hljs-preprocessor .hljs-keyword,
+.markup-viewer .hljs-pragma,
+.markup-viewer .hljs-shebang,
+.markup-viewer .hljs-symbol,
+.markup-viewer .hljs-symbol .hljs-string,
+.markup-viewer .diff .hljs-change,
+.markup-viewer .hljs-special,
+.markup-viewer .hljs-attr_selector,
+.markup-viewer .hljs-subst,
+.markup-viewer .hljs-cdata,
+.markup-viewer .clojure .hljs-title,
+.markup-viewer .css .hljs-pseudo,
+.markup-viewer .hljs-header {
+  color: #cb4b16;
+}
+
+/* Solarized Red */
+.markup-viewer .hljs-deletion,
+.markup-viewer .hljs-important {
+  color: #dc322f;
+}
+
+/* Solarized Violet */
+.markup-viewer .hljs-link_label {
+  color: #6c71c4;
+}
+
+.markup-viewer .tex .hljs-formula {
+  background: #eee8d5;
+}

@@ -1,6 +1,7 @@
 /** @module index
     @description Exposes the main files
 */
+
 module.exports = {
   assessment : require('./lib/assessment'),
   generator  : require('./lib/markupGenerator'),
