@@ -4,7 +4,7 @@ require('brace/theme/monokai');
 
 var editor = ace.edit("asq-editor")
   , when = require('when')
-  , microformat = require('asq-microformat')
+  , microformat = require('../../index')
   , parser = new microformat.parser()
   , ent = require('ent')
   , mGen1 = new microformat.generator()
