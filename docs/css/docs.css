@@ -1,0 +1,163 @@
+.asq-docs-sidebar.affix {
+  position: static;
+}
+@media (min-width: 768px) {
+  .asq-docs-sidebar {
+    padding-left: 20px;
+  }
+}
+.asq-docs-sidenav {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+.asq-docs-sidebar .nav > li > a {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #999;
+  padding: 4px 20px;
+}
+.asq-docs-sidebar .nav > li > a:hover,
+.asq-docs-sidebar .nav > li > a:focus {
+  padding-left: 19px;
+  color: #ff0066;
+  text-decoration: none;
+  background-color: transparent;
+  border-left: 1px solid #ff0066;
+}
+.asq-docs-sidebar .nav .nav {
+  display: none;
+  padding-bottom: 10px;
+}
+.asq-docs-sidebar .nav .nav .active:hover > a {
+  font-weight: 500;
+  padding-left: 28px;
+}
+.asq-docs-sidebar .nav .nav .active:focus > a {
+  font-weight: 500;
+  padding-left: 28px;
+}
+.asq-docs-sidebar .nav .nav .active > a {
+  font-weight: 500;
+  padding-left: 28px;
+}
+.asq-docs-sidebar .nav .nav > li > a {
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 30px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.asq-docs-sidebar .nav .nav > li > a:hover {
+  padding-left: 29px;
+}
+.asq-docs-sidebar .nav > .active:hover > a {
+  padding-left: 18px;
+  font-weight: 700;
+  color: #ff0066;
+  background-color: transparent;
+  border-left: 2px solid #ff0066;
+}
+.asq-docs-sidebar .nav > .active:focus > a {
+  padding-left: 18px;
+  font-weight: 700;
+  color: #ff0066;
+  background-color: transparent;
+  border-left: 2px solid #ff0066;
+}
+.asq-docs-sidebar .nav > .active > a {
+  padding-left: 18px;
+  font-weight: 700;
+  color: #ff0066;
+  background-color: transparent;
+  border-left: 2px solid #ff0066;
+}
+.asq-docs-sidebar .nav > .active ul {
+  display: block;
+}
+.back-to-top {
+  display: none;
+  margin-top: 10px;
+  margin-left: 10px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #999999;
+}
+.back-to-top:hover {
+  text-decoration: none;
+  color: #ff0066;
+}
+@media (min-width: 768px) {
+  .back-to-top {
+    display: block;
+  }
+}
+@media (min-width: 992px) {
+  .asq-docs-sidebar .nav > .active > ul {
+    display: block;
+  }
+  .asq-docs-sidebar.affix,
+  .asq-docs-sidebar.affix-bottom {
+    width: 213px;
+  }
+  .asq-docs-sidebar.affix {
+    position: fixed;
+    top: 40px;
+  }
+  .asq-docs-sidebar.affix-bottom {
+    position: absolute;
+  }
+  .asq-docs-sidebar.affix-bottom .asq-docs-sidenav,
+  .asq-docs-sidebar.affix .asq-docs-sidenav {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+@media (min-width: 1200px) {
+  .asq-docs-sidebar.affix-bottom,
+  .asq-docs-sidebar.affix {
+    width: 263px;
+  }
+}
+.btn-cool {
+  color: #fff;
+  background-color: #FF0066;
+  border-color: #FF0066;
+}
+.btn-cool:hover,
+.btn-cool:focus,
+.btn-cool:active,
+.btn-cool.active,
+.open .dropdown-toggle.btn-cool {
+  color: #fff;
+  background-color: #DF035B;
+  border-color: #df035b;
+}
+.btn-cool:active,
+.btn-cool.active,
+.open .dropdown-toggle.btn-cool {
+  background-image: none;
+}
+.btn-cool.disabled,
+.btn-cool[disabled],
+fieldset[disabled] .btn-cool,
+.btn-cool.disabled:hover,
+.btn-cool[disabled]:hover,
+fieldset[disabled] .btn-cool:hover,
+.btn-cool.disabled:focus,
+.btn-cool[disabled]:focus,
+fieldset[disabled] .btn-cool:focus,
+.btn-cool.disabled:active,
+.btn-cool[disabled]:active,
+fieldset[disabled] .btn-cool:active,
+.btn-cool.disabled.active,
+.btn-cool[disabled].active,
+fieldset[disabled] .btn-cool.active {
+  background-color: #EB2B78;
+  border-color: #eb2b78;
+}
+.btn-cool .badge {
+  color: #FF0066;
+  background-color: #ffffff;
+}

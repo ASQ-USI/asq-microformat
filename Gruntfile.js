@@ -92,7 +92,8 @@ module.exports = function(grunt) {
         },
         files: {
           "docs/css/asq-default-theme.css": "docs/less/asq-default-theme.less",
-          "docs/css/renderer.css": "docs/less/renderer.less"
+          "docs/css/docs.css": "docs/less/docs.less",
+          "docs/css/microformat-editor.css": "docs/less/microformat-editor.less"
         }
       },
       production: {

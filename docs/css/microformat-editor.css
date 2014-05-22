@@ -1,4 +1,7 @@
+@import "../css/viewer-hljs.css";
+@import "../css/presenter-hljs.css";
 /* Styles for the asq microformat editor */
+/* import highlight themes */
 /* header */
 header {
   padding: 5px 10px;
