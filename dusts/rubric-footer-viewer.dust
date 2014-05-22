@@ -1,4 +1,4 @@
 <p class="text-right">
-  <span class="am-confidence-label">Confidence:</span> {>rating rated=rated ratin="9"/}
+  <span class="asq-confidence-label">Confidence:</span> {>rating rated=rated ratin="9"/}
   <button type="submit" class="btn btn-success">Submit</button>
 </p>

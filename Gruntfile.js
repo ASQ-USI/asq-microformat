@@ -152,7 +152,7 @@ module.exports = function(grunt) {
   // Default grunt
   grunt.registerTask( 'default', [ 'build'] );
   // devbuild grunt
-  grunt.registerTask( 'devbuild', ['dust', 'post-dust', 'browserify'] );
+  grunt.registerTask( 'devbuild', ['dust', 'post-dust', 'browserify', "less:development"] );
   // Dev grunt
   grunt.registerTask( 'devwatch', [ 'devbuild', 'watch'] );
 };

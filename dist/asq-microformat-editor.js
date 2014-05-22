@@ -11,38 +11,51 @@ var editor = ace.edit("asq-editor")
   , mGen1 = new microformat.generator()
   , mGen2 = new microformat.generator()
   , beautify_html = require('js-beautify').html
-  , timer;
+  , timer
+  , viewerIframe
+  , presenterIframe;
 
-//setup editor
-editor.setTheme("ace/theme/monokai");
-editor.getSession().setMode("ace/mode/html");
-//everytime the editor's text is changing
-// parse the text and render
-editor.getSession().on('change', function(e) {
-  clearTimeout(timer)
-  timer = setTimeout(process, 100)
-});
-
-//create question menu 
-var templates = require('./editor-question-templates')
-  , keys = Object.keys(templates)
-  , listHtml = "";
-
-keys.forEach(function(key){
-  listHtml+=  '<a href="#" class="list-group-item">' + key +'</a>\n';
-});
-$('#question-type-list').html(listHtml);
-
-$('#question-type-list').on('click', '.list-group-item', function(){
-  $(this).addClass('active')
-    .siblings().removeClass('active');
-    //add question to editor
-    editor.setValue(templates[$(this).html()]);
-    editor.session.selection.clearSelection();
+$(function onDocumentReady(){
+  init();
 })
 
-//load first question
-$('#question-type-list .list-group-item').eq(0).trigger('click');
+function init(){
+  //cache iframes
+  viewerIframe = $('#render-viewer')[0];
+  presenterIframe = $('#render-presenter')[0];
+
+  //setup editor
+  editor.setTheme("ace/theme/monokai");
+  editor.getSession().setMode("ace/mode/html");
+  //everytime the editor's text is changing
+  // parse the text and render
+  editor.getSession().on('change', function(e) {
+    clearTimeout(timer)
+    timer = setTimeout(process, 100)
+  });
+
+  //create question menu 
+  var templates = require('./editor-question-templates')
+    , keys = Object.keys(templates)
+    , listHtml = "";
+
+  keys.forEach(function(key){
+    listHtml+=  '<a href="#" class="list-group-item">' + key +'</a>\n';
+  });
+  $('#question-type-list').html(listHtml);
+
+  $('#question-type-list').on('click', '.list-group-item', function(){
+    $(this).addClass('active')
+      .siblings().removeClass('active');
+      //add question to editor
+      editor.setValue(templates[$(this).html()]);
+      editor.session.selection.clearSelection();
+  })
+
+  //load first question
+  $('#question-type-list .list-group-item').eq(0).trigger('click');
+}
+
 
 /**
 * Parses the content of the ace editor and render with microformat
@@ -62,7 +75,14 @@ function process(){
                       indent_size: 2 ,
                       preserve_newlines: true });
 
-    $('#render-viewer').html(viewerHtml)
+    // $('#render-viewer').html(viewerHtml)
+
+  // var iframe = $("#render-viewer")[0];
+
+  injectHtmltoIframe(viewerIframe, viewerHtml)
+  injectHtmltoIframe(presenterIframe, presenterHtml)
+  
+
     $('#render-presenter').html(presenterHtml)
     // show generated code
     $('#viewer-src').html(ent.encode(viewerHtml));
@@ -74,8 +94,20 @@ function process(){
   })
 }
 
+function injectHtmltoIframe(iframeEl, html){
+   if(iframeEl.contentDocument){
+    doc = iframeEl.contentDocument;
+  }
+  else if(iframeEl.contentWindow){
+    doc = iframeEl.contentWindow.document;
+  }
+  doc.open();
+  doc.write(html);
+  doc.close();    
+}
 
-},{"../../index":5,"./editor-question-templates":3,"brace":11,"brace/mode/html":12,"brace/theme/monokai":14,"ent":36,"js-beautify":39,"when":58}],"asq-microformat-editor":[function(require,module,exports){
+
+},{"../../index":5,"./editor-question-templates":3,"brace":11,"brace/mode/html":12,"brace/theme/monokai":14,"ent":36,"js-beautify":39,"when":61}],"asq-microformat-editor":[function(require,module,exports){
 module.exports=require('i/yuPw');
 },{}],3:[function(require,module,exports){
 
@@ -112,7 +144,7 @@ module.exports = function (dust) {
 	// answer.dust
 	(function(){dust.register("answer",body_0);function body_0(chk,ctx){return chk.reference(ctx.getPath(false,["question","stem"]),ctx,"h",["s"]).write("<ul class=\"nav nav-tabs\">").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_1},null).exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_2},null).exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_3},null).exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_4},null).exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_5},null).write("</ul><div class=\"tab-content\"><!--  Displays correct solution -->").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_6},null).write("<!-- Displays Pie-Chart Right vs. Wrong -->").exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_10},null).write("<!-- Display distinct answers -->").exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_11},null).write("<!-- Display distinct options  -->").exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_12},null).write("<!-- Display correctness  -->").exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_13},null).write("</div>");}function body_1(chk,ctx){return chk.write("<li class=\"active\"><a href=\"#answersolutions-").reference(ctx.get("statId"),ctx,"h").write("\"  data-toggle=\"tab\">Correct Answer</a></li>");}function body_2(chk,ctx){return chk.write("<li><a href=\"#rvsw-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Right vs. Wrong</a></li>");}function body_3(chk,ctx){return chk.write("<li><a href=\"#mscstats-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Answers</a></li>");}function body_4(chk,ctx){return chk.write("<li><a href=\"#diffAns-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Options</a></li>");}function body_5(chk,ctx){return chk.write("<li><a href=\"#asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Correctness</a></li>");}function body_6(chk,ctx){return chk.write("<div class=\"tab-pane answersolutions active\" id='answersolutions-").reference(ctx.get("statId"),ctx,"h").write("'>").exists(ctx.getPath(false,["question","correctAnswer"]),ctx,{"else":body_7,"block":body_9},null).write("</div>");}function body_7(chk,ctx){return chk.write("<ol>").section(ctx.getPath(false,["question","questionOptions"]),ctx,{"block":body_8},{"formButtonType":ctx.getPath(false,["question","formButtonType"]),"htmlId":ctx.getPath(false,["question","htmlId"])}).write("</ol>");}function body_8(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" ><label class=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\"><input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"").reference(ctx.get("htmlId"),ctx,"h").write("\" value=\"").reference(ctx.get("$idx"),ctx,"h").write("\" disabled> ").reference(ctx.get("text"),ctx,"h",["s"]).write("</label></li>\n");}function body_9(chk,ctx){return chk;}function body_10(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"rvsw-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"rvswChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"rvswChart\" style=\"width: 100%; height: 500px;\"></div></div>");}function body_11(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"mscstats-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"mscstatChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"distinctAnswers\" style=\"height:500px\"></div></div>");}function body_12(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"diffAns-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"diffAnsChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"distinctOptions\" style=\"height:500px\"></div></div>");}function body_13(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\"><div class=\"asq-viz-graph\" data-width=\"").reference(ctx.get("width"),ctx,"h").write("\" data-height=\"").reference(ctx.get("height"),ctx,"h").write("\" data-margin=\"").reference(ctx.get("margin"),ctx,"h",["js"]).write("\"></div></div>");}return body_0;})();
 	 // assessment-viewer.dust
-	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"am-assessment-container\">").section(ctx.get("exercises"),ctx,{"block":body_1},null).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"am-assessment-outer\"><div class=\"am-assessment\"><form class=\"am-assessment-inner\">").section(ctx.get("questions"),ctx,{"block":body_2},null).write("<p class=\"text-right\"><span class=\"am-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("_id"),"ratin":"7"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form></div></div>");}function body_2(chk,ctx){return chk.write("<div class=\"am-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"am-flex-col am-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"am-flex-handle\"></div><div class=\"am-flex-col am-rubric\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("</div></div>");}return body_0;})();
+	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"asq-assessment-container\">").section(ctx.get("exercises"),ctx,{"block":body_1},null).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"asq-assessment-outer\"><div class=\"asq-assessment\"><form class=\"asq-assessment-inner\">").section(ctx.get("questions"),ctx,{"block":body_2},null).write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("_id"),"ratin":"7"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form></div></div>");}function body_2(chk,ctx){return chk.write("<div class=\"asq-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-flex-col asq-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"asq-flex-handle\"></div><div class=\"asq-flex-col asq-rubric\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("</div></div>");}return body_0;})();
 	 // exercise-presenter.dust
 	(function(){dust.register("exercise-presenter",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).write("<div class=\"progress\" ><div class=\"progress-bar\" role=\"progressbar\" style=\"width: 0%;\"></div></div><h5 class=\"pull-right progressNum\">Waiting for answers!</h5></form>");}return body_0;})();
 	 // exercise-viewer.dust
@@ -136,13 +168,13 @@ module.exports = function (dust) {
 	 // question-text-input-viewer.dust
 	(function(){dust.register("question-text-input-viewer",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"inputText\">Your solution:</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
 	 // question-viewer.dust
-	(function(){dust.register("question-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("stem"),ctx,"h",["s"]).partial(body_1,ctx,null).write(" <input type=\"hidden\" name=\"question-id\" value=").reference(ctx.get("id"),ctx,"h").write("><p class=\"text-right\"><span class=\"asq-rating-widget\"><span class=\"am-confidence-label\">Confidence:</span>").exists(ctx.get("confidence"),ctx,{"else":body_2,"block":body_4},null).write("</span></p>");}function body_1(chk,ctx){return chk.write("question-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}function body_2(chk,ctx){return chk.partial("rating",ctx,{"rated":body_3,"ratin":0});}function body_3(chk,ctx){return chk.reference(ctx.get("id"),ctx,"h");}function body_4(chk,ctx){return chk.partial("rating",ctx,{"rated":body_5,"ratin":ctx.get("confidence")});}function body_5(chk,ctx){return chk.reference(ctx.get("id"),ctx,"h");}return body_0;})();
+	(function(){dust.register("question-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("stem"),ctx,"h",["s"]).partial(body_1,ctx,null).write(" <input type=\"hidden\" name=\"question-id\" value=").reference(ctx.get("id"),ctx,"h").write("><p class=\"text-right\"><span class=\"asq-rating-widget\"><span class=\"asq-confidence-label\">Confidence:</span>").exists(ctx.get("confidence"),ctx,{"else":body_2,"block":body_4},null).write("</span></p>");}function body_1(chk,ctx){return chk.write("question-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}function body_2(chk,ctx){return chk.partial("rating",ctx,{"rated":body_3,"ratin":0});}function body_3(chk,ctx){return chk.reference(ctx.get("id"),ctx,"h");}function body_4(chk,ctx){return chk.partial("rating",ctx,{"rated":body_5,"ratin":ctx.get("confidence")});}function body_5(chk,ctx){return chk.reference(ctx.get("id"),ctx,"h");}return body_0;})();
 	 // rating.dust
-	(function(){dust.register("rating",body_0);function body_0(chk,ctx){return chk.write("<span class=\"am-rating").helper("if",ctx,{"block":body_1},{"cond":body_2}).write("\"><!-- 5 stars rating --><input type=\"radio\" id=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-5\" value=\"5\"class=\"am-rating-input\" name=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_3},{"cond":body_5}).write("><label for=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-5\" class=\"am-rating-star\"></label><!-- 4 stars rating --><input type=\"radio\" id=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-4\" value=\"4\"class=\"am-rating-input\" name=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_6},{"cond":body_8}).write("><label for=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-4\" class=\"am-rating-star\"></label><!-- 3 stars rating --><input type=\"radio\" id=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-3\" value=\"3\"class=\"am-rating-input\" name=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_9},{"cond":body_11}).write("><label for=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-3\" class=\"am-rating-star\"></label><!-- 2 stars rating --><input type=\"radio\" id=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-2\" value=\"2\"class=\"am-rating-input\" name=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_12},{"cond":body_14}).write("><label for=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-2\" class=\"am-rating-star\"></label><!-- 1 star rating --><input type=\"radio\" id=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-1\" value=\"1\"class=\"am-rating-input\" name=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_15},{"cond":body_17}).write("><label for=\"am-rating-").reference(ctx.get("rated"),ctx,"h").write("-1\" class=\"am-rating-star\"></label></span>");}function body_1(chk,ctx){return chk.write(" disabled");}function body_2(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_3(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_4},{"key":ctx.get("ratin"),"value":5});}function body_4(chk,ctx){return chk.write(" checked ");}function body_5(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_6(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_7},{"key":ctx.get("ratin"),"value":4});}function body_7(chk,ctx){return chk.write(" checked ");}function body_8(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_9(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_10},{"key":ctx.get("ratin"),"value":3});}function body_10(chk,ctx){return chk.write(" checked ");}function body_11(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_12(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_13},{"key":ctx.get("ratin"),"value":2});}function body_13(chk,ctx){return chk.write(" checked ");}function body_14(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_15(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_16},{"key":ctx.get("ratin"),"value":1});}function body_16(chk,ctx){return chk.write(" checked ");}function body_17(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}return body_0;})();
+	(function(){dust.register("rating",body_0);function body_0(chk,ctx){return chk.write("<span class=\"asq-rating").helper("if",ctx,{"block":body_1},{"cond":body_2}).write("\"><!-- 5 stars rating --><input type=\"radio\" id=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-5\" value=\"5\"class=\"asq-rating-input\" name=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_3},{"cond":body_5}).write("><label for=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-5\" class=\"asq-rating-star\"></label><!-- 4 stars rating --><input type=\"radio\" id=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-4\" value=\"4\"class=\"asq-rating-input\" name=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_6},{"cond":body_8}).write("><label for=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-4\" class=\"asq-rating-star\"></label><!-- 3 stars rating --><input type=\"radio\" id=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-3\" value=\"3\"class=\"asq-rating-input\" name=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_9},{"cond":body_11}).write("><label for=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-3\" class=\"asq-rating-star\"></label><!-- 2 stars rating --><input type=\"radio\" id=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-2\" value=\"2\"class=\"asq-rating-input\" name=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_12},{"cond":body_14}).write("><label for=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-2\" class=\"asq-rating-star\"></label><!-- 1 star rating --><input type=\"radio\" id=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-1\" value=\"1\"class=\"asq-rating-input\" name=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("\"").helper("if",ctx,{"block":body_15},{"cond":body_17}).write("><label for=\"asq-rating-").reference(ctx.get("rated"),ctx,"h").write("-1\" class=\"asq-rating-star\"></label></span>");}function body_1(chk,ctx){return chk.write(" disabled");}function body_2(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_3(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_4},{"key":ctx.get("ratin"),"value":5});}function body_4(chk,ctx){return chk.write(" checked ");}function body_5(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_6(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_7},{"key":ctx.get("ratin"),"value":4});}function body_7(chk,ctx){return chk.write(" checked ");}function body_8(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_9(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_10},{"key":ctx.get("ratin"),"value":3});}function body_10(chk,ctx){return chk.write(" checked ");}function body_11(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_12(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_13},{"key":ctx.get("ratin"),"value":2});}function body_13(chk,ctx){return chk.write(" checked ");}function body_14(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}function body_15(chk,ctx){return chk.write(" disabled").helper("eq",ctx,{"block":body_16},{"key":ctx.get("ratin"),"value":1});}function body_16(chk,ctx){return chk.write(" checked ");}function body_17(chk,ctx){return chk.write("1<=").reference(ctx.get("ratin"),ctx,"h").write(" && ").reference(ctx.get("ratin"),ctx,"h").write(" <= 5");}return body_0;})();
 	 // rubric-footer-viewer.dust
-	(function(){dust.register("rubric-footer-viewer",body_0);function body_0(chk,ctx){return chk.write("<p class=\"text-right\"><span class=\"am-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("rated"),"ratin":"9"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p>");}return body_0;})();
+	(function(){dust.register("rubric-footer-viewer",body_0);function body_0(chk,ctx){return chk.write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("rated"),"ratin":"9"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p>");}return body_0;})();
 	 // rubric-multi-choice-viewer.dust
-	(function(){dust.register("rubric-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel panel-default\" data-rubric=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"panel-heading\"><h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse-").reference(ctx.get("_id"),ctx,"h").write("\">").reference(ctx.get("stemText"),ctx,"h").write("</a><span class=\"label label-default am-rubric-grade\"></span></h4></div><div id=\"collapse-").reference(ctx.get("_id"),ctx,"h").write("\" class=\"panel-collapse collapse in\"><div class=\"panel-body\"><div class=\"input-group am-rubric-group\"><ul class=\"am-rubric-list list-group\">").section(ctx.get("criteria"),ctx,{"block":body_1},null).write("</ul></div></div></div></div>");}function body_1(chk,ctx){return chk.write("<li class=\"list-group-item\"><div class=\"am-rubric-elem\"><input type=\"radio\" name=\"collaspe-").reference(ctx.get("_id"),ctx,"h").write("\" value=\"").reference(ctx.get("points"),ctx,"h").write("\"/><span class=\"label label-default\">").reference(ctx.get("label"),ctx,"h").write("</span></div><div class=\"am-rubric-elem\">").reference(ctx.get("desc"),ctx,"h").write("</div></li>");}return body_0;})();
+	(function(){dust.register("rubric-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel panel-default\" data-rubric=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"panel-heading\"><h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse-").reference(ctx.get("_id"),ctx,"h").write("\">").reference(ctx.get("stemText"),ctx,"h").write("</a><span class=\"label label-default asq-rubric-grade\"></span></h4></div><div id=\"collapse-").reference(ctx.get("_id"),ctx,"h").write("\" class=\"panel-collapse collapse in\"><div class=\"panel-body\"><div class=\"input-group asq-rubric-group\"><ul class=\"asq-rubric-list list-group\">").section(ctx.get("criteria"),ctx,{"block":body_1},null).write("</ul></div></div></div></div>");}function body_1(chk,ctx){return chk.write("<li class=\"list-group-item\"><div class=\"asq-rubric-elem\"><input type=\"radio\" name=\"collaspe-").reference(ctx.get("_id"),ctx,"h").write("\" value=\"").reference(ctx.get("points"),ctx,"h").write("\"/><span class=\"label label-default\">").reference(ctx.get("label"),ctx,"h").write("</span></div><div class=\"asq-rubric-elem\">").reference(ctx.get("desc"),ctx,"h").write("</div></li>");}return body_0;})();
 	 // rubric-viewer.dust
 	(function(){dust.register("rubric-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-group\">").section(ctx.get("rubrics"),ctx,{"block":body_1},{"question":ctx.get("question")}).write("</div>");}function body_1(chk,ctx){return chk.partial(body_2,ctx,null);}function body_2(chk,ctx){return chk.write("rubric-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}return body_0;})();
 	 // stats.dust
@@ -608,7 +640,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
 }).call(MarkupGenerator.prototype);
 
 }).call(this,require("FWaASH"))
-},{"../dusts/compiled/templates":4,"./scriptBlacklist":9,"./utils":10,"FWaASH":27,"dustjs-linkedin":34,"jquery":38,"lodash":43,"when":58}],8:[function(require,module,exports){
+},{"../dusts/compiled/templates":4,"./scriptBlacklist":9,"./utils":10,"FWaASH":27,"dustjs-linkedin":34,"jquery":38,"lodash":43,"when":61}],8:[function(require,module,exports){
 /** @module lib/parser
     @description Parse HTML files to extract assessment information
 */
@@ -31076,7 +31108,7 @@ module.exports={
 }
 },{}],38:[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v2.1.0
+ * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -31086,7 +31118,7 @@ module.exports={
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-01-23T21:10Z
+ * Date: 2014-05-01T17:11Z
  */
 
 (function( global, factory ) {
@@ -31136,8 +31168,6 @@ var toString = class2type.toString;
 
 var hasOwn = class2type.hasOwnProperty;
 
-var trim = "".trim;
-
 var support = {};
 
 
@@ -31146,7 +31176,7 @@ var
 	// Use the correct document accordingly with window argument (sandbox)
 	document = window.document,
 
-	version = "2.1.0",
+	version = "2.1.1",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -31154,6 +31184,10 @@ var
 		// Need init if jQuery is called (just allow error to be thrown if not included)
 		return new jQuery.fn.init( selector, context );
 	},
+
+	// Support: Android<4.1
+	// Make sure we trim BOM and NBSP
+	rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
 
 	// Matches dashed string for camelizing
 	rmsPrefix = /^-ms-/,
@@ -31185,10 +31219,10 @@ jQuery.fn = jQuery.prototype = {
 	get: function( num ) {
 		return num != null ?
 
-			// Return a 'clean' array
+			// Return just the one element from the set
 			( num < 0 ? this[ num + this.length ] : this[ num ] ) :
 
-			// Return just the object
+			// Return all the elements in a clean array
 			slice.call( this );
 	},
 
@@ -31344,7 +31378,7 @@ jQuery.extend({
 		// parseFloat NaNs numeric-cast false positives (null|true|false|"")
 		// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
 		// subtraction forces infinities to NaN
-		return obj - parseFloat( obj ) >= 0;
+		return !jQuery.isArray( obj ) && obj - parseFloat( obj ) >= 0;
 	},
 
 	isPlainObject: function( obj ) {
@@ -31356,16 +31390,8 @@ jQuery.extend({
 			return false;
 		}
 
-		// Support: Firefox <20
-		// The try/catch suppresses exceptions thrown when attempting to access
-		// the "constructor" property of certain host objects, ie. |window.location|
-		// https://bugzilla.mozilla.org/show_bug.cgi?id=814622
-		try {
-			if ( obj.constructor &&
-					!hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
-				return false;
-			}
-		} catch ( e ) {
+		if ( obj.constructor &&
+				!hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
 			return false;
 		}
 
@@ -31475,8 +31501,11 @@ jQuery.extend({
 		return obj;
 	},
 
+	// Support: Android<4.1
 	trim: function( text ) {
-		return text == null ? "" : trim.call( text );
+		return text == null ?
+			"" :
+			( text + "" ).replace( rtrim, "" );
 	},
 
 	// results is for internal usage only
@@ -31628,14 +31657,14 @@ function isArraylike( obj ) {
 }
 var Sizzle =
 /*!
- * Sizzle CSS Selector Engine v1.10.16
+ * Sizzle CSS Selector Engine v1.10.19
  * http://sizzlejs.com/
  *
  * Copyright 2013 jQuery Foundation, Inc. and other contributors
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-01-13
+ * Date: 2014-04-18
  */
 (function( window ) {
 
@@ -31644,7 +31673,9 @@ var i,
 	Expr,
 	getText,
 	isXML,
+	tokenize,
 	compile,
+	select,
 	outermostContext,
 	sortInput,
 	hasDuplicate,
@@ -31711,17 +31742,23 @@ var i,
 	// Proper syntax: http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
 	identifier = characterEncoding.replace( "w", "w#" ),
 
-	// Acceptable operators http://www.w3.org/TR/selectors/#attribute-selectors
-	attributes = "\\[" + whitespace + "*(" + characterEncoding + ")" + whitespace +
-		"*(?:([*^$|!~]?=)" + whitespace + "*(?:(['\"])((?:\\\\.|[^\\\\])*?)\\3|(" + identifier + ")|)|)" + whitespace + "*\\]",
+	// Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
+	attributes = "\\[" + whitespace + "*(" + characterEncoding + ")(?:" + whitespace +
+		// Operator (capture 2)
+		"*([*^$|!~]?=)" + whitespace +
+		// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
+		"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace +
+		"*\\]",
 
-	// Prefer arguments quoted,
-	//   then not containing pseudos/brackets,
-	//   then attribute selectors/non-parenthetical expressions,
-	//   then anything else
-	// These preferences are here to reduce the number of selectors
-	//   needing tokenize in the PSEUDO preFilter
-	pseudos = ":(" + characterEncoding + ")(?:\\(((['\"])((?:\\\\.|[^\\\\])*?)\\3|((?:\\\\.|[^\\\\()[\\]]|" + attributes.replace( 3, 8 ) + ")*)|.*)\\)|)",
+	pseudos = ":(" + characterEncoding + ")(?:\\((" +
+		// To reduce the number of selectors needing tokenize in the preFilter, prefer arguments:
+		// 1. quoted (capture 3; capture 4 or capture 5)
+		"('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|" +
+		// 2. simple (capture 6)
+		"((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
+		// 3. anything else (capture 2)
+		".*" +
+		")\\)|)",
 
 	// Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
 	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g" ),
@@ -31766,7 +31803,7 @@ var i,
 	funescape = function( _, escaped, escapedWhitespace ) {
 		var high = "0x" + escaped - 0x10000;
 		// NaN means non-codepoint
-		// Support: Firefox
+		// Support: Firefox<24
 		// Workaround erroneous numeric interpretation of +"0x"
 		return high !== high || escapedWhitespace ?
 			escaped :
@@ -32162,7 +32199,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 				var m = context.getElementById( id );
 				// Check parentNode to catch when Blackberry 4.6 returns
 				// nodes that are no longer in the document #6963
-				return m && m.parentNode ? [m] : [];
+				return m && m.parentNode ? [ m ] : [];
 			}
 		};
 		Expr.filter["ID"] = function( id ) {
@@ -32242,11 +32279,13 @@ setDocument = Sizzle.setDocument = function( node ) {
 			// setting a boolean content attribute,
 			// since its presence should be enough
 			// http://bugs.jquery.com/ticket/12359
-			div.innerHTML = "<select t=''><option selected=''></option></select>";
+			div.innerHTML = "<select msallowclip=''><option selected=''></option></select>";
 
-			// Support: IE8, Opera 10-12
+			// Support: IE8, Opera 11-12.16
 			// Nothing should be selected when empty strings follow ^= or $= or *=
-			if ( div.querySelectorAll("[t^='']").length ) {
+			// The test attribute must be unknown in Opera but "safe" for WinRT
+			// http://msdn.microsoft.com/en-us/library/ie/hh465388.aspx#attribute_section
+			if ( div.querySelectorAll("[msallowclip^='']").length ) {
 				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
 			}
 
@@ -32289,7 +32328,8 @@ setDocument = Sizzle.setDocument = function( node ) {
 		});
 	}
 
-	if ( (support.matchesSelector = rnative.test( (matches = docElem.webkitMatchesSelector ||
+	if ( (support.matchesSelector = rnative.test( (matches = docElem.matches ||
+		docElem.webkitMatchesSelector ||
 		docElem.mozMatchesSelector ||
 		docElem.oMatchesSelector ||
 		docElem.msMatchesSelector) )) ) {
@@ -32470,7 +32510,7 @@ Sizzle.matchesSelector = function( elem, expr ) {
 		} catch(e) {}
 	}
 
-	return Sizzle( expr, document, null, [elem] ).length > 0;
+	return Sizzle( expr, document, null, [ elem ] ).length > 0;
 };
 
 Sizzle.contains = function( context, elem ) {
@@ -32599,7 +32639,7 @@ Expr = Sizzle.selectors = {
 			match[1] = match[1].replace( runescape, funescape );
 
 			// Move the given value to match[3] whether quoted or unquoted
-			match[3] = ( match[4] || match[5] || "" ).replace( runescape, funescape );
+			match[3] = ( match[3] || match[4] || match[5] || "" ).replace( runescape, funescape );
 
 			if ( match[2] === "~=" ) {
 				match[3] = " " + match[3] + " ";
@@ -32642,15 +32682,15 @@ Expr = Sizzle.selectors = {
 
 		"PSEUDO": function( match ) {
 			var excess,
-				unquoted = !match[5] && match[2];
+				unquoted = !match[6] && match[2];
 
 			if ( matchExpr["CHILD"].test( match[0] ) ) {
 				return null;
 			}
 
 			// Accept quoted arguments as-is
-			if ( match[3] && match[4] !== undefined ) {
-				match[2] = match[4];
+			if ( match[3] ) {
+				match[2] = match[4] || match[5] || "";
 
 			// Strip excess characters from unquoted arguments
 			} else if ( unquoted && rpseudo.test( unquoted ) &&
@@ -33055,7 +33095,7 @@ function setFilters() {}
 setFilters.prototype = Expr.filters = Expr.pseudos;
 Expr.setFilters = new setFilters();
 
-function tokenize( selector, parseOnly ) {
+tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
 		cached = tokenCache[ selector + " " ];
@@ -33120,7 +33160,7 @@ function tokenize( selector, parseOnly ) {
 			Sizzle.error( selector ) :
 			// Cache the tokens
 			tokenCache( selector, groups ).slice( 0 );
-}
+};
 
 function toSelector( tokens ) {
 	var i = 0,
@@ -33197,6 +33237,15 @@ function elementMatcher( matchers ) {
 			return true;
 		} :
 		matchers[0];
+}
+
+function multipleContexts( selector, contexts, results ) {
+	var i = 0,
+		len = contexts.length;
+	for ( ; i < len; i++ ) {
+		Sizzle( selector, contexts[i], results );
+	}
+	return results;
 }
 
 function condense( unmatched, map, filter, context, xml ) {
@@ -33467,7 +33516,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		superMatcher;
 }
 
-compile = Sizzle.compile = function( selector, group /* Internal Use Only */ ) {
+compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
 		elementMatchers = [],
@@ -33475,12 +33524,12 @@ compile = Sizzle.compile = function( selector, group /* Internal Use Only */ ) {
 
 	if ( !cached ) {
 		// Generate a function of recursive functions that can be used to check each element
-		if ( !group ) {
-			group = tokenize( selector );
+		if ( !match ) {
+			match = tokenize( selector );
 		}
-		i = group.length;
+		i = match.length;
 		while ( i-- ) {
-			cached = matcherFromTokens( group[i] );
+			cached = matcherFromTokens( match[i] );
 			if ( cached[ expando ] ) {
 				setMatchers.push( cached );
 			} else {
@@ -33490,74 +33539,83 @@ compile = Sizzle.compile = function( selector, group /* Internal Use Only */ ) {
 
 		// Cache the compiled function
 		cached = compilerCache( selector, matcherFromGroupMatchers( elementMatchers, setMatchers ) );
+
+		// Save selector and tokenization
+		cached.selector = selector;
 	}
 	return cached;
 };
 
-function multipleContexts( selector, contexts, results ) {
-	var i = 0,
-		len = contexts.length;
-	for ( ; i < len; i++ ) {
-		Sizzle( selector, contexts[i], results );
-	}
-	return results;
-}
-
-function select( selector, context, results, seed ) {
+/**
+ * A low-level selection function that works with Sizzle's compiled
+ *  selector functions
+ * @param {String|Function} selector A selector or a pre-compiled
+ *  selector function built with Sizzle.compile
+ * @param {Element} context
+ * @param {Array} [results]
+ * @param {Array} [seed] A set of elements to match against
+ */
+select = Sizzle.select = function( selector, context, results, seed ) {
 	var i, tokens, token, type, find,
-		match = tokenize( selector );
+		compiled = typeof selector === "function" && selector,
+		match = !seed && tokenize( (selector = compiled.selector || selector) );
 
-	if ( !seed ) {
-		// Try to minimize operations if there is only one group
-		if ( match.length === 1 ) {
+	results = results || [];
 
-			// Take a shortcut and set the context if the root selector is an ID
-			tokens = match[0] = match[0].slice( 0 );
-			if ( tokens.length > 2 && (token = tokens[0]).type === "ID" &&
-					support.getById && context.nodeType === 9 && documentIsHTML &&
-					Expr.relative[ tokens[1].type ] ) {
+	// Try to minimize operations if there is no seed and only one group
+	if ( match.length === 1 ) {
 
-				context = ( Expr.find["ID"]( token.matches[0].replace(runescape, funescape), context ) || [] )[0];
-				if ( !context ) {
-					return results;
-				}
-				selector = selector.slice( tokens.shift().value.length );
+		// Take a shortcut and set the context if the root selector is an ID
+		tokens = match[0] = match[0].slice( 0 );
+		if ( tokens.length > 2 && (token = tokens[0]).type === "ID" &&
+				support.getById && context.nodeType === 9 && documentIsHTML &&
+				Expr.relative[ tokens[1].type ] ) {
+
+			context = ( Expr.find["ID"]( token.matches[0].replace(runescape, funescape), context ) || [] )[0];
+			if ( !context ) {
+				return results;
+
+			// Precompiled matchers will still verify ancestry, so step up a level
+			} else if ( compiled ) {
+				context = context.parentNode;
 			}
 
-			// Fetch a seed set for right-to-left matching
-			i = matchExpr["needsContext"].test( selector ) ? 0 : tokens.length;
-			while ( i-- ) {
-				token = tokens[i];
+			selector = selector.slice( tokens.shift().value.length );
+		}
 
-				// Abort if we hit a combinator
-				if ( Expr.relative[ (type = token.type) ] ) {
-					break;
-				}
-				if ( (find = Expr.find[ type ]) ) {
-					// Search, expanding context for leading sibling combinators
-					if ( (seed = find(
-						token.matches[0].replace( runescape, funescape ),
-						rsibling.test( tokens[0].type ) && testContext( context.parentNode ) || context
-					)) ) {
+		// Fetch a seed set for right-to-left matching
+		i = matchExpr["needsContext"].test( selector ) ? 0 : tokens.length;
+		while ( i-- ) {
+			token = tokens[i];
 
-						// If seed is empty or no tokens remain, we can return early
-						tokens.splice( i, 1 );
-						selector = seed.length && toSelector( tokens );
-						if ( !selector ) {
-							push.apply( results, seed );
-							return results;
-						}
+			// Abort if we hit a combinator
+			if ( Expr.relative[ (type = token.type) ] ) {
+				break;
+			}
+			if ( (find = Expr.find[ type ]) ) {
+				// Search, expanding context for leading sibling combinators
+				if ( (seed = find(
+					token.matches[0].replace( runescape, funescape ),
+					rsibling.test( tokens[0].type ) && testContext( context.parentNode ) || context
+				)) ) {
 
-						break;
+					// If seed is empty or no tokens remain, we can return early
+					tokens.splice( i, 1 );
+					selector = seed.length && toSelector( tokens );
+					if ( !selector ) {
+						push.apply( results, seed );
+						return results;
 					}
+
+					break;
 				}
 			}
 		}
 	}
 
-	// Compile and execute a filtering function
+	// Compile and execute a filtering function if one is not provided
 	// Provide `match` to avoid retokenization if we modified the selector above
-	compile( selector, match )(
+	( compiled || compile( selector, match ) )(
 		seed,
 		context,
 		!documentIsHTML,
@@ -33565,7 +33623,7 @@ function select( selector, context, results, seed ) {
 		rsibling.test( selector ) && testContext( context.parentNode ) || context
 	);
 	return results;
-}
+};
 
 // One-time assignments
 
@@ -34442,8 +34500,9 @@ jQuery.extend({
 		readyList.resolveWith( document, [ jQuery ] );
 
 		// Trigger any bound ready events
-		if ( jQuery.fn.trigger ) {
-			jQuery( document ).trigger("ready").off("ready");
+		if ( jQuery.fn.triggerHandler ) {
+			jQuery( document ).triggerHandler( "ready" );
+			jQuery( document ).off( "ready" );
 		}
 	}
 });
@@ -34815,11 +34874,15 @@ jQuery.fn.extend({
 				if ( elem.nodeType === 1 && !data_priv.get( elem, "hasDataAttrs" ) ) {
 					i = attrs.length;
 					while ( i-- ) {
-						name = attrs[ i ].name;
 
-						if ( name.indexOf( "data-" ) === 0 ) {
-							name = jQuery.camelCase( name.slice(5) );
-							dataAttr( elem, name, data[ name ] );
+						// Support: IE11+
+						// The attrs elements can be null (#14894)
+						if ( attrs[ i ] ) {
+							name = attrs[ i ].name;
+							if ( name.indexOf( "data-" ) === 0 ) {
+								name = jQuery.camelCase( name.slice(5) );
+								dataAttr( elem, name, data[ name ] );
+							}
 						}
 					}
 					data_priv.set( elem, "hasDataAttrs", true );
@@ -35049,10 +35112,17 @@ var rcheckableType = (/^(?:checkbox|radio)$/i);
 
 (function() {
 	var fragment = document.createDocumentFragment(),
-		div = fragment.appendChild( document.createElement( "div" ) );
+		div = fragment.appendChild( document.createElement( "div" ) ),
+		input = document.createElement( "input" );
 
 	// #11217 - WebKit loses check when the name is after the checked attribute
-	div.innerHTML = "<input type='radio' checked='checked' name='t'/>";
+	// Support: Windows Web Apps (WWA)
+	// `name` and `type` need .setAttribute for WWA
+	input.setAttribute( "type", "radio" );
+	input.setAttribute( "checked", "checked" );
+	input.setAttribute( "name", "t" );
+
+	div.appendChild( input );
 
 	// Support: Safari 5.1, iOS 5.1, Android 4.x, Android 2.3
 	// old WebKit doesn't clone checked state correctly in fragments
@@ -35072,7 +35142,7 @@ support.focusinBubbles = "onfocusin" in window;
 
 var
 	rkeyEvent = /^key/,
-	rmouseEvent = /^(?:mouse|contextmenu)|click/,
+	rmouseEvent = /^(?:mouse|pointer|contextmenu)|click/,
 	rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
 	rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
 
@@ -35641,7 +35711,7 @@ jQuery.event = {
 
 				// Support: Firefox 20+
 				// Firefox doesn't alert if the returnValue field is not set.
-				if ( event.result !== undefined ) {
+				if ( event.result !== undefined && event.originalEvent ) {
 					event.originalEvent.returnValue = event.result;
 				}
 			}
@@ -35692,9 +35762,9 @@ jQuery.Event = function( src, props ) {
 		// Events bubbling up the document may have been marked as prevented
 		// by a handler lower down the tree; reflect the correct value.
 		this.isDefaultPrevented = src.defaultPrevented ||
-				// Support: Android < 4.0
 				src.defaultPrevented === undefined &&
-				src.getPreventDefault && src.getPreventDefault() ?
+				// Support: Android < 4.0
+				src.returnValue === false ?
 			returnTrue :
 			returnFalse;
 
@@ -35741,7 +35811,14 @@ jQuery.Event.prototype = {
 		}
 	},
 	stopImmediatePropagation: function() {
+		var e = this.originalEvent;
+
 		this.isImmediatePropagationStopped = returnTrue;
+
+		if ( e && e.stopImmediatePropagation ) {
+			e.stopImmediatePropagation();
+		}
+
 		this.stopPropagation();
 	}
 };
@@ -35750,7 +35827,9 @@ jQuery.Event.prototype = {
 // Support: Chrome 15+
 jQuery.each({
 	mouseenter: "mouseover",
-	mouseleave: "mouseout"
+	mouseleave: "mouseout",
+	pointerenter: "pointerover",
+	pointerleave: "pointerout"
 }, function( orig, fix ) {
 	jQuery.event.special[ orig ] = {
 		delegateType: fix,
@@ -36175,7 +36254,7 @@ jQuery.extend({
 	},
 
 	cleanData: function( elems ) {
-		var data, elem, events, type, key, j,
+		var data, elem, type, key,
 			special = jQuery.event.special,
 			i = 0;
 
@@ -36184,9 +36263,8 @@ jQuery.extend({
 				key = elem[ data_priv.expando ];
 
 				if ( key && (data = data_priv.cache[ key ]) ) {
-					events = Object.keys( data.events || {} );
-					if ( events.length ) {
-						for ( j = 0; (type = events[j]) !== undefined; j++ ) {
+					if ( data.events ) {
+						for ( type in data.events ) {
 							if ( special[ type ] ) {
 								jQuery.event.remove( elem, type );
 
@@ -36489,14 +36567,15 @@ var iframe,
  */
 // Called only from within defaultDisplay
 function actualDisplay( name, doc ) {
-	var elem = jQuery( doc.createElement( name ) ).appendTo( doc.body ),
+	var style,
+		elem = jQuery( doc.createElement( name ) ).appendTo( doc.body ),
 
 		// getDefaultComputedStyle might be reliably used only on attached element
-		display = window.getDefaultComputedStyle ?
+		display = window.getDefaultComputedStyle && ( style = window.getDefaultComputedStyle( elem[ 0 ] ) ) ?
 
 			// Use of this method is a temporary fix (more like optmization) until something better comes along,
 			// since it was removed from specification and supported only in FF
-			window.getDefaultComputedStyle( elem[ 0 ] ).display : jQuery.css( elem[ 0 ], "display" );
+			style.display : jQuery.css( elem[ 0 ], "display" );
 
 	// We don't have any data stored on the element,
 	// so use "detach" method as fast way to get rid of the element
@@ -36619,28 +36698,32 @@ function addGetHookIf( conditionFn, hookFn ) {
 
 (function() {
 	var pixelPositionVal, boxSizingReliableVal,
-		// Support: Firefox, Android 2.3 (Prefixed box-sizing versions).
-		divReset = "padding:0;margin:0;border:0;display:block;-webkit-box-sizing:content-box;" +
-			"-moz-box-sizing:content-box;box-sizing:content-box",
 		docElem = document.documentElement,
 		container = document.createElement( "div" ),
 		div = document.createElement( "div" );
+
+	if ( !div.style ) {
+		return;
+	}
 
 	div.style.backgroundClip = "content-box";
 	div.cloneNode( true ).style.backgroundClip = "";
 	support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
-	container.style.cssText = "border:0;width:0;height:0;position:absolute;top:0;left:-9999px;" +
-		"margin-top:1px";
+	container.style.cssText = "border:0;width:0;height:0;top:0;left:-9999px;margin-top:1px;" +
+		"position:absolute";
 	container.appendChild( div );
 
 	// Executing both pixelPosition & boxSizingReliable tests require only one layout
 	// so they're executed at the same time to save the second computation.
 	function computePixelPositionAndBoxSizingReliable() {
-		// Support: Firefox, Android 2.3 (Prefixed box-sizing versions).
-		div.style.cssText = "-webkit-box-sizing:border-box;-moz-box-sizing:border-box;" +
-			"box-sizing:border-box;padding:1px;border:1px;display:block;width:4px;margin-top:1%;" +
-			"position:absolute;top:1%";
+		div.style.cssText =
+			// Support: Firefox<29, Android 2.3
+			// Vendor-prefix box-sizing
+			"-webkit-box-sizing:border-box;-moz-box-sizing:border-box;" +
+			"box-sizing:border-box;display:block;margin-top:1%;top:1%;" +
+			"border:1px;padding:1px;width:4px;position:absolute";
+		div.innerHTML = "";
 		docElem.appendChild( container );
 
 		var divStyle = window.getComputedStyle( div, null );
@@ -36650,9 +36733,10 @@ function addGetHookIf( conditionFn, hookFn ) {
 		docElem.removeChild( container );
 	}
 
-	// Use window.getComputedStyle because jsdom on node.js will break without it.
+	// Support: node.js jsdom
+	// Don't assume that getComputedStyle is a property of the global object
 	if ( window.getComputedStyle ) {
-		jQuery.extend(support, {
+		jQuery.extend( support, {
 			pixelPosition: function() {
 				// This test is executed only once but we still do memoizing
 				// since we can use the boxSizingReliable pre-computing.
@@ -36674,7 +36758,13 @@ function addGetHookIf( conditionFn, hookFn ) {
 				// This support function is only executed once so no memoizing is needed.
 				var ret,
 					marginDiv = div.appendChild( document.createElement( "div" ) );
-				marginDiv.style.cssText = div.style.cssText = divReset;
+
+				// Reset CSS: box-sizing; display; margin; border; padding
+				marginDiv.style.cssText = div.style.cssText =
+					// Support: Firefox<29, Android 2.3
+					// Vendor-prefix box-sizing
+					"-webkit-box-sizing:content-box;-moz-box-sizing:content-box;" +
+					"box-sizing:content-box;display:block;margin:0;border:0;padding:0";
 				marginDiv.style.marginRight = marginDiv.style.width = "0";
 				div.style.width = "1px";
 				docElem.appendChild( container );
@@ -36682,9 +36772,6 @@ function addGetHookIf( conditionFn, hookFn ) {
 				ret = !parseFloat( window.getComputedStyle( marginDiv, null ).marginRight );
 
 				docElem.removeChild( container );
-
-				// Clean up the div for other support tests.
-				div.innerHTML = "";
 
 				return ret;
 			}
@@ -36724,8 +36811,8 @@ var
 
 	cssShow = { position: "absolute", visibility: "hidden", display: "block" },
 	cssNormalTransform = {
-		letterSpacing: 0,
-		fontWeight: 400
+		letterSpacing: "0",
+		fontWeight: "400"
 	},
 
 	cssPrefixes = [ "Webkit", "O", "Moz", "ms" ];
@@ -36872,13 +36959,10 @@ function showHide( elements, show ) {
 				values[ index ] = data_priv.access( elem, "olddisplay", defaultDisplay(elem.nodeName) );
 			}
 		} else {
+			hidden = isHidden( elem );
 
-			if ( !values[ index ] ) {
-				hidden = isHidden( elem );
-
-				if ( display && display !== "none" || !hidden ) {
-					data_priv.set( elem, "olddisplay", hidden ? display : jQuery.css(elem, "display") );
-				}
+			if ( display !== "none" || !hidden ) {
+				data_priv.set( elem, "olddisplay", hidden ? display : jQuery.css( elem, "display" ) );
 			}
 		}
 	}
@@ -36917,6 +37001,8 @@ jQuery.extend({
 	cssNumber: {
 		"columnCount": true,
 		"fillOpacity": true,
+		"flexGrow": true,
+		"flexShrink": true,
 		"fontWeight": true,
 		"lineHeight": true,
 		"opacity": true,
@@ -36981,9 +37067,6 @@ jQuery.extend({
 
 			// If a hook was provided, use that value, otherwise just set the specified value
 			if ( !hooks || !("set" in hooks) || (value = hooks.set( elem, value, extra )) !== undefined ) {
-				// Support: Chrome, Safari
-				// Setting style to blank string required to delete "style: x !important;"
-				style[ name ] = "";
 				style[ name ] = value;
 			}
 
@@ -37039,7 +37122,7 @@ jQuery.each([ "height", "width" ], function( i, name ) {
 			if ( computed ) {
 				// certain elements can have dimension info if we invisibly show them
 				// however, it must have a current display style that would benefit from this
-				return elem.offsetWidth === 0 && rdisplayswap.test( jQuery.css( elem, "display" ) ) ?
+				return rdisplayswap.test( jQuery.css( elem, "display" ) ) && elem.offsetWidth === 0 ?
 					jQuery.swap( elem, cssShow, function() {
 						return getWidthOrHeight( elem, name, extra );
 					}) :
@@ -37360,7 +37443,7 @@ function createTween( value, prop, animation ) {
 
 function defaultPrefilter( elem, props, opts ) {
 	/* jshint validthis: true */
-	var prop, value, toggle, tween, hooks, oldfire, display,
+	var prop, value, toggle, tween, hooks, oldfire, display, checkDisplay,
 		anim = this,
 		orig = {},
 		style = elem.style,
@@ -37404,13 +37487,12 @@ function defaultPrefilter( elem, props, opts ) {
 		// Set display property to inline-block for height/width
 		// animations on inline elements that are having width/height animated
 		display = jQuery.css( elem, "display" );
-		// Get default display if display is currently "none"
-		if ( display === "none" ) {
-			display = defaultDisplay( elem.nodeName );
-		}
-		if ( display === "inline" &&
-				jQuery.css( elem, "float" ) === "none" ) {
 
+		// Test default display if display is currently "none"
+		checkDisplay = display === "none" ?
+			data_priv.get( elem, "olddisplay" ) || defaultDisplay( elem.nodeName ) : display;
+
+		if ( checkDisplay === "inline" && jQuery.css( elem, "float" ) === "none" ) {
 			style.display = "inline-block";
 		}
 	}
@@ -37440,6 +37522,10 @@ function defaultPrefilter( elem, props, opts ) {
 				}
 			}
 			orig[ prop ] = dataShow && dataShow[ prop ] || jQuery.style( elem, prop );
+
+		// Any non-fx value stops us from restoring the original display value
+		} else {
+			display = undefined;
 		}
 	}
 
@@ -37482,6 +37568,10 @@ function defaultPrefilter( elem, props, opts ) {
 				}
 			}
 		}
+
+	// If this is a noop like .hide().hide(), restore an overwritten display value
+	} else if ( (display === "none" ? defaultDisplay( elem.nodeName ) : display) === "inline" ) {
+		style.display = display;
 	}
 }
 
@@ -38374,6 +38464,16 @@ jQuery.fn.extend({
 
 jQuery.extend({
 	valHooks: {
+		option: {
+			get: function( elem ) {
+				var val = jQuery.find.attr( elem, "value" );
+				return val != null ?
+					val :
+					// Support: IE10-11+
+					// option.text throws exceptions (#14686, #14858)
+					jQuery.trim( jQuery.text( elem ) );
+			}
+		},
 		select: {
 			get: function( elem ) {
 				var value, option,
@@ -38420,7 +38520,7 @@ jQuery.extend({
 
 				while ( i-- ) {
 					option = options[ i ];
-					if ( (option.selected = jQuery.inArray( jQuery(option).val(), values ) >= 0) ) {
+					if ( (option.selected = jQuery.inArray( option.value, values ) >= 0) ) {
 						optionSet = true;
 					}
 				}
@@ -39627,10 +39727,15 @@ jQuery.ajaxTransport(function( options ) {
 				// Create the abort callback
 				callback = xhrCallbacks[ id ] = callback("abort");
 
-				// Do send the request
-				// This may raise an exception which is actually
-				// handled in jQuery.ajax (so no try/catch here)
-				xhr.send( options.hasContent && options.data || null );
+				try {
+					// Do send the request (this may raise an exception)
+					xhr.send( options.hasContent && options.data || null );
+				} catch ( e ) {
+					// #14683: Only rethrow if this hasn't been notified as an error yet
+					if ( callback ) {
+						throw e;
+					}
+				}
 			},
 
 			abort: function() {
@@ -39837,7 +39942,7 @@ jQuery.fn.load = function( url, params, callback ) {
 		off = url.indexOf(" ");
 
 	if ( off >= 0 ) {
-		selector = url.slice( off );
+		selector = jQuery.trim( url.slice( off ) );
 		url = url.slice( 0, off );
 	}
 
@@ -40145,6 +40250,12 @@ jQuery.fn.andSelf = jQuery.fn.addBack;
 // derived from file names, and jQuery is normally delivered in a lowercase
 // file name. Do this after creating the global so that if an AMD module wants
 // to call noConflict to hide this version of jQuery, it will work.
+
+// Note that for maximum portability, libraries that are not jQuery should
+// declare themselves as anonymous modules, and avoid setting a global if an
+// AMD loader is present. jQuery is a special case. For more information, see
+// https://github.com/jrburke/requirejs/wiki/Updating-existing-libraries#wiki-anon
+
 if ( typeof define === "function" && define.amd ) {
 	define( "jquery", [], function() {
 		return jQuery;
@@ -50229,14 +50340,13 @@ define(function (require) {
 	var async = require('./async');
 
 	return makePromise({
-		scheduler: new Scheduler(async),
-		monitor: typeof console !== 'undefined' ? console : void 0
+		scheduler: new Scheduler(async)
 	});
 
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./async":47,"./makePromise":55,"./scheduler":56}],46:[function(require,module,exports){
+},{"./async":48,"./makePromise":58,"./scheduler":59}],46:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50309,6 +50419,34 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}],47:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function() {
+
+	/**
+	 * Custom error type for promises rejected by promise.timeout
+	 * @param {string} message
+	 * @constructor
+	 */
+	function TimeoutError (message) {
+		Error.call(this);
+		this.message = message;
+		this.name = TimeoutError.name;
+		if (typeof Error.captureStackTrace === 'function') {
+			Error.captureStackTrace(this, TimeoutError);
+		}
+	}
+
+	TimeoutError.prototype = Object.create(Error.prototype);
+	TimeoutError.prototype.constructor = TimeoutError;
+
+	return TimeoutError;
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+},{}],48:[function(require,module,exports){
 (function (process){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
@@ -50373,7 +50511,7 @@ define(function(require) {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":27}],48:[function(require,module,exports){
+},{"FWaASH":27}],49:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50455,6 +50593,8 @@ define(function() {
 		 * @param {array} promises
 		 * @param {number} n
 		 * @returns {Promise} promise for the earliest n fulfillment values
+		 *
+		 * @deprecated
 		 */
 		function some(promises, n) {
 			return new Promise(function(resolve, reject, notify) {
@@ -50566,21 +50706,19 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
 
 (function(define) { 'use strict';
-define(function(require) {
-
-	var setTimer = require('../timer').set;
+define(function() {
 
 	return function flow(Promise) {
 
-		var resolve = Promise.resolve;
 		var reject = Promise.reject;
 		var origCatch = Promise.prototype['catch'];
+		var nil = Promise.nil;
 
 		/**
 		 * Handle the ultimate fulfillment value or rejection reason, and assume
@@ -50593,31 +50731,9 @@ define(function(require) {
 		 */
 		Promise.prototype.done = function(onResult, onError) {
 			var h = this._handler;
-			h.when(this._maybeFatal, noop, this, h.receiver, onResult, onError);
-		};
-
-		/**
-		 * Check if x is a rejected promise, and if so, delegate to this._fatal
-		 * @private
-		 * @param {*} x
-		 */
-		Promise.prototype._maybeFatal = function(x) {
-			if((typeof x === 'object' || typeof x === 'function') && x !== null) {
-				// Delegate to promise._fatal in case it has been overridden
-				resolve(x)._handler.chain(this, void 0, this._fatal);
-			}
-		};
-
-		/**
-		 * Propagate fatal errors to the host environment.
-		 * @private
-		 */
-		Promise.prototype._fatal = function(e) {
-			if(this._handler._isMonitored()) {
-				this._handler.join()._fatal(e);
-			} else {
-				setTimer(function() { throw e; }, 0);
-			}
+			h.when({ resolve: this._maybeFatal, notify: noop, context: this,
+				receiver: h.receiver, arg: nil, fulfilled: onResult, rejected: onError,
+				progress: void 0 });
 		};
 
 		/**
@@ -50740,9 +50856,32 @@ define(function(require) {
 	function noop() {}
 
 });
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{"../timer":57}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+/** @author Jeff Escalante */
+
+(function(define) { 'use strict';
+define(function() {
+
+	return function fold(Promise) {
+
+		Promise.prototype.fold = function(fn, arg) {
+			var promise = this._beget();
+			this._handler.fold(promise._handler, fn, arg);
+			return promise;
+		};
+
+		return Promise;
+	};
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+
+},{}],52:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50762,7 +50901,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],51:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50791,17 +50930,9 @@ define(function() {
 		 *  condition returns true
 		 */
 		function iterate(f, condition, handler, x) {
-			return resolve(x).then(function(x) {
-				return resolve(condition(x)).then(function(done) {
-					return done ? x : next(x);
-				});
-			});
-
-			function next(nextValue) {
-				return resolve(handler(nextValue)).then(function() {
-					return iterate(f, condition, handler, f(nextValue));
-				});
-			}
+			return unfold(function(x) {
+				return [x, f(x)];
+			}, condition, handler, x);
 		}
 
 		/**
@@ -50835,7 +50966,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],52:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50860,7 +50991,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50869,6 +51000,7 @@ define(function() {
 define(function(require) {
 
 	var timer = require('../timer');
+	var TimeoutError = require('../TimeoutError');
 
 	return function timed(Promise) {
 		/**
@@ -50879,13 +51011,11 @@ define(function(require) {
 		 */
 		Promise.prototype.delay = function(ms) {
 			var p = this._beget();
+			var h = p._handler;
 
-			this._handler.chain(p._handler,
-				function delay(x) {
-					var h = this; // this = p._handler
+			this._handler.chain(h, function delay(x) {
 					timer.set(function() { h.resolve(x); }, ms);
-				},
-				p._handler.reject, p._handler.notify);
+				}, h.reject, h.notify);
 
 			return p;
 		};
@@ -50902,10 +51032,11 @@ define(function(require) {
 		Promise.prototype.timeout = function(ms, reason) {
 			var hasReason = arguments.length > 1;
 			var p = this._beget();
+			var h = p._handler;
 
 			var t = timer.set(onTimeout, ms);
 
-			this._handler.chain(p._handler,
+			this._handler.chain(h,
 				function onFulfill(x) {
 					timer.clear(t);
 					this.resolve(x); // this = p._handler
@@ -50914,24 +51045,113 @@ define(function(require) {
 					timer.clear(t);
 					this.reject(x); // this = p._handler
 				},
-				p._handler.notify);
+				h.notify);
 
 			return p;
 
 			function onTimeout() {
-				p._handler.reject(hasReason
-					? reason : new Error('timed out after ' + ms + 'ms'));
+				h.reject(hasReason
+					? reason : new TimeoutError('timed out after ' + ms + 'ms'));
 			}
 		};
 
 		return Promise;
-
 	};
 
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../timer":57}],54:[function(require,module,exports){
+},{"../TimeoutError":47,"../timer":60}],56:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+
+	var timer = require('../timer');
+
+	var logError = (function() {
+		if(typeof console !== 'undefined') {
+			if(typeof console.error !== 'undefined') {
+				return function(e) {
+					console.error(e);
+				};
+			}
+
+			if(typeof console.log !== 'undefined') {
+				return function(e) {
+					console.log(e);
+				};
+			}
+		}
+
+		return noop;
+	}());
+
+	return function unhandledRejection(Promise, enqueue) {
+		var unhandledRejections = [];
+
+		if(typeof enqueue !== 'function') {
+			enqueue = function(f) {
+				timer.set(f, 0);
+			};
+		}
+
+		function reportUnhandledRejections() {
+			unhandledRejections.forEach(function (r) {
+				if(!r.handled) {
+					logError('Potentially unhandled rejection ' + formatError(r.value));
+				}
+			});
+			unhandledRejections = [];
+		}
+
+		Promise.onPotentiallyUnhandledRejection = function(rejection) {
+			if(unhandledRejections.length === 0) {
+				enqueue(reportUnhandledRejections);
+			}
+			unhandledRejections.push(rejection);
+		};
+
+		Promise.onFatalRejection = function(rejection) {
+			enqueue(function() {
+				throw rejection.value;
+			});
+		};
+
+		return Promise;
+	};
+
+	function formatError(e) {
+		var s;
+		if(typeof e === 'object' && e.stack) {
+			s = e.stack;
+		} else {
+			s = String(e);
+			if(s === '[object Object]' && typeof JSON !== 'undefined') {
+				s = tryStringify(e, s);
+			}
+		}
+
+		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
+	}
+
+	function tryStringify(e, defaultValue) {
+		try {
+			return JSON.stringify(e);
+		} catch(e) {
+			// Ignore. Cannot JSON.stringify e, stick with String(e)
+			return defaultValue;
+		}
+	}
+
+	function noop() {}
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{"../timer":60}],57:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -50965,7 +51185,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 
-},{}],55:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -51076,7 +51296,7 @@ define(function() {
 		/**
 		 * Creates an internal {promise, resolver} pair
 		 * @private
-		 * @returns {{_handler: DeferredHandler, promise: Promise}}
+		 * @returns {Promise}
 		 */
 		function defer() {
 			return promiseFromHandler(new DeferredHandler());
@@ -51104,18 +51324,31 @@ define(function() {
 		 * for the transformed result.  If the promise cannot be fulfilled, onRejected
 		 * is called with the reason.  onProgress *may* be called with updates toward
 		 * this promise's fulfillment.
-		 * @param [onFulfilled] {Function} fulfillment handler
-		 * @param [onRejected] {Function} rejection handler
-		 * @param [onProgress] {Function} progress handler
+		 * @param {function=} onFulfilled fulfillment handler
+		 * @param {function=} onRejected rejection handler
+		 * @deprecated @param {function=} onProgress progress handler
 		 * @return {Promise} new promise
 		 */
-		Promise.prototype.then = function(onFulfilled, onRejected, onProgress) {
-			var p = this._beget();
+		Promise.prototype.then = function(onFulfilled, onRejected) {
 			var parent = this._handler;
+
+			if (typeof onFulfilled !== 'function' && parent.join().state > 0) {
+				// Short circuit: value will not change, simply share handler
+				return promiseFromHandler(parent);
+			}
+
+			var p = this._beget();
 			var child = p._handler;
 
-			parent.when(child.resolve, child.notify, child,
-				parent.receiver, onFulfilled, onRejected, onProgress);
+			parent.when({
+				resolve: child.resolve,
+				notify: child.notify,
+				context: child,
+				receiver: parent.receiver,
+				fulfilled: onFulfilled,
+				rejected: onRejected,
+				progress: arguments.length > 2 ? arguments[2] : void 0
+			});
 
 			return p;
 		};
@@ -51153,6 +51386,23 @@ define(function() {
 			return configurePromise(child, p);
 		};
 
+		/**
+		 * Check if x is a rejected promise, and if so, delegate to handler._fatal
+		 * @private
+		 * @param {*} x
+		 */
+		Promise.prototype._maybeFatal = function(x) {
+			if(!maybeThenable(x)) {
+				return;
+			}
+
+			var handler = getHandlerUnchecked(x);
+			handler.context = this._handler.context;
+			handler.chain(handler, void 0, function() {
+				this._fatal(this.context);
+			});
+		};
+
 		// Array combinators
 
 		Promise.all = all;
@@ -51166,26 +51416,37 @@ define(function() {
 		 * @returns {Promise} promise for array of fulfillment values
 		 */
 		function all(promises) {
-			/*jshint maxcomplexity:6*/
+			/*jshint maxcomplexity:8*/
 			var resolver = new DeferredHandler();
-			var len = promises.length >>> 0;
-			var pending = len;
-			var results = [];
-			var i, h;
+			var pending = promises.length >>> 0;
+			var results = new Array(pending);
 
-			for (i = 0; i < len; ++i) {
-				if (i in promises) {
-					h = getHandlerUnchecked(promises[i]);
-					if(h.state === 0) {
+			var i, h, x;
+			for (i = 0; i < promises.length; ++i) {
+				x = promises[i];
+
+				if (x === void 0 && !(i in promises)) {
+					--pending;
+					continue;
+				}
+
+				if (maybeThenable(x)) {
+					h = x instanceof Promise
+						? x._handler.join()
+						: getHandlerUntrusted(x);
+
+					if (h.state === 0) {
 						resolveOne(resolver, results, h, i);
-					} else if (h.state === 1) {
+					} else if (h.state > 0) {
 						results[i] = h.value;
 						--pending;
 					} else {
-						h.chain(resolver, void 0, resolver.reject);
+						resolver.reject(h.value);
 						break;
 					}
+
 				} else {
+					results[i] = x;
 					--pending;
 				}
 			}
@@ -51228,10 +51489,13 @@ define(function() {
 			}
 
 			var h = new DeferredHandler();
-			for(var i=0; i<promises.length; ++i) {
-				getHandler(promises[i]).chain(h, h.resolve, h.reject);
+			var i, x;
+			for(i=0; i<promises.length; ++i) {
+				x = promises[i];
+				if (x !== void 0 && i in promises) {
+					getHandler(x).chain(h, h.resolve, h.reject);
+				}
 			}
-
 			return promiseFromHandler(h);
 		}
 
@@ -51247,7 +51511,8 @@ define(function() {
 		 */
 		function getHandler(x, h) {
 			if(x instanceof Promise) {
-				return getHandlerChecked(x, h);
+				var xh = x._handler.join();
+				return h === xh ? promiseCycleHandler() : xh;
 			}
 			return maybeThenable(x) ? getHandlerUntrusted(x) : new FulfilledHandler(x);
 		}
@@ -51266,17 +51531,6 @@ define(function() {
 		}
 
 		/**
-		 * Get x's handler, checking for cycles
-		 * @param {Promise} x
-		 * @param {object?} h handler to check for cycles
-		 * @returns {object} handler
-		 */
-		function getHandlerChecked(x, h) {
-			var xh = x._handler.join();
-			return h === xh ? promiseCycleHandler() : xh;
-		}
-
-		/**
 		 * Get a handler for potentially untrusted thenable x
 		 * @param {*} x
 		 * @returns {object} handler
@@ -51290,6 +51544,19 @@ define(function() {
 			} catch(e) {
 				return new RejectedHandler(e);
 			}
+		}
+
+		/**
+		 * Recursively collapse handler chain to find the handler
+		 * nearest to the fully resolved value.
+		 * @param {Handler} h
+		 * @returns {*}
+		 */
+		function join(h) {
+			while(h.handler !== void 0) {
+				h = h.handler;
+			}
+			return h;
 		}
 
 		/**
@@ -51312,29 +51579,26 @@ define(function() {
 
 		Handler.prototype.inspect = toPendingState;
 
-		Handler.prototype.join = function() { return this; };
+		Handler.prototype.join = function() { return join(this); };
 
-		Handler.prototype.chain = function(to, f, r, u) {
-			this.when(noop, noop, void 0, to, f, r, u);
+		Handler.prototype.chain = function(to, fulfilled, rejected, progress) {
+			this.when({
+				resolve: noop,
+				notify: noop,
+				context: void 0,
+				receiver: to,
+				fulfilled: fulfilled,
+				rejected: rejected,
+				progress: progress
+			});
 		};
 
-		Handler.prototype._env = environment.monitor || Promise;
-		Handler.prototype._isMonitored = function() {
-			return typeof this._env.promiseMonitor !== 'undefined';
-		};
-
-		Handler.prototype._createContext = function(fromContext) {
-			var parent = fromContext || executionContext[executionContext.length - 1];
-			this.context = { stack: void 0, parent: parent };
-			this._env.promiseMonitor.captureStack(this.context, this.constructor);
-		};
-
-		Handler.prototype._enterContext = function() {
-			executionContext.push(this.context);
-		};
-
-		Handler.prototype._exitContext = function() {
-			executionContext.pop();
+		Handler.prototype.fold = function(to, f, z) {
+			join(this).chain(to, function(x) {
+				getHandler(z).chain(this, function(z) {
+					this.resolve(tryCatchReject2(f, z, x, this.receiver));
+				}, this.reject, this.notify);
+			}, to.reject, to.notify);
 		};
 
 		/**
@@ -51343,14 +51607,13 @@ define(function() {
 		 * @constructor
 		 */
 		function DeferredHandler(receiver, inheritedContext) {
+			Promise.createContext(this, inheritedContext);
+
 			this.consumers = [];
 			this.receiver = receiver;
 			this.handler = void 0;
 			this.resolved = false;
 			this.state = 0;
-			if(this._isMonitored()) {
-				this._createContext(inheritedContext);
-			}
 		}
 
 		inherit(Handler, DeferredHandler);
@@ -51360,17 +51623,20 @@ define(function() {
 		};
 
 		DeferredHandler.prototype.resolve = function(x) {
-			this._join(getHandler(x, this));
+			if(!this.resolved) {
+				this._resolve(getHandler(x, this));
+			}
 		};
 
 		DeferredHandler.prototype.reject = function(x) {
-			this._join(new RejectedHandler(x));
+			if(!this.resolved) {
+				this._resolve(new RejectedHandler(x));
+			}
 		};
 
 		DeferredHandler.prototype.join = function() {
 			if (this.resolved) {
-				this.handler = this.handler.join();
-				return this.handler;
+				return this.handler = join(this.handler);
 			} else {
 				return this;
 			}
@@ -51378,36 +51644,29 @@ define(function() {
 
 		DeferredHandler.prototype.run = function() {
 			var q = this.consumers;
-			var handler = this.handler = this.handler.join();
+			var handler = this.handler.join();
 			this.consumers = void 0;
 
-			for (var i = 0; i < q.length; i+=7) {
-				handler.when(q[i], q[i+1], q[i+2], q[i+3], q[i+4], q[i+5], q[i+6]);
+			for (var i = 0; i < q.length; ++i) {
+				handler.when(q[i]);
 			}
 		};
 
-		DeferredHandler.prototype._join = function(handler) {
-			if(this.resolved) {
-				return;
-			}
-
+		DeferredHandler.prototype._resolve = function(handler) {
 			this.resolved = true;
 			this.handler = handler;
 			tasks.enqueue(this);
 
-			if(this._isMonitored()) {
+			if(this.context !== void 0) {
 				handler._reportTrace(this.context);
-				this.context = void 0;
 			}
 		};
 
-		DeferredHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
-			if(this._isMonitored()) { this.context = void 0; }
-
+		DeferredHandler.prototype.when = function(continuation) {
 			if(this.resolved) {
-				tasks.enqueue(new RunHandlerTask(resolve, notify, t, receiver, f, r, u, this.handler));
+				tasks.enqueue(new ContinuationTask(continuation, this.handler));
 			} else {
-				this.consumers.push(resolve, notify, t, receiver, f, r, u);
+				this.consumers.push(continuation);
 			}
 		};
 
@@ -51425,6 +51684,11 @@ define(function() {
 			this.resolved && this.handler.join()._removeTrace();
 		};
 
+		DeferredHandler.prototype._fatal = function(context) {
+			var c = typeof context === 'undefined' ? this.context : context;
+			this.resolved && this.handler.join()._fatal(c);
+		};
+
 		/**
 		 * Abstract base for handler that delegates to another handler
 		 * @private
@@ -51437,10 +51701,6 @@ define(function() {
 		}
 
 		inherit(Handler, DelegateHandler);
-
-		DelegateHandler.prototype.join = function() {
-			return this.handler.join();
-		};
 
 		DelegateHandler.prototype.inspect = function() {
 			return this.join().inspect();
@@ -51466,8 +51726,8 @@ define(function() {
 
 		inherit(DelegateHandler, AsyncHandler);
 
-		AsyncHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
-			tasks.enqueue(new RunHandlerTask(resolve, notify, t, receiver, f, r, u, this.join()));
+		AsyncHandler.prototype.when = function(continuation) {
+			tasks.enqueue(new ContinuationTask(continuation, this.join()));
 		};
 
 		/**
@@ -51484,15 +51744,15 @@ define(function() {
 
 		inherit(DelegateHandler, BoundHandler);
 
-		BoundHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
+		BoundHandler.prototype.when = function(continuation) {
 			// Because handlers are allowed to be shared among promises,
 			// each of which possibly having a different receiver, we have
 			// to insert our own receiver into the chain if it has been set
 			// so that callbacks (f, r, u) will be called using our receiver
 			if(this.receiver !== void 0) {
-				receiver = this.receiver;
+				continuation.receiver = this.receiver;
 			}
-			this.join().when(resolve, notify, t, receiver, f, r, u);
+			this.join().when(continuation);
 		};
 
 		/**
@@ -51511,30 +51771,29 @@ define(function() {
 
 		inherit(DeferredHandler, ThenableHandler);
 
-		ThenableHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
+		ThenableHandler.prototype.when = function(continuation) {
 			if(!this.assimilated) {
 				this.assimilated = true;
-				this._assimilate();
+				assimilate(this);
 			}
-			DeferredHandler.prototype.when.call(this, resolve, notify, t, receiver, f, r, u);
+			DeferredHandler.prototype.when.call(this, continuation);
 		};
 
-		ThenableHandler.prototype._assimilate = function() {
-			var h = this;
-			this._try(this.untrustedThen, this.thenable, _resolve, _reject, _notify);
+		function assimilate(h) {
+			tryAssimilate(h.untrustedThen, h.thenable, _resolve, _reject, _notify);
 
 			function _resolve(x) { h.resolve(x); }
 			function _reject(x)  { h.reject(x); }
 			function _notify(x)  { h.notify(x); }
-		};
+		}
 
-		ThenableHandler.prototype._try = function(then, thenable, resolve, reject, notify) {
+		function tryAssimilate(then, thenable, resolve, reject, notify) {
 			try {
 				then.call(thenable, resolve, reject, notify);
 			} catch (e) {
 				reject(e);
 			}
-		};
+		}
 
 		/**
 		 * Handler for a fulfilled promise
@@ -51543,12 +51802,10 @@ define(function() {
 		 * @constructor
 		 */
 		function FulfilledHandler(x) {
+			Promise.createContext(this);
+
 			this.value = x;
 			this.state = 1;
-
-			if(this._isMonitored()) {
-				this._createContext();
-			}
 		}
 
 		inherit(Handler, FulfilledHandler);
@@ -51557,16 +51814,18 @@ define(function() {
 			return { state: 'fulfilled', value: this.value };
 		};
 
-		FulfilledHandler.prototype.when = function(resolve, notify, t, receiver, f) {
-			if(this._isMonitored()) { this._enterContext(); }
+		FulfilledHandler.prototype.when = function(cont) {
+			var x;
 
-			var x = typeof f === 'function'
-				? tryCatchReject(f, this.value, receiver)
-				: this.value;
+			if (typeof cont.fulfilled === 'function') {
+				Promise.enterContext(this);
+				x = tryCatchReject(cont.fulfilled, this.value, cont.receiver);
+				Promise.exitContext();
+			} else {
+				x = this.value;
+			}
 
-			if(this._isMonitored()) { this._exitContext(); }
-
-			resolve.call(t, x);
+			cont.resolve.call(cont.context, x);
 		};
 
 		/**
@@ -51576,14 +51835,13 @@ define(function() {
 		 * @constructor
 		 */
 		function RejectedHandler(x) {
+			Promise.createContext(this);
+
 			this.value = x;
 			this.state = -1;
+			this.handled = false;
 
-			if(this._isMonitored()) {
-				this.id = errorId++;
-				this._createContext();
-				this._reportTrace();
-			}
+			this._reportTrace();
 		}
 
 		inherit(Handler, RejectedHandler);
@@ -51592,37 +51850,46 @@ define(function() {
 			return { state: 'rejected', reason: this.value };
 		};
 
-		RejectedHandler.prototype.when = function(resolve, notify, t, receiver, f, r) {
-			if(this._isMonitored()) {
+		RejectedHandler.prototype.when = function(cont) {
+			var x;
+
+			if (typeof cont.rejected === 'function') {
 				this._removeTrace();
-				this._enterContext();
+				Promise.enterContext(this);
+				x = tryCatchReject(cont.rejected, this.value, cont.receiver);
+				Promise.exitContext();
+			} else {
+				x = promiseFromHandler(this);
 			}
 
-			var x = typeof r === 'function'
-				? tryCatchReject(r, this.value, receiver)
-				: promiseFromHandler(this);
 
-			if(this._isMonitored()) { this._exitContext(); }
-
-			resolve.call(t, x);
+			cont.resolve.call(cont.context, x);
 		};
 
 		RejectedHandler.prototype._reportTrace = function(context) {
-			this._env.promiseMonitor.addTrace(this, context);
+			Promise.onPotentiallyUnhandledRejection(this, context);
 		};
 
 		RejectedHandler.prototype._removeTrace = function() {
-			this._env.promiseMonitor.removeTrace(this);
+			this.handled = true;
+			Promise.onPotentiallyUnhandledRejectionHandled(this);
 		};
 
-		RejectedHandler.prototype._fatal = function() {
-			this._env.promiseMonitor.fatal(this);
+		RejectedHandler.prototype._fatal = function(context) {
+			Promise.onFatalRejection(this, context);
 		};
 
-		// Execution context tracking for long stack traces
+		// Unhandled rejection hooks
+		// By default, everything is a noop
 
-		var executionContext = [];
-		var errorId = 0;
+		// TODO: Better names: "annotate"?
+		Promise.createContext
+			= Promise.enterContext
+			= Promise.exitContext
+			= Promise.onPotentiallyUnhandledRejection
+			= Promise.onPotentiallyUnhandledRejectionHandled
+			= Promise.onFatalRejection
+			= noop;
 
 		// Errors and singletons
 
@@ -51651,13 +51918,13 @@ define(function() {
 		 * @private
 		 * @constructor
 		 */
-		function RunHandlerTask(a, b, c, d, e, f, g, handler) {
-			this.a=a;this.b=b;this.c=c;this.d=d;this.e=e;this.f=f;this.g=g;
+		function ContinuationTask(continuation, handler) {
+			this.continuation = continuation;
 			this.handler = handler;
 		}
 
-		RunHandlerTask.prototype.run = function() {
-			this.handler.join().when(this.a,this.b,this.c,this.d,this.e,this.f,this.g);
+		ContinuationTask.prototype.run = function() {
+			this.handler.join().when(this.continuation);
 		};
 
 		/**
@@ -51673,17 +51940,17 @@ define(function() {
 		ProgressTask.prototype.run = function() {
 			var q = this.q;
 			// First progress handler is at index 1
-			for (var i = 1; i < q.length; i+=7) {
-				this._notify(q[i], q[i+1], q[i+2], q[i+5]);
+			for (var i = 0; i < q.length; ++i) {
+				this._notify(q[i]);
 			}
 		};
 
-		ProgressTask.prototype._notify = function(notify, t, receiver, u) {
-			var x = typeof u === 'function'
-				? tryCatchReturn(u, this.value, receiver)
+		ProgressTask.prototype._notify = function(continuation) {
+			var x = typeof continuation.progress === 'function'
+				? tryCatchReturn(continuation.progress, this.value, continuation.receiver)
 				: this.value;
 
-			notify.call(t, x);
+			continuation.notify.call(continuation.context, x);
 		};
 
 		// Other helpers
@@ -51704,6 +51971,18 @@ define(function() {
 		function tryCatchReject(f, x, thisArg) {
 			try {
 				return f.call(thisArg, x);
+			} catch(e) {
+				return reject(e);
+			}
+		}
+
+		/**
+		 * Same as above, but includes the extra argument parameter.
+		 * @private
+		 */
+		function tryCatchReject2(f, x, y, thisArg) {
+			try {
+				return f.call(thisArg, x, y);
 			} catch(e) {
 				return reject(e);
 			}
@@ -51733,7 +52012,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],56:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -51762,9 +52041,10 @@ define(function(require) {
 	 * @param {function} task
 	 */
 	Scheduler.prototype.enqueue = function(task) {
-		if(this._handlerQueue.push(task) === 1) {
+		if(this._handlerQueue.length === 0) {
 			this._enqueue(this.drainQueue);
 		}
+		this._handlerQueue.push(task);
 	};
 
 	/**
@@ -51784,7 +52064,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"./Queue":46}],57:[function(require,module,exports){
+},{"./Queue":46}],60:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -51813,7 +52093,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{}],58:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 
 /**
@@ -51821,7 +52101,7 @@ define(function(require) {
  * when is part of the cujoJS family of libraries (http://cujojs.com/)
  * @author Brian Cavalier
  * @author John Hann
- * @version 3.1.0
+ * @version 3.2.1
  */
 (function(define) { 'use strict';
 define(function (require) {
@@ -51829,17 +52109,20 @@ define(function (require) {
 	var timed = require('./lib/decorators/timed');
 	var array = require('./lib/decorators/array');
 	var flow = require('./lib/decorators/flow');
+	var fold = require('./lib/decorators/fold');
 	var inspect = require('./lib/decorators/inspect');
 	var generate = require('./lib/decorators/iterate');
 	var progress = require('./lib/decorators/progress');
 	var withThis = require('./lib/decorators/with');
+	var unhandledRejection = require('./lib/decorators/unhandledRejection');
+	var TimeoutError = require('./lib/TimeoutError');
 
-	var Promise = [array, flow, generate, progress, inspect, withThis, timed]
-		.reduceRight(function(Promise, feature) {
+	var Promise = [array, flow, fold, generate, progress,
+		inspect, withThis, timed, unhandledRejection]
+		.reduce(function(Promise, feature) {
 			return feature(Promise);
 		}, require('./lib/Promise'));
 
-	var resolve = Promise.resolve;
 	var slice = Array.prototype.slice;
 
 	// Public API
@@ -51849,8 +52132,8 @@ define(function (require) {
 	when.reject      = Promise.reject;       // Create a rejected promise
 
 	when.lift        = lift;                 // lift a function to return promises
-	when['try']      = tryCall;              // call a function and return a promise
-	when.attempt     = tryCall;              // alias for when.try
+	when['try']      = attempt;              // call a function and return a promise
+	when.attempt     = attempt;              // alias for when.try
 
 	when.iterate     = Promise.iterate;      // Generate a stream of promises
 	when.unfold      = Promise.unfold;       // Generate a stream of promises
@@ -51872,8 +52155,12 @@ define(function (require) {
 	when.Promise     = Promise;              // Promise constructor
 	when.defer       = defer;                // Create a {promise, resolve, reject} tuple
 
+	// Error types
+
+	when.TimeoutError = TimeoutError;
+
 	/**
-	 * When x, which may be a promise, thenable, or non-promise value,
+	 * Get a trusted promise for x, or by transforming x with onFulfilled
 	 *
 	 * @param {*} x
 	 * @param {function?} onFulfilled callback to be called when x is
@@ -51881,15 +52168,21 @@ define(function (require) {
 	 *   will be invoked immediately.
 	 * @param {function?} onRejected callback to be called when x is
 	 *   rejected.
-	 * @param {function?} onProgress callback to be called when progress updates
+	 * @deprecated @param {function?} onProgress callback to be called when progress updates
 	 *   are issued for x.
 	 * @returns {Promise} a new promise that will fulfill with the return
 	 *   value of callback or errback or the completion value of promiseOrValue if
 	 *   callback and/or errback is not supplied.
 	 */
-	function when(x, onFulfilled, onRejected, onProgress) {
-		var p = resolve(x);
-		return arguments.length < 2 ? p : p.then(onFulfilled, onRejected, onProgress);
+	function when(x, onFulfilled, onRejected) {
+		var p = Promise.resolve(x);
+		if(arguments.length < 2) {
+			return p;
+		}
+
+		return arguments.length > 3
+			? p.then(onFulfilled, onRejected, arguments[3])
+			: p.then(onFulfilled, onRejected);
 	}
 
 	/**
@@ -51919,7 +52212,7 @@ define(function (require) {
 	 * @param {function} f
 	 * @returns {Promise}
 	 */
-	function tryCall(f /*, args... */) {
+	function attempt(f /*, args... */) {
 		/*jshint validthis:true */
 		return _apply(f, this, slice.call(arguments, 1));
 	}
@@ -51928,9 +52221,9 @@ define(function (require) {
 	 * try/lift helper that allows specifying thisArg
 	 * @private
 	 */
-	function _apply(func, thisArg, args) {
+	function _apply(f, thisArg, args) {
 		return Promise.all(args).then(function(args) {
-			return func.apply(thisArg, args);
+			return f.apply(thisArg, args);
 		});
 	}
 
@@ -52059,4 +52352,4 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./lib/Promise":45,"./lib/decorators/array":48,"./lib/decorators/flow":49,"./lib/decorators/inspect":50,"./lib/decorators/iterate":51,"./lib/decorators/progress":52,"./lib/decorators/timed":53,"./lib/decorators/with":54}]},{},["i/yuPw"])
+},{"./lib/Promise":45,"./lib/TimeoutError":47,"./lib/decorators/array":49,"./lib/decorators/flow":50,"./lib/decorators/fold":51,"./lib/decorators/inspect":52,"./lib/decorators/iterate":53,"./lib/decorators/progress":54,"./lib/decorators/timed":55,"./lib/decorators/unhandledRejection":56,"./lib/decorators/with":57}]},{},["i/yuPw"])

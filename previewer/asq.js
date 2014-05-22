@@ -124,7 +124,7 @@ function handleSubmit(exercises) {
     var $exercise = $(evt.target).closest('.asq-exercise');
     //disable submission form
     $exercise.find(':input').attr('disabled', true);
-    $exercise.find('.am-rating').addClass('disabled')
+    $exercise.find('.asq-rating').addClass('disabled')
 
     // fadeout questions and insert wait msg
     $exercise.fadeTo(600, 0.3, function() {
@@ -170,7 +170,7 @@ function handleSubmit(exercises) {
               $btn.css('top',(-$btn.offset().top) + 'px');
             })
             $(out).insertAfter($exercise).hide().fadeIn(600, function() {
-                $(this).find('.am-flex-handle').drags();
+                $(this).find('.asq-flex-handle').drags();
                 console.log('should not be called twice')
                 var $btn = $('.step.present').find('.asq-rubric-expand');
                 if ($btn.length === 0) { return; }
@@ -186,7 +186,7 @@ function handleSubmit(exercises) {
   var restoreId = null;
   // Expand handler
   $(document).on('click', '.asq-rubric-expand', function expandRubric(evt) {
-    var $slide = $(evt.target).parent().siblings('.am-assessment-container');
+    var $slide = $(evt.target).parent().siblings('.asq-assessment-container');
 
     // Restore existing content to slide from modal.
     if (restoreId) {
@@ -211,18 +211,18 @@ function handleSubmit(exercises) {
   });
 
   // Handler for rubric submit logic
-  $(document).on('click', '.am-assessment button[type="submit"]', function rubricSubmitHandler(evt) {
+  $(document).on('click', '.asq-assessment button[type="submit"]', function rubricSubmitHandler(evt) {
     evt.preventDefault();
 
     // Get Submission
     var submission  = [];
-    var $assessment = $(evt.target).closest('.am-assessment-inner');
-    $assessment.find('.am-flex-box').each(function() {
+    var $assessment = $(evt.target).closest('.asq-assessment-inner');
+    $assessment.find('.asq-flex-box').each(function() {
 
       // submission per question
       var qId = $(this).attr('data-question');
       submission[qId] = [];
-      $(this).children('.am-rubric').find('[data-rubric]').each(function() {
+      $(this).children('.asq-rubric').find('[data-rubric]').each(function() {
 
         // Rubric for each question
         var rId     = $(this).attr('data-rubric');
@@ -241,7 +241,7 @@ function handleSubmit(exercises) {
     // disable inputs
     $assessment.find(':input').attr('disabled', true);
     $assessment.find('p.text-right > button').attr('disabled', true); //submit btn
-    $assessment.find('p.text-right .am-rating').attr('disabled', true).addClass('disabled'); //submit btn
+    $assessment.find('p.text-right .asq-rating').attr('disabled', true).addClass('disabled'); //submit btn
 
     $assessment.fadeTo(600, 0.3, function() {
       $('<span class="asq-submit-wait"><span class="label label-default"><i class="asq-spinner glyphicon glyphicon-refresh"></i> Submitting your assessment...</span></span>')
@@ -322,7 +322,7 @@ function handleRubrics(data) {
       // Handler to close modal
       // $(document).on('click', '#ap-rubric-hide', function closeModal(evt) {
       //   evt.preventDefault();
-      //   $('#am-modal-container').fadeOut();
+      //   $('#asq-modal-container').fadeOut();
       // });
       return currentExs;
     } else {

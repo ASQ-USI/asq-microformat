@@ -6,7 +6,7 @@
 <input type="hidden" name="question-id" value={id}>
 <p class="text-right">
   <span class="asq-rating-widget">
-    <span class="am-confidence-label">Confidence:</span>
+    <span class="asq-confidence-label">Confidence:</span>
     {?confidence}
       {>rating rated="{id}" ratin=confidence/}
     {:else}
