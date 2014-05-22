@@ -43,16 +43,17 @@
         var total = prev.outerWidth() + next.outerWidth();
 
 
-        console.log('l: ' + prev.outerWidth() + ', r:' + next.outerWidth());
-
-        var leftPercentage = (((e.pageX - prev.offset().left) + (pos_x - drg_w / 2)) / total);
+        // console.log('l: ' + prev.outerWidth() + ', r:' + next.outerWidth());
+        var offset = prev.offset();
+        offset = Object.prototype.hasOwnProperty.call(offset, 'left') ? offset.left : 0;
+        var leftPercentage = (((e.pageX - offset) + (pos_x - drg_w / 2)) / total);
         var rightPercentage = 1 - leftPercentage;
 
         if (leftPercentage * 100 < opt.min || rightPercentage * 100 < opt.min) {
           return;
         }
 
-        console.log('l: ' + leftPercentage + ', r:' + rightPercentage);
+        // console.log('l: ' + leftPercentage + ', r:' + rightPercentage);
 
         prev.css('flex', leftPercentage.toString());
         next.css('flex', rightPercentage.toString());
