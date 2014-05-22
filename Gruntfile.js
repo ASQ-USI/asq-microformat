@@ -37,11 +37,10 @@ module.exports = function(grunt) {
         }        
       },
       editor:{
-        src: ['docs/js/asq-microformat-editor.js'],
-        dest: 'dist/asq-microformat-editor.js',
+        src: ['docs/js/_src/asq-microformat-editor.js'],
+        dest: 'docs/js/asq-microformat-editor.js',
         options: {
-          debug: true,
-          alias: ['docs/js/asq-microformat-editor.js:asq-microformat-editor']
+          debug: true
         }        
       },
     },
@@ -152,7 +151,7 @@ module.exports = function(grunt) {
   // Default grunt
   grunt.registerTask( 'default', [ 'build'] );
   // devbuild grunt
-  grunt.registerTask( 'devbuild', ['dust', 'post-dust', 'browserify', "less:development"] );
+  grunt.registerTask( 'devbuild', ['dust', 'post-dust', 'browserify',  'less:development'] );
   // Dev grunt
   grunt.registerTask( 'devwatch', [ 'devbuild', 'watch'] );
 };
