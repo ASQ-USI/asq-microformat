@@ -1,7 +1,5 @@
 /* Styles for the asq microformat editor */
-#logo {
-  height: 30px;
-}
+/* header */
 header {
   padding: 5px 10px;
   border-bottom: 1px solid #ccc;
@@ -21,10 +19,11 @@ header h4 > span {
   font-family: 'HelveticaNeue-Light';
   font-weight: 200;
 }
-.editor-section,
-.view-section,
-.markup-section,
-.render-section {
+#logo {
+  height: 30px;
+}
+/* editor */
+.editor-section {
   position: relative;
   width: 100%;
   display: -webkit-box;
@@ -32,8 +31,6 @@ header h4 > span {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-}
-.editor-section {
   margin-top: 10px;
   padding: 0 10px;
 }
@@ -49,7 +46,15 @@ header h4 > span {
   width: 600px;
   height: 400px;
 }
+/* view icons */
 .view-section {
+  position: relative;
+  width: 100%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
   background: white;
 }
 .view-section.affix {
@@ -58,16 +63,12 @@ header h4 > span {
   left: 0;
   z-index: 2;
 }
-.view-heading,
-.render-box,
-.markup-box {
+.view-heading {
   -webkit-box-flex: 1;
   -moz-box-flex: 1;
   -webkit-flex: 1;
   -ms-flex: 1;
   flex: 1;
-}
-.view-heading {
   margin: 0;
   padding: 5px 0;
   text-align: center;
@@ -79,7 +80,22 @@ header h4 > span {
 .view-heading > img {
   height: 24px;
 }
+/* render section */
+.render-section {
+  position: relative;
+  width: 100%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
 .render-box {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
   border: none;
   min-height: 300px;
 }
@@ -87,17 +103,25 @@ header h4 > span {
 #render-presenter {
   border-left: 1px dashed #ccc;
 }
+.markup-section {
+  position: relative;
+  width: 100%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+/* markup section */
 .markup-box {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
   border-top: 1px dashed #ccc;
 }
-#markup-viewer {
-  background: #fdf6e3;
-}
-#markup-presenter {
-  border-left: 1px dashed #ccc;
-  background: #474949;
-}
-pre {
+.markup-box pre {
   height: 100%;
   padding: 0;
   margin: 0;
@@ -105,6 +129,13 @@ pre {
   border-radius: 0;
   background: none;
 }
-pre > code {
+.markup-box pre > code {
   margin-top: -1em;
+}
+#markup-viewer {
+  background: #fdf6e3;
+}
+#markup-presenter {
+  border-left: 1px dashed #ccc;
+  background: #474949;
 }
