@@ -44,7 +44,8 @@ function init(){
   });
   $('#question-type-list').html(listHtml);
 
-  $('#question-type-list').on('click', '.list-group-item', function(){
+  $('#question-type-list').on('click', '.list-group-item', function(event){
+    event.preventDefault();
     $(this).addClass('active')
       .siblings().removeClass('active');
       //add question to editor
@@ -103,7 +104,12 @@ function injectHtmltoIframe(iframeEl, html){
   }
   doc.open();
   doc.write(html);
-  doc.close();    
+  doc.close();   
+
+  //append css
+  var $head = $(iframeEl).contents().find("head");                
+$head.append($("<link/>", 
+    { rel: "stylesheet", href: "css/asq-default-theme.css", type: "text/css" })); 
 }
 
 
