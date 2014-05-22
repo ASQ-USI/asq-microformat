@@ -80,7 +80,8 @@ header h4 > span {
   height: 24px;
 }
 .render-box {
-  padding: 10px;
+  border: none;
+  min-height: 300px;
 }
 #presenter-heading,
 #render-presenter {

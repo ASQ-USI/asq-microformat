@@ -136,7 +136,6 @@ function configure4Browser_(){
   logger = console;
   dust  =  require('../dusts/compiled/templates')(require('dustjs-linkedin'));
   getRootHTML = function($, $root) {
-    console.log($root)
     return $root.html();
   };
 }

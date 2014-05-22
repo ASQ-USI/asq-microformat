@@ -109,12 +109,20 @@ module.exports = function(grunt) {
 
     //watch
     watch: {
-      defaults: {
-        files: ['lib/**/*.js',
-                'dusts/**/*.dust',
-                'docs/**/*.dust',
+      dust: {
+        files:['dusts/**/*.dust',
+              'docs/**/*.dust'],
+          tasks: ['dust', 'post-dust'],
+        options: {
+          livereload: true,
+          interrupt: true
+        },
+      },
+      js: {
+        files:['lib/**/*.js',
+                'docs/**/*.js',                
                 'previewer/*.js'],
-        tasks: ['devbuild'],
+        tasks: ['browserify'],
         options: {
           livereload: true,
           interrupt: true
@@ -139,11 +147,11 @@ module.exports = function(grunt) {
   grunt.loadTasks('./tasks');
 
   // Build grunt
-  grunt.registerTask( "build", [ "dust", "post-dust", "browserify", "less:development", "uglify" ] );
+  grunt.registerTask( 'build', [ 'dust', 'post-dust', 'browserify', 'less:development', 'uglify' ] );
   // Default grunt
-  grunt.registerTask( "default", [ "build"] );
+  grunt.registerTask( 'default', [ 'build'] );
   // devbuild grunt
-  grunt.registerTask( "devbuild", ["dust", "post-dust", "browserify"] );
+  grunt.registerTask( 'devbuild', ['dust', 'post-dust', 'browserify'] );
   // Dev grunt
-  grunt.registerTask( "devwatch", [ "devbuild", "watch"] );
+  grunt.registerTask( 'devwatch', [ 'devbuild', 'watch'] );
 };
