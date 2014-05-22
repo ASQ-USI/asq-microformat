@@ -3,10 +3,14 @@
 // mixins
 @import "lib/lesshat.less";
 
-#logo{
- height: 30px;
+.fullwidthflex(){
+  position:relative;
+  width:100%;
+  .display(flex);
 }
 
+
+/* header */
 header {
   padding: 5px 10px;
   border-bottom: 1px solid #ccc;
@@ -24,16 +28,14 @@ header {
   }
 }
 
-.editor-section,
-.view-section, 
-.markup-section,
-.render-section{
-  position:relative;
-  width:100%;
-  .display(flex);
+#logo{
+ height: 30px;
 }
 
+
+/* editor */
 .editor-section{
+  .fullwidthflex;
   margin-top: 10px;
   padding: 0 10px;
 }
@@ -53,7 +55,10 @@ header {
   height: 400px;
 }
 
+
+/* view icons */
 .view-section{
+  .fullwidthflex;
   background: white;
     &.affix{
     position: fixed;
@@ -63,13 +68,8 @@ header {
   } 
 }
 
-.view-heading,
-.render-box,
-.markup-box{
-   .flex(1);
-}
-
 .view-heading{
+  .flex(1);
   margin: 0;
   padding: 5px 0;
   text-align: center;
@@ -83,23 +83,44 @@ header {
   }
 }
 
+
+/* render section */
+.render-section{
+  .fullwidthflex
+}
+
 .render-box{
-  padding: 10px
-}
-
-#viewer-heading{
-}
-
-#presenter-heading{
-
+  .flex(1);
+  border:none;
+  min-height:300px;
 }
 
 #presenter-heading, #render-presenter{
   border-left: 1px dashed #ccc;
 }
 
+.markup-section{
+  .fullwidthflex;
+}
+
+
+/* markup section */
 .markup-box{
+  .flex(1);
   border-top: 1px dashed #ccc;
+
+  pre {
+    height:100%;
+    padding: 0; 
+    margin: 0;
+    border: none; 
+    border-radius: 0; 
+    background: none;
+
+    > code{
+      margin-top: -1.00em;
+    }
+  }
 }
 
 #markup-viewer{
@@ -109,17 +130,4 @@ header {
 #markup-presenter{
   border-left: 1px dashed #ccc;
   background: #474949;
-}
-
-pre {
-  height:100%;
-  padding: 0; 
-  margin: 0;
-  border: none; 
-  border-radius: 0; 
-  background: none;
-
-  > code{
-    margin-top: -1.00em;
-  }
 }
