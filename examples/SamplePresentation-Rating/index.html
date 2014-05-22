@@ -205,7 +205,7 @@
 
       //ASQ previewer
       var asqPreviewer = require('asq');
-      asqPreviewer.init(function(err, done){
+      asqPreviewer.init($('#impress'), function(err, done){
         if (err) throw err;
         impress().init();
       })
