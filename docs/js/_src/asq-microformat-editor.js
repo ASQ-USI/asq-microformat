@@ -108,6 +108,8 @@ function injectHtmltoIframe(iframeEl, html){
   //append css
   var $head = $(iframeEl).contents().find("head");                
 $head.append($("<link/>", 
-    { rel: "stylesheet", href: "css/asq-default-theme.css", type: "text/css" })); 
+    { rel: "stylesheet", href: "css/asq-default-theme.css", type: "text/css" }));
+$head.append($("<link/>", 
+    { rel: "stylesheet", href: "css/bootstrap.min.css", type: "text/css" })); 
 }
 

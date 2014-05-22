@@ -8,8 +8,6 @@ module.exports = function (dust) {
 	(function(){dust.register("exercise-presenter",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).write("<div class=\"progress\" ><div class=\"progress-bar\" role=\"progressbar\" style=\"width: 0%;\"></div></div><h5 class=\"pull-right progressNum\">Waiting for answers!</h5></form>");}return body_0;})();
 	 // exercise-viewer.dust
 	(function(){dust.register("exercise-viewer",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).write("<input type=\"hidden\" name=\"exercise-id\" value=").reference(ctx.getPath(false,["exercise","id"]),ctx,"h").write("><p class=\"text-right\"><button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form>");}return body_0;})();
-	 // modal.dust
-	(function(){dust.register("modal",body_0);function body_0(chk,ctx){return chk.write("<div id=\"am-modal-container\"><div id=\"am-modal\"><div id=\"am-modal-flex-box\"><div class=\"am-modal-flex-col\"></div><div class=\"am-modal-flex-handle\"></div><div class=\"am-modal-flex-col\"></div></div></div>");}return body_0;})();
 	 // question-code-input-presenter.dust
 	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.getPath(false,["question","id"]),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.getPath(false,["question","id"]),ctx,"h").write("\" class=\"asq-code-editor\" ></div>");}return body_0;})();
 	 // question-code-input-viewer.dust

@@ -1,8 +1,0 @@
-<div id="am-modal-container">
-  <div id="am-modal">
-    <div id="am-modal-flex-box">
-      <div class="am-modal-flex-col"></div>
-      <div class="am-modal-flex-handle"></div>
-      <div class="am-modal-flex-col"></div>
-  </div>
-</div>
