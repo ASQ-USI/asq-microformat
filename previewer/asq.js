@@ -16,22 +16,23 @@ var dust          = require('dustjs-linkedin')
 
 require('dustjs-helpers');
 
-function start(userType, cb) {
+function start($el, userType, cb) {
   //parse
   var asqParser = new Parser();
-  var parsedData = asqParser.parse('')
+  var parsedData = asqParser.parse($el[0].outerHTML)
   parsedData = fakeDatabaseIds(parsedData);
-
   //render
   var asqRenderer = new MarkupGenerator()
-  asqRenderer.render('', parsedData.exercises, parsedData.rubrics,
+  asqRenderer.render(parsedData.html, parsedData.exercises, parsedData.rubrics,
     { userType: userType, mode: 'preview' }).then(
-  function(html) {
+  function(out) {
+    $el[0].outerHTML = out;
     assessment.initCodeEditors();
     generatesampleData(userType);
-    handleModal(parsedData);
+    var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
+    handleSubmit(exercises);
     if (typeof cb !== 'undefined' && typeof cb === 'function') {
-      cb.call(this, null, true)
+      cb.call(this, null, out)
     }
   },
   function(err) {
@@ -42,13 +43,13 @@ function start(userType, cb) {
   });
 }
 
-function init(cb) {
+function init($el, cb) {
   //detect if we need to render anything or the user is just chilin
   var search = window.location.search;
   if (search.match(/viewer/)) {
-    start('viewer',cb);
+    start($el, 'viewer', cb);
   } else if (search.match(/presenter/)) {
-    start('presenter',cb);
+    start($el, 'presenter', cb);
   } else if (typeof cb !== 'undefined' && typeof cb === 'function') {
     cb.call(this, null, true);
   }
@@ -112,9 +113,146 @@ function generatesampleData(mode) {
   }
 }
 
+function handleSubmit(exercises) {
+  // Inject empty modal for rubrics
+  $('<div id="asq-rubric-expanded-container"><button id="asq-rubric-reduce"><i class="glyphicon glyphicon-remove"></i></button><div id="asq-rubric-expanded"></div></div>')
+    .appendTo($('body')).hide(); // Modal for expanded rubrics
+
+  // Handler for question submit button
+  $(document).on('click', '.asq-exercise button[type="submit"]', function questionSumbitHandler(evt) {
+    evt.preventDefault();
+    var $exercise = $(evt.target).closest('.asq-exercise');
+    //disable submission form
+    $exercise.find(':input').attr('disabled', true);
+    $exercise.find('.am-rating').addClass('disabled')
+
+    // fadeout questions and insert wait msg
+    $exercise.fadeTo(600, 0.3, function() {
+      $('<span class="asq-submit-wait"><span class="label label-default"><i class="asq-spinner glyphicon glyphicon-refresh"></i> Submitting your answer...</span></span>')
+        .insertAfter($exercise).fadeIn(600);
+    });
+    var delay = when.defer();
+    setTimeout(function() { delay.resolve(true); }, 2000);
+    var getExercise = function() { // I know this is bad, but this is just to fake it...
+      var i ,len;
+      var selected = [];
+      for(i = 0, len = exercises.length; i < len; i++) {
+        if ($exercise.attr('id') === exercises[i].htmlId) {
+          selected.push(exercises[i]);
+        }
+      }
+      return when.resolve(selected);
+    };
+    when.all([getExercise(), delay.promise]).then(function onSubmission(data) {
+      var exercises = data[0];
+      if (exercises.length === 0) { // No rubrics
+        // Remove wait message
+        $exercise.siblings('.asq-submit-wait').fadeOut(600).remove();
+        // Success message
+        $('<span class="asq-submit-success"><span class="label label-success"><i class="glyphicon glyphicon-ok"></i> Answer submitted successfully.</span></span>')
+        .insertAfter($exercise).fadeIn(600);
+        return;
+      }
+
+      // Rubrics
+      $exercise.fadeOut(600);
+      // Remove wait message
+      $exercise.siblings('.asq-submit-wait').fadeOut(600).remove();
+      dust.render('assessment-viewer', { exercises : exercises },
+        function onRender(err, out) {
+          if (err) { console.error(err); }
+          else {
+            out = '<button class="asq-rubric-expand"><i class="glyphicon glyphicon-fullscreen"></i></button>' + out;
+            $(window).on('resize', function displayExpandBtn() {
+              console.log('resize');
+              var $btn = $('.step.present').find('.asq-rubric-expand');
+              if ($btn.length === 0) { return; }
+              $btn.css('top',(-$btn.offset().top) + 'px');
+            })
+            $(out).insertAfter($exercise).hide().fadeIn(600, function() {
+                $(this).find('.am-flex-handle').drags();
+                console.log('should not be called twice')
+                var $btn = $('.step.present').find('.asq-rubric-expand');
+                if ($btn.length === 0) { return; }
+                $btn.css('top', '400px');
+            });
+          }
+      });
+    });
+    return;
+  });
+
+  // Expand rubric logic
+  var restoreId = null;
+  // Expand handler
+  $(document).on('click', '.asq-rubric-expand', function expandRubric(evt) {
+    var $slide = $(evt.target).parent().siblings('.am-assessment-container');
+
+    // Restore existing content to slide from modal.
+    if (restoreId) {
+      $('#' + restoreId).append($('#asq-rubric-expanded').html($slide));
+    }
+
+    // Set content of modal from slide and dispaly modal
+    restoreId = $slide.closest('.step').attr('id');
+    $('#asq-rubric-expanded').html($slide);
+    $('#asq-rubric-expanded-container').fadeIn(600);
+  });
+
+  // Reduce rubric handler
+  $(document).on('click', '#asq-rubric-reduce', function reduceRubric(evt) {
+    if (restoreId) { // Restore existing content to slide from modal.
+      $('#' + restoreId).append($('#asq-rubric-expanded').html());
+    }
+    // Empty modal, reset restore id and hide modal..
+    $('#asq-rubric-expanded').html('');
+    restoreId = null;
+    $('#asq-rubric-expanded-container').fadeOut(600);
+  });
+
+  // Handler for rubric submit logic
+  $(document).on('click', '.am-assessment button[type="submit"]', function rubricSubmitHandler(evt) {
+    evt.preventDefault();
+
+    // Get Submission
+    var submission  = [];
+    var $assessment = $(evt.target).closest('.am-assessment-inner');
+    $assessment.find('.am-flex-box').each(function() {
+
+      // submission per question
+      var qId = $(this).attr('data-question');
+      submission[qId] = [];
+      $(this).children('.am-rubric').find('[data-rubric]').each(function() {
+
+        // Rubric for each question
+        var rId     = $(this).attr('data-rubric');
+        var rubric  = {};
+        rubric[rId] = [];
+
+        // Selected rubric for questions
+        $(this).find('input[type=checkbox], input[type=radio]').each(function() {
+          rubric[rId].push([$(this).is(':checked'), $(this).val()]);
+        });
+        submission[qId].push(rubric);
+      });
+    });
+    console.dir(submission);
+
+    // disable inputs
+    $assessment.find(':input').attr('disabled', true);
+    $assessment.find('p.text-right > button').attr('disabled', true); //submit btn
+    $assessment.find('p.text-right .am-rating').attr('disabled', true).addClass('disabled'); //submit btn
+
+    $assessment.fadeTo(600, 0.3, function() {
+      $('<span class="asq-submit-wait"><span class="label label-default"><i class="asq-spinner glyphicon glyphicon-refresh"></i> Submitting your assessment...</span></span>')
+        .insertAfter($assessment).fadeIn(600);
+    });
+  });
+}
+
 // Add interaction for modal
 // (This is done automatically in Asq with the help of sockets.)
-function handleModal(data) {
+function handleRubrics(data) {
   var exercises = data.exercises;
   var rubrics   = data.rubrics;
   var i = exercises.length;
@@ -145,69 +283,50 @@ function handleModal(data) {
   }
 
   if (exercises.length > 0) {
-    var done = [];
     i = exercises.length;
     var $slide;
     while (i--) {
 
       $slide = $('#' + exercise.htmlId).parent('.step');
       if ($slide.length !== 1 || done.indexOf($slide[0].id) > -1) {
-        continue;
+        exercises.splice(i, 1);
       }
-      done.push(exercise.htmlId);
       // Add open modal button to slide
-      $slide.prepend('<a href="#" class="ap-modal-show" style="position:absolute;top:0;left:0;display:block;background:#ccc;border-bottom-left-radius:4px;font-size: 0.6em;padding:5px;">Expand</a>');
+      //$slide.prepend('<a href="#" class="ap-rubric-show" style="position:fixed;top:0;right:0;display:block;background:#ccc;border-bottom-left-radius:4px;font-size: 0.6em;padding:5px;">Show Rubrics</a>');
     }
-    if (done.length > 0) {
+    if (exercises.length > 0) {
       // Modal show handler with fetching of exercises
-      $(document).on('click', '.ap-modal-show', function showModal(evt) {
-        evt.preventDefault();
-        var exIds = [];
-        $(evt.target).siblings('.asq-exercise').each(function() {
-          exIds.push(this.id);
-        });
-        var currentExs = [];
-        var i, len;
-        for (i = 0, len = exercises.length; i < len; i++) {
-          if (exIds.indexOf(exercises[i].htmlId) > -1) {
-            exercise = exercises[i];
-            j = exercise.questions.length;
-            while(j--) {
-              question = exercise.questions[j];
-              if ('multi-choice' === question.questionType) {
-                question.submission = Array.apply(null,
-                  new Array(question.questionOptions.length))
-                    .map(Boolean.prototype.valueOf, false);
-                var correct = Math.floor(Math.random() * (question.questionOptions.length));
-                question.submission[correct] = true;
-              } else if ('text-input' === question.questionType) {
-                question.submission = 'Text Input Answer';
-              }
-              else if ('code-input' === question.questionType) {
-                question.submission = 'Code Input Answer';
-              }
-              question.confidence = Math.floor(Math.random() * (5 - 1 + 1) + 1);
-            }
-            currentExs.push(exercises[i]);
+      var currentExs = [];
+      var i, len;
+      for (i = 0, len = exercises.length; i < len; i++) {
+        exercise = exercises[i];
+        j = exercise.questions.length;
+        while(j--) {
+          question = exercise.questions[j];
+          if ('multi-choice' === question.questionType) {
+            question.submission = Array.apply(null,
+              new Array(question.questionOptions.length))
+                .map(Boolean.prototype.valueOf, false);
+            var correct = Math.floor(Math.random() * (question.questionOptions.length));
+            question.submission[correct] = true;
+          } else if ('text-input' === question.questionType) {
+            question.submission = 'Text Input Answer';
           }
+          else if ('code-input' === question.questionType) {
+            question.submission = 'Code Input Answer';
+          }
+          question.confidence = Math.floor(Math.random() * (5 - 1 + 1) + 1);
         }
-        dust.render('assessment-viewer', { exercises : currentExs },
-          function onRender(err, out) {
-            if (err) { console.error(err); }
-            else {
-              $('#am-modal').html(out);
-              // Add modal close button
-              $('#am-modal').prepend('<a id="ap-modal-close" href="#" style="position:fixed;top:0;left:0;font-size:1em;z-index:1000;background:#ccc;border-bottom-left-radius:4px;display:block;padding:8px;">Close</a>');
-              $('#am-modal .am-flex-handle').drags()
-              $('#am-modal-container').fadeIn();
-            }
-          })
-      });
+        currentExs.push(exercises[i]);
+      }
       // Handler to close modal
-      $(document).on('click', '#ap-modal-close', function closeModal(evt) {
-        evt.preventDefault();
-        $('#am-modal-container').fadeOut();
-      });
+      // $(document).on('click', '#ap-rubric-hide', function closeModal(evt) {
+      //   evt.preventDefault();
+      //   $('#am-modal-container').fadeOut();
+      // });
+      return currentExs;
+    } else {
+      return [];
     }
   }
 }

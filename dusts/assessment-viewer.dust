@@ -5,12 +5,12 @@
     <div class="am-assessment">
       <form class="am-assessment-inner">
         {#questions}
-        <div class="am-flex-box">
-          <div class="am-flex-col">
+        <div class="am-flex-box" data-question="{_id}">
+          <div class="am-flex-col am-question-preview">
             {>"question-viewer"/} {! Select question template according to question type !}
           </div>
           <div class="am-flex-handle"></div>
-          <div class="am-flex-col">
+          <div class="am-flex-col am-rubric">
             {>rubric-viewer question=_id/}
           </div>
         </div>
