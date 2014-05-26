@@ -103,12 +103,50 @@ function generatesampleData(mode) {
   if ('presenter' === mode) {
     // Progress bar for presenter
     $('.asq-exercise').each(function() {
+      var $info = $(this).find('.asq-progress-info');
+      var items = $info.find('.progress > .progress-bar').length;
       var audience = Math.floor(Math.random() * (347 - 5 + 1) + 5);
-      var done = Math.floor(Math.random() * (audience - 1 + 1) + 1);
-      $(this).find('.progress-bar').attr('style', 'width:' +
-        Math.round(done / audience * 100).toString() + '%;')
-      $(this).find('.progressNum').text(done + '/' + audience +
-        ' answers received.');
+      //var total = 2 * audience + peerTotal;
+
+      // Answer
+      var answers = Math.floor(Math.random() * (audience + 1));
+      var answerProgress = (answers / audience) * 100;
+      // Progress bar
+      $info.find('.progress > .asq-progress-answers')
+        .css('width', (answerProgress / items) + '%');
+      // Label
+      $info.find('.asq-progress-details > .row > .asq-label-answers > span')
+      .html('Answers: ' + answers + '/' + audience + ' (' +
+        Math.floor(answerProgress) + '%)');
+
+      // Self-assessment
+      var self = -1;
+      if ($info.find('.progress > .asq-progress-self').length > 0) {
+        self = Math.floor(Math.random() * (answers + 1));
+         var selfProgress = (self / audience) * 100;
+        // Progress bar
+        $info.find('.progress > .asq-progress-self')
+          .css('width', ( selfProgress / items) + '%');
+        // Label
+        $info.find('.asq-progress-details > .row > .asq-label-self  > span')
+          .html('Self-assessments: ' + self + '/' + audience + ' (' +
+            Math.floor(selfProgress) + '%)');
+      }
+
+      // Peer-assessment
+      if ($info.find('.progress > .asq-progress-peer').length > 0) {
+        var p = self > -1 ? self : answers;
+        var peer = Math.floor(Math.random() * (p * p - p + 1));
+        var peerTotal = (audience * audience - audience);
+        var peerProgress = (peer / peerTotal) * 100;
+        // Progress bar
+        $info.find('.progress > .asq-progress-peer')
+          .css('width', (peerProgress / items) + '%');
+        // Label
+        $info.find('.asq-progress-details > .row > .asq-label-peer  > span')
+          .html('Peer-assessment: ' + peer + '/' + peerTotal + ' (' +
+            Math.floor(peerProgress) + '%)');
+      }
     });
   }
 }
@@ -170,11 +208,11 @@ function handleSubmit(exercises) {
               $btn.css('top',(-$btn.offset().top) + 'px');
             })
             $(out).insertAfter($exercise).hide().fadeIn(600, function() {
-                $(this).find('.asq-flex-handle').drags();
-                console.log('should not be called twice')
-                var $btn = $('.step.present').find('.asq-rubric-expand');
-                if ($btn.length === 0) { return; }
-                $btn.css('top', '400px');
+              $(this).find('.asq-flex-handle').drags();
+              console.log('should not be called twice')
+              var $btn = $('.step.present').find('.asq-rubric-expand');
+              if ($btn.length === 0) { return; }
+              $btn.css('top', '400px');
             });
           }
       });

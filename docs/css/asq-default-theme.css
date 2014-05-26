@@ -14,8 +14,8 @@
   text-align: center;
 }
 /*------------ Progress ------------*/
-#progressNum {
-  margin: 15px;
+.asq-progress-info {
+  margin: 0.4em;
 }
 /*------------ Tabs ------------*/
 .tab-pane {
