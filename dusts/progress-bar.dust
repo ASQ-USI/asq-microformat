@@ -1,0 +1,28 @@
+<div class="asq-progress-info">
+  <div class="progress">
+    <div class="progress-bar asq-progress-answers" style="width: 0%"></div>
+    {?self}
+    <div class="progress-bar progress-bar-warning asq-progress-self" style="width: 0%"></div>
+    {/self}
+    {?peer}
+    <div class="progress-bar progress-bar-success asq-progress-peer" style="width: 0%"></div>
+    {/peer}
+  </div>
+  <div class="asq-progress-details container-fluid">
+    <div class="row">
+      <div class="col-sm-4 col-xs-12 text-left asq-label-answers">
+        <span class="label label-primary">Answers</span>
+      </div>
+      {?self}
+      <div class="col-sm-4 col-xs-12 text-center asq-label-self">
+        <span class="label label-warning text-center">Self-Assessments</span>
+      </div>
+      {/self}
+      {?peer}
+      <div class="col-sm-4{^self} col-sm-offset-4{/self} col-xs-12 text-right asq-label-peer">
+        <span class="label label-success">Peer-Assessments</span>
+      </div>
+      {/peer}
+    </div>
+  </div>
+</div>

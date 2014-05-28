@@ -6,9 +6,11 @@ module.exports = function (dust) {
 	 // assessment-viewer.dust
 	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"asq-assessment-container\">").section(ctx.get("exercises"),ctx,{"block":body_1},null).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"asq-assessment-outer\"><div class=\"asq-assessment\"><form class=\"asq-assessment-inner\">").section(ctx.get("questions"),ctx,{"block":body_2},null).write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("_id"),"ratin":"7"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form></div></div>");}function body_2(chk,ctx){return chk.write("<div class=\"asq-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-flex-col asq-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"asq-flex-handle\"></div><div class=\"asq-flex-col asq-rubric\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("</div></div>");}return body_0;})();
 	 // exercise-presenter.dust
-	(function(){dust.register("exercise-presenter",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).write("<div class=\"progress\" ><div class=\"progress-bar\" role=\"progressbar\" style=\"width: 0%;\"></div></div><h5 class=\"pull-right progressNum\">Waiting for answers!</h5></form>");}return body_0;})();
+	(function(){dust.register("exercise-presenter",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).partial("progress-bar",ctx,null).write("</form>");}return body_0;})();
 	 // exercise-viewer.dust
-	(function(){dust.register("exercise-viewer",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).write("<input type=\"hidden\" name=\"exercise-id\" value=").reference(ctx.getPath(false,["exercise","id"]),ctx,"h").write("><p class=\"text-right\"><button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form>");}return body_0;})();
+	(function(){dust.register("exercise-viewer",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).write("<input type=\"hidden\" name=\"exercise-id\" value=").reference(ctx.get("id"),ctx,"h").write("><p class=\"text-right\"><button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form>");}return body_0;})();
+	 // progress-bar.dust
+	(function(){dust.register("progress-bar",body_0);function body_0(chk,ctx){return chk.write("<div class=\"asq-progress-info\"><div class=\"progress\"><div class=\"progress-bar asq-progress-answers\" style=\"width: 0%\"></div>").exists(ctx.get("self"),ctx,{"block":body_1},null).exists(ctx.get("peer"),ctx,{"block":body_2},null).write("</div><div class=\"asq-progress-details container-fluid\"><div class=\"row\"><div class=\"col-sm-4 col-xs-12 text-left asq-label-answers\"><span class=\"label label-primary\">Answers</span></div>").exists(ctx.get("self"),ctx,{"block":body_3},null).exists(ctx.get("peer"),ctx,{"block":body_4},null).write("</div></div></div>");}function body_1(chk,ctx){return chk.write("<div class=\"progress-bar progress-bar-warning asq-progress-self\" style=\"width: 0%\"></div>");}function body_2(chk,ctx){return chk.write("<div class=\"progress-bar progress-bar-success asq-progress-peer\" style=\"width: 0%\"></div>");}function body_3(chk,ctx){return chk.write("<div class=\"col-sm-4 col-xs-12 text-center asq-label-self\"><span class=\"label label-warning text-center\">Self-Assessments</span></div>");}function body_4(chk,ctx){return chk.write("<div class=\"col-sm-4").notexists(ctx.get("self"),ctx,{"block":body_5},null).write(" col-xs-12 text-right asq-label-peer\"><span class=\"label label-success\">Peer-Assessments</span></div>");}function body_5(chk,ctx){return chk.write(" col-sm-offset-4");}return body_0;})();
 	 // question-code-input-presenter.dust
 	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.getPath(false,["question","id"]),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.getPath(false,["question","id"]),ctx,"h").write("\" class=\"asq-code-editor\" ></div>");}return body_0;})();
 	 // question-code-input-viewer.dust
@@ -342,14 +344,11 @@ var MarkupGenerator = module.exports = function(dustInstance){
     if('undefined' === typeof template){
       deferred.reject(new Error('Invalid template'));
     }
-
+    exercise.exerciseContent = $el.html()
+    exercise.self = exercise.assessment.indexOf('self') > -1;
+    exercise.peer = exercise.assessment.indexOf('peer') > -1;
     //render preserving content
-    this.dust.render(template,
-      {
-        exerciseContent : $el.html(),
-        exercise        : exercise
-      },
-      function(err, out) {
+    this.dust.render(template, exercise, function onExRender(err, out) {
       if(err) {
         process.nextTick(function(){
           deferred.reject(err);
@@ -486,7 +485,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
 }).call(MarkupGenerator.prototype);
 
 }).call(this,require("FWaASH"))
-},{"../dusts/compiled/templates":1,"./scriptBlacklist":5,"./utils":6,"FWaASH":17,"dustjs-linkedin":24,"jquery":25,"lodash":26,"when":49}],4:[function(require,module,exports){
+},{"../dusts/compiled/templates":1,"./scriptBlacklist":5,"./utils":6,"FWaASH":17,"dustjs-linkedin":24,"jquery":25,"lodash":26,"when":45}],4:[function(require,module,exports){
 /** @module lib/parser
     @description Parse HTML files to extract assessment information
 */
@@ -678,26 +677,34 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     //parse questions
-    var exQuestions = [];
-    var questionIds = [];
+    var questionsMap = {};
+    var self = false;
+    var peer = false;
     $el.find('.' + this.options.questionClass)
       .each((function(index, el){
         var newQuestion = this.parseQuestion(el);
-        exQuestions.push(newQuestion);
-        questionIds.push(newQuestion.htmlId);
+        questionsMap[newQuestion.htmlId] = newQuestion;
       }).bind(this));
 
     // Parsing rubric
     var $rubrics = $el.children('.asq-rubric');
 
     if ($rubrics.length > 0) {
-      var i, max;
+      var i, max, types;
       for (i = 0, max = $rubrics.length; i < max; i++){
-        this.parseRubric($, $($rubrics[i]), questionIds);
+        types = this.parseRubric($, $rubrics.eq(i), questionsMap);
+        if (self || types.indexOf('self') > -1) { self = true; }
+        if (peer || types.indexOf('peer') > -1) { peer = true; }
       }
     }
 
-    this.exercises.push({ htmlId : $el.attr('id'), questions : exQuestions });
+    var assessment = []
+    if (self) { assessment.push('self'); }
+    if (peer) { assessment.push('peer'); }
+
+    this.exercises.push({ htmlId : $el.attr('id'), questions :
+      Object.keys(questionsMap).map(function(k) { return questionsMap[k]; }),
+      assessment : assessment });
   }
 
   this.parseStats = function($stats) {
@@ -755,6 +762,8 @@ var Parser = module.exports = function(loggerInstance){
         question = this.parseTextInput($, $el, opts);
         break;
     }
+
+    question.assessment = [];
 
     return question;
   }
@@ -859,12 +868,12 @@ var Parser = module.exports = function(loggerInstance){
    *  Parse a rubric and return a JSON of the formated rubric.
    *  @param {Object} $rubric - jQuery node of the rubric to parse.
    **/
-  this.parseRubric = function($, $rubric, validRefs) {
+  this.parseRubric = function($, $rubric, questionsMap) {
 
     // check for multiple question types
     var rubricType = this.getQuestionType($rubric);
-    if (!rubricType) { // Something went wrong while getting the question
-      return false;    // type. It's been handled, we just return false.
+    if (!rubricType) {
+      return '';
     }
 
     var rubric     = {}
@@ -874,18 +883,31 @@ var Parser = module.exports = function(loggerInstance){
 
     if (! rubric.question) {
       this.pushError('Missing question reference for rubric.');
-      return false;
+      return '';
     }
-    if (validRefs.indexOf(rubric.question) < 0) {
+    if (! Object.prototype.hasOwnProperty.call(questionsMap, rubric.question)) {
       this.pushError('Rubric referencing invalid question id: ' +
         rubric.question);
-      return false;
+      return '';
     }
 
     //Stem
     var $stem = $rubric.find('.stem');
     rubric.stem     = getOuterHTML($stem);
     rubric.stemText = $stem.html();
+
+    // Self and peer assessment
+    var $types = $rubric.attr('data-asq-assessment')
+    if ($types) {
+      var types = $types.split(/[ ,]+/);
+      if (types.indexOf('self') > -1) {
+        questionsMap[rubric.question].assessment.push('self')
+      }
+      if (types.indexOf('peer') > -1) {
+        questionsMap[rubric.question].assessment.push('peer')
+      }
+      console.dir(questionsMap[rubric.question]);
+    }
 
     // Parse the rubric according to its type.
     var questionTypes = this.options.questionSelectors;
@@ -905,10 +927,11 @@ var Parser = module.exports = function(loggerInstance){
         break;
     }
 
-    if (! validParsing) { return; } // bad rubric -> abort!
+    if (! validParsing) { return ''; } // bad rubric -> abort!
 
     //add the rubric
     this.rubrics.push(rubric);
+    return questionsMap[rubric.question].assessment;
   }
 
   this.parseMCQRubric = function($, $rubric, rubric) {
@@ -8056,7 +8079,7 @@ module.exports = dust;
 }).call(this,require("FWaASH"))
 },{"./compiler":21,"./dust":22,"./parser":23,"FWaASH":17,"path":16,"vm":18}],25:[function(require,module,exports){
 /*!
- * jQuery JavaScript Library v2.1.1
+ * jQuery JavaScript Library v2.1.0
  * http://jquery.com/
  *
  * Includes Sizzle.js
@@ -8066,7 +8089,7 @@ module.exports = dust;
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-05-01T17:11Z
+ * Date: 2014-01-23T21:10Z
  */
 
 (function( global, factory ) {
@@ -8116,6 +8139,8 @@ var toString = class2type.toString;
 
 var hasOwn = class2type.hasOwnProperty;
 
+var trim = "".trim;
+
 var support = {};
 
 
@@ -8124,7 +8149,7 @@ var
 	// Use the correct document accordingly with window argument (sandbox)
 	document = window.document,
 
-	version = "2.1.1",
+	version = "2.1.0",
 
 	// Define a local copy of jQuery
 	jQuery = function( selector, context ) {
@@ -8132,10 +8157,6 @@ var
 		// Need init if jQuery is called (just allow error to be thrown if not included)
 		return new jQuery.fn.init( selector, context );
 	},
-
-	// Support: Android<4.1
-	// Make sure we trim BOM and NBSP
-	rtrim = /^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g,
 
 	// Matches dashed string for camelizing
 	rmsPrefix = /^-ms-/,
@@ -8167,10 +8188,10 @@ jQuery.fn = jQuery.prototype = {
 	get: function( num ) {
 		return num != null ?
 
-			// Return just the one element from the set
+			// Return a 'clean' array
 			( num < 0 ? this[ num + this.length ] : this[ num ] ) :
 
-			// Return all the elements in a clean array
+			// Return just the object
 			slice.call( this );
 	},
 
@@ -8326,7 +8347,7 @@ jQuery.extend({
 		// parseFloat NaNs numeric-cast false positives (null|true|false|"")
 		// ...but misinterprets leading-number strings, particularly hex literals ("0x...")
 		// subtraction forces infinities to NaN
-		return !jQuery.isArray( obj ) && obj - parseFloat( obj ) >= 0;
+		return obj - parseFloat( obj ) >= 0;
 	},
 
 	isPlainObject: function( obj ) {
@@ -8338,8 +8359,16 @@ jQuery.extend({
 			return false;
 		}
 
-		if ( obj.constructor &&
-				!hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+		// Support: Firefox <20
+		// The try/catch suppresses exceptions thrown when attempting to access
+		// the "constructor" property of certain host objects, ie. |window.location|
+		// https://bugzilla.mozilla.org/show_bug.cgi?id=814622
+		try {
+			if ( obj.constructor &&
+					!hasOwn.call( obj.constructor.prototype, "isPrototypeOf" ) ) {
+				return false;
+			}
+		} catch ( e ) {
 			return false;
 		}
 
@@ -8449,11 +8478,8 @@ jQuery.extend({
 		return obj;
 	},
 
-	// Support: Android<4.1
 	trim: function( text ) {
-		return text == null ?
-			"" :
-			( text + "" ).replace( rtrim, "" );
+		return text == null ? "" : trim.call( text );
 	},
 
 	// results is for internal usage only
@@ -8605,14 +8631,14 @@ function isArraylike( obj ) {
 }
 var Sizzle =
 /*!
- * Sizzle CSS Selector Engine v1.10.19
+ * Sizzle CSS Selector Engine v1.10.16
  * http://sizzlejs.com/
  *
  * Copyright 2013 jQuery Foundation, Inc. and other contributors
  * Released under the MIT license
  * http://jquery.org/license
  *
- * Date: 2014-04-18
+ * Date: 2014-01-13
  */
 (function( window ) {
 
@@ -8621,9 +8647,7 @@ var i,
 	Expr,
 	getText,
 	isXML,
-	tokenize,
 	compile,
-	select,
 	outermostContext,
 	sortInput,
 	hasDuplicate,
@@ -8690,23 +8714,17 @@ var i,
 	// Proper syntax: http://www.w3.org/TR/CSS21/syndata.html#value-def-identifier
 	identifier = characterEncoding.replace( "w", "w#" ),
 
-	// Attribute selectors: http://www.w3.org/TR/selectors/#attribute-selectors
-	attributes = "\\[" + whitespace + "*(" + characterEncoding + ")(?:" + whitespace +
-		// Operator (capture 2)
-		"*([*^$|!~]?=)" + whitespace +
-		// "Attribute values must be CSS identifiers [capture 5] or strings [capture 3 or capture 4]"
-		"*(?:'((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\"|(" + identifier + "))|)" + whitespace +
-		"*\\]",
+	// Acceptable operators http://www.w3.org/TR/selectors/#attribute-selectors
+	attributes = "\\[" + whitespace + "*(" + characterEncoding + ")" + whitespace +
+		"*(?:([*^$|!~]?=)" + whitespace + "*(?:(['\"])((?:\\\\.|[^\\\\])*?)\\3|(" + identifier + ")|)|)" + whitespace + "*\\]",
 
-	pseudos = ":(" + characterEncoding + ")(?:\\((" +
-		// To reduce the number of selectors needing tokenize in the preFilter, prefer arguments:
-		// 1. quoted (capture 3; capture 4 or capture 5)
-		"('((?:\\\\.|[^\\\\'])*)'|\"((?:\\\\.|[^\\\\\"])*)\")|" +
-		// 2. simple (capture 6)
-		"((?:\\\\.|[^\\\\()[\\]]|" + attributes + ")*)|" +
-		// 3. anything else (capture 2)
-		".*" +
-		")\\)|)",
+	// Prefer arguments quoted,
+	//   then not containing pseudos/brackets,
+	//   then attribute selectors/non-parenthetical expressions,
+	//   then anything else
+	// These preferences are here to reduce the number of selectors
+	//   needing tokenize in the PSEUDO preFilter
+	pseudos = ":(" + characterEncoding + ")(?:\\(((['\"])((?:\\\\.|[^\\\\])*?)\\3|((?:\\\\.|[^\\\\()[\\]]|" + attributes.replace( 3, 8 ) + ")*)|.*)\\)|)",
 
 	// Leading and non-escaped trailing whitespace, capturing some non-whitespace characters preceding the latter
 	rtrim = new RegExp( "^" + whitespace + "+|((?:^|[^\\\\])(?:\\\\.)*)" + whitespace + "+$", "g" ),
@@ -8751,7 +8769,7 @@ var i,
 	funescape = function( _, escaped, escapedWhitespace ) {
 		var high = "0x" + escaped - 0x10000;
 		// NaN means non-codepoint
-		// Support: Firefox<24
+		// Support: Firefox
 		// Workaround erroneous numeric interpretation of +"0x"
 		return high !== high || escapedWhitespace ?
 			escaped :
@@ -9147,7 +9165,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 				var m = context.getElementById( id );
 				// Check parentNode to catch when Blackberry 4.6 returns
 				// nodes that are no longer in the document #6963
-				return m && m.parentNode ? [ m ] : [];
+				return m && m.parentNode ? [m] : [];
 			}
 		};
 		Expr.filter["ID"] = function( id ) {
@@ -9227,13 +9245,11 @@ setDocument = Sizzle.setDocument = function( node ) {
 			// setting a boolean content attribute,
 			// since its presence should be enough
 			// http://bugs.jquery.com/ticket/12359
-			div.innerHTML = "<select msallowclip=''><option selected=''></option></select>";
+			div.innerHTML = "<select t=''><option selected=''></option></select>";
 
-			// Support: IE8, Opera 11-12.16
+			// Support: IE8, Opera 10-12
 			// Nothing should be selected when empty strings follow ^= or $= or *=
-			// The test attribute must be unknown in Opera but "safe" for WinRT
-			// http://msdn.microsoft.com/en-us/library/ie/hh465388.aspx#attribute_section
-			if ( div.querySelectorAll("[msallowclip^='']").length ) {
+			if ( div.querySelectorAll("[t^='']").length ) {
 				rbuggyQSA.push( "[*^$]=" + whitespace + "*(?:''|\"\")" );
 			}
 
@@ -9276,8 +9292,7 @@ setDocument = Sizzle.setDocument = function( node ) {
 		});
 	}
 
-	if ( (support.matchesSelector = rnative.test( (matches = docElem.matches ||
-		docElem.webkitMatchesSelector ||
+	if ( (support.matchesSelector = rnative.test( (matches = docElem.webkitMatchesSelector ||
 		docElem.mozMatchesSelector ||
 		docElem.oMatchesSelector ||
 		docElem.msMatchesSelector) )) ) {
@@ -9458,7 +9473,7 @@ Sizzle.matchesSelector = function( elem, expr ) {
 		} catch(e) {}
 	}
 
-	return Sizzle( expr, document, null, [ elem ] ).length > 0;
+	return Sizzle( expr, document, null, [elem] ).length > 0;
 };
 
 Sizzle.contains = function( context, elem ) {
@@ -9587,7 +9602,7 @@ Expr = Sizzle.selectors = {
 			match[1] = match[1].replace( runescape, funescape );
 
 			// Move the given value to match[3] whether quoted or unquoted
-			match[3] = ( match[3] || match[4] || match[5] || "" ).replace( runescape, funescape );
+			match[3] = ( match[4] || match[5] || "" ).replace( runescape, funescape );
 
 			if ( match[2] === "~=" ) {
 				match[3] = " " + match[3] + " ";
@@ -9630,15 +9645,15 @@ Expr = Sizzle.selectors = {
 
 		"PSEUDO": function( match ) {
 			var excess,
-				unquoted = !match[6] && match[2];
+				unquoted = !match[5] && match[2];
 
 			if ( matchExpr["CHILD"].test( match[0] ) ) {
 				return null;
 			}
 
 			// Accept quoted arguments as-is
-			if ( match[3] ) {
-				match[2] = match[4] || match[5] || "";
+			if ( match[3] && match[4] !== undefined ) {
+				match[2] = match[4];
 
 			// Strip excess characters from unquoted arguments
 			} else if ( unquoted && rpseudo.test( unquoted ) &&
@@ -10043,7 +10058,7 @@ function setFilters() {}
 setFilters.prototype = Expr.filters = Expr.pseudos;
 Expr.setFilters = new setFilters();
 
-tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
+function tokenize( selector, parseOnly ) {
 	var matched, match, tokens, type,
 		soFar, groups, preFilters,
 		cached = tokenCache[ selector + " " ];
@@ -10108,7 +10123,7 @@ tokenize = Sizzle.tokenize = function( selector, parseOnly ) {
 			Sizzle.error( selector ) :
 			// Cache the tokens
 			tokenCache( selector, groups ).slice( 0 );
-};
+}
 
 function toSelector( tokens ) {
 	var i = 0,
@@ -10185,15 +10200,6 @@ function elementMatcher( matchers ) {
 			return true;
 		} :
 		matchers[0];
-}
-
-function multipleContexts( selector, contexts, results ) {
-	var i = 0,
-		len = contexts.length;
-	for ( ; i < len; i++ ) {
-		Sizzle( selector, contexts[i], results );
-	}
-	return results;
 }
 
 function condense( unmatched, map, filter, context, xml ) {
@@ -10464,7 +10470,7 @@ function matcherFromGroupMatchers( elementMatchers, setMatchers ) {
 		superMatcher;
 }
 
-compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
+compile = Sizzle.compile = function( selector, group /* Internal Use Only */ ) {
 	var i,
 		setMatchers = [],
 		elementMatchers = [],
@@ -10472,12 +10478,12 @@ compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 
 	if ( !cached ) {
 		// Generate a function of recursive functions that can be used to check each element
-		if ( !match ) {
-			match = tokenize( selector );
+		if ( !group ) {
+			group = tokenize( selector );
 		}
-		i = match.length;
+		i = group.length;
 		while ( i-- ) {
-			cached = matcherFromTokens( match[i] );
+			cached = matcherFromTokens( group[i] );
 			if ( cached[ expando ] ) {
 				setMatchers.push( cached );
 			} else {
@@ -10487,83 +10493,74 @@ compile = Sizzle.compile = function( selector, match /* Internal Use Only */ ) {
 
 		// Cache the compiled function
 		cached = compilerCache( selector, matcherFromGroupMatchers( elementMatchers, setMatchers ) );
-
-		// Save selector and tokenization
-		cached.selector = selector;
 	}
 	return cached;
 };
 
-/**
- * A low-level selection function that works with Sizzle's compiled
- *  selector functions
- * @param {String|Function} selector A selector or a pre-compiled
- *  selector function built with Sizzle.compile
- * @param {Element} context
- * @param {Array} [results]
- * @param {Array} [seed] A set of elements to match against
- */
-select = Sizzle.select = function( selector, context, results, seed ) {
+function multipleContexts( selector, contexts, results ) {
+	var i = 0,
+		len = contexts.length;
+	for ( ; i < len; i++ ) {
+		Sizzle( selector, contexts[i], results );
+	}
+	return results;
+}
+
+function select( selector, context, results, seed ) {
 	var i, tokens, token, type, find,
-		compiled = typeof selector === "function" && selector,
-		match = !seed && tokenize( (selector = compiled.selector || selector) );
+		match = tokenize( selector );
 
-	results = results || [];
+	if ( !seed ) {
+		// Try to minimize operations if there is only one group
+		if ( match.length === 1 ) {
 
-	// Try to minimize operations if there is no seed and only one group
-	if ( match.length === 1 ) {
+			// Take a shortcut and set the context if the root selector is an ID
+			tokens = match[0] = match[0].slice( 0 );
+			if ( tokens.length > 2 && (token = tokens[0]).type === "ID" &&
+					support.getById && context.nodeType === 9 && documentIsHTML &&
+					Expr.relative[ tokens[1].type ] ) {
 
-		// Take a shortcut and set the context if the root selector is an ID
-		tokens = match[0] = match[0].slice( 0 );
-		if ( tokens.length > 2 && (token = tokens[0]).type === "ID" &&
-				support.getById && context.nodeType === 9 && documentIsHTML &&
-				Expr.relative[ tokens[1].type ] ) {
-
-			context = ( Expr.find["ID"]( token.matches[0].replace(runescape, funescape), context ) || [] )[0];
-			if ( !context ) {
-				return results;
-
-			// Precompiled matchers will still verify ancestry, so step up a level
-			} else if ( compiled ) {
-				context = context.parentNode;
+				context = ( Expr.find["ID"]( token.matches[0].replace(runescape, funescape), context ) || [] )[0];
+				if ( !context ) {
+					return results;
+				}
+				selector = selector.slice( tokens.shift().value.length );
 			}
 
-			selector = selector.slice( tokens.shift().value.length );
-		}
+			// Fetch a seed set for right-to-left matching
+			i = matchExpr["needsContext"].test( selector ) ? 0 : tokens.length;
+			while ( i-- ) {
+				token = tokens[i];
 
-		// Fetch a seed set for right-to-left matching
-		i = matchExpr["needsContext"].test( selector ) ? 0 : tokens.length;
-		while ( i-- ) {
-			token = tokens[i];
-
-			// Abort if we hit a combinator
-			if ( Expr.relative[ (type = token.type) ] ) {
-				break;
-			}
-			if ( (find = Expr.find[ type ]) ) {
-				// Search, expanding context for leading sibling combinators
-				if ( (seed = find(
-					token.matches[0].replace( runescape, funescape ),
-					rsibling.test( tokens[0].type ) && testContext( context.parentNode ) || context
-				)) ) {
-
-					// If seed is empty or no tokens remain, we can return early
-					tokens.splice( i, 1 );
-					selector = seed.length && toSelector( tokens );
-					if ( !selector ) {
-						push.apply( results, seed );
-						return results;
-					}
-
+				// Abort if we hit a combinator
+				if ( Expr.relative[ (type = token.type) ] ) {
 					break;
+				}
+				if ( (find = Expr.find[ type ]) ) {
+					// Search, expanding context for leading sibling combinators
+					if ( (seed = find(
+						token.matches[0].replace( runescape, funescape ),
+						rsibling.test( tokens[0].type ) && testContext( context.parentNode ) || context
+					)) ) {
+
+						// If seed is empty or no tokens remain, we can return early
+						tokens.splice( i, 1 );
+						selector = seed.length && toSelector( tokens );
+						if ( !selector ) {
+							push.apply( results, seed );
+							return results;
+						}
+
+						break;
+					}
 				}
 			}
 		}
 	}
 
-	// Compile and execute a filtering function if one is not provided
+	// Compile and execute a filtering function
 	// Provide `match` to avoid retokenization if we modified the selector above
-	( compiled || compile( selector, match ) )(
+	compile( selector, match )(
 		seed,
 		context,
 		!documentIsHTML,
@@ -10571,7 +10568,7 @@ select = Sizzle.select = function( selector, context, results, seed ) {
 		rsibling.test( selector ) && testContext( context.parentNode ) || context
 	);
 	return results;
-};
+}
 
 // One-time assignments
 
@@ -11448,9 +11445,8 @@ jQuery.extend({
 		readyList.resolveWith( document, [ jQuery ] );
 
 		// Trigger any bound ready events
-		if ( jQuery.fn.triggerHandler ) {
-			jQuery( document ).triggerHandler( "ready" );
-			jQuery( document ).off( "ready" );
+		if ( jQuery.fn.trigger ) {
+			jQuery( document ).trigger("ready").off("ready");
 		}
 	}
 });
@@ -11822,15 +11818,11 @@ jQuery.fn.extend({
 				if ( elem.nodeType === 1 && !data_priv.get( elem, "hasDataAttrs" ) ) {
 					i = attrs.length;
 					while ( i-- ) {
+						name = attrs[ i ].name;
 
-						// Support: IE11+
-						// The attrs elements can be null (#14894)
-						if ( attrs[ i ] ) {
-							name = attrs[ i ].name;
-							if ( name.indexOf( "data-" ) === 0 ) {
-								name = jQuery.camelCase( name.slice(5) );
-								dataAttr( elem, name, data[ name ] );
-							}
+						if ( name.indexOf( "data-" ) === 0 ) {
+							name = jQuery.camelCase( name.slice(5) );
+							dataAttr( elem, name, data[ name ] );
 						}
 					}
 					data_priv.set( elem, "hasDataAttrs", true );
@@ -12060,17 +12052,10 @@ var rcheckableType = (/^(?:checkbox|radio)$/i);
 
 (function() {
 	var fragment = document.createDocumentFragment(),
-		div = fragment.appendChild( document.createElement( "div" ) ),
-		input = document.createElement( "input" );
+		div = fragment.appendChild( document.createElement( "div" ) );
 
 	// #11217 - WebKit loses check when the name is after the checked attribute
-	// Support: Windows Web Apps (WWA)
-	// `name` and `type` need .setAttribute for WWA
-	input.setAttribute( "type", "radio" );
-	input.setAttribute( "checked", "checked" );
-	input.setAttribute( "name", "t" );
-
-	div.appendChild( input );
+	div.innerHTML = "<input type='radio' checked='checked' name='t'/>";
 
 	// Support: Safari 5.1, iOS 5.1, Android 4.x, Android 2.3
 	// old WebKit doesn't clone checked state correctly in fragments
@@ -12090,7 +12075,7 @@ support.focusinBubbles = "onfocusin" in window;
 
 var
 	rkeyEvent = /^key/,
-	rmouseEvent = /^(?:mouse|pointer|contextmenu)|click/,
+	rmouseEvent = /^(?:mouse|contextmenu)|click/,
 	rfocusMorph = /^(?:focusinfocus|focusoutblur)$/,
 	rtypenamespace = /^([^.]*)(?:\.(.+)|)$/;
 
@@ -12659,7 +12644,7 @@ jQuery.event = {
 
 				// Support: Firefox 20+
 				// Firefox doesn't alert if the returnValue field is not set.
-				if ( event.result !== undefined && event.originalEvent ) {
+				if ( event.result !== undefined ) {
 					event.originalEvent.returnValue = event.result;
 				}
 			}
@@ -12710,9 +12695,9 @@ jQuery.Event = function( src, props ) {
 		// Events bubbling up the document may have been marked as prevented
 		// by a handler lower down the tree; reflect the correct value.
 		this.isDefaultPrevented = src.defaultPrevented ||
-				src.defaultPrevented === undefined &&
 				// Support: Android < 4.0
-				src.returnValue === false ?
+				src.defaultPrevented === undefined &&
+				src.getPreventDefault && src.getPreventDefault() ?
 			returnTrue :
 			returnFalse;
 
@@ -12759,14 +12744,7 @@ jQuery.Event.prototype = {
 		}
 	},
 	stopImmediatePropagation: function() {
-		var e = this.originalEvent;
-
 		this.isImmediatePropagationStopped = returnTrue;
-
-		if ( e && e.stopImmediatePropagation ) {
-			e.stopImmediatePropagation();
-		}
-
 		this.stopPropagation();
 	}
 };
@@ -12775,9 +12753,7 @@ jQuery.Event.prototype = {
 // Support: Chrome 15+
 jQuery.each({
 	mouseenter: "mouseover",
-	mouseleave: "mouseout",
-	pointerenter: "pointerover",
-	pointerleave: "pointerout"
+	mouseleave: "mouseout"
 }, function( orig, fix ) {
 	jQuery.event.special[ orig ] = {
 		delegateType: fix,
@@ -13202,7 +13178,7 @@ jQuery.extend({
 	},
 
 	cleanData: function( elems ) {
-		var data, elem, type, key,
+		var data, elem, events, type, key, j,
 			special = jQuery.event.special,
 			i = 0;
 
@@ -13211,8 +13187,9 @@ jQuery.extend({
 				key = elem[ data_priv.expando ];
 
 				if ( key && (data = data_priv.cache[ key ]) ) {
-					if ( data.events ) {
-						for ( type in data.events ) {
+					events = Object.keys( data.events || {} );
+					if ( events.length ) {
+						for ( j = 0; (type = events[j]) !== undefined; j++ ) {
 							if ( special[ type ] ) {
 								jQuery.event.remove( elem, type );
 
@@ -13515,15 +13492,14 @@ var iframe,
  */
 // Called only from within defaultDisplay
 function actualDisplay( name, doc ) {
-	var style,
-		elem = jQuery( doc.createElement( name ) ).appendTo( doc.body ),
+	var elem = jQuery( doc.createElement( name ) ).appendTo( doc.body ),
 
 		// getDefaultComputedStyle might be reliably used only on attached element
-		display = window.getDefaultComputedStyle && ( style = window.getDefaultComputedStyle( elem[ 0 ] ) ) ?
+		display = window.getDefaultComputedStyle ?
 
 			// Use of this method is a temporary fix (more like optmization) until something better comes along,
 			// since it was removed from specification and supported only in FF
-			style.display : jQuery.css( elem[ 0 ], "display" );
+			window.getDefaultComputedStyle( elem[ 0 ] ).display : jQuery.css( elem[ 0 ], "display" );
 
 	// We don't have any data stored on the element,
 	// so use "detach" method as fast way to get rid of the element
@@ -13646,32 +13622,28 @@ function addGetHookIf( conditionFn, hookFn ) {
 
 (function() {
 	var pixelPositionVal, boxSizingReliableVal,
+		// Support: Firefox, Android 2.3 (Prefixed box-sizing versions).
+		divReset = "padding:0;margin:0;border:0;display:block;-webkit-box-sizing:content-box;" +
+			"-moz-box-sizing:content-box;box-sizing:content-box",
 		docElem = document.documentElement,
 		container = document.createElement( "div" ),
 		div = document.createElement( "div" );
-
-	if ( !div.style ) {
-		return;
-	}
 
 	div.style.backgroundClip = "content-box";
 	div.cloneNode( true ).style.backgroundClip = "";
 	support.clearCloneStyle = div.style.backgroundClip === "content-box";
 
-	container.style.cssText = "border:0;width:0;height:0;top:0;left:-9999px;margin-top:1px;" +
-		"position:absolute";
+	container.style.cssText = "border:0;width:0;height:0;position:absolute;top:0;left:-9999px;" +
+		"margin-top:1px";
 	container.appendChild( div );
 
 	// Executing both pixelPosition & boxSizingReliable tests require only one layout
 	// so they're executed at the same time to save the second computation.
 	function computePixelPositionAndBoxSizingReliable() {
-		div.style.cssText =
-			// Support: Firefox<29, Android 2.3
-			// Vendor-prefix box-sizing
-			"-webkit-box-sizing:border-box;-moz-box-sizing:border-box;" +
-			"box-sizing:border-box;display:block;margin-top:1%;top:1%;" +
-			"border:1px;padding:1px;width:4px;position:absolute";
-		div.innerHTML = "";
+		// Support: Firefox, Android 2.3 (Prefixed box-sizing versions).
+		div.style.cssText = "-webkit-box-sizing:border-box;-moz-box-sizing:border-box;" +
+			"box-sizing:border-box;padding:1px;border:1px;display:block;width:4px;margin-top:1%;" +
+			"position:absolute;top:1%";
 		docElem.appendChild( container );
 
 		var divStyle = window.getComputedStyle( div, null );
@@ -13681,10 +13653,9 @@ function addGetHookIf( conditionFn, hookFn ) {
 		docElem.removeChild( container );
 	}
 
-	// Support: node.js jsdom
-	// Don't assume that getComputedStyle is a property of the global object
+	// Use window.getComputedStyle because jsdom on node.js will break without it.
 	if ( window.getComputedStyle ) {
-		jQuery.extend( support, {
+		jQuery.extend(support, {
 			pixelPosition: function() {
 				// This test is executed only once but we still do memoizing
 				// since we can use the boxSizingReliable pre-computing.
@@ -13706,13 +13677,7 @@ function addGetHookIf( conditionFn, hookFn ) {
 				// This support function is only executed once so no memoizing is needed.
 				var ret,
 					marginDiv = div.appendChild( document.createElement( "div" ) );
-
-				// Reset CSS: box-sizing; display; margin; border; padding
-				marginDiv.style.cssText = div.style.cssText =
-					// Support: Firefox<29, Android 2.3
-					// Vendor-prefix box-sizing
-					"-webkit-box-sizing:content-box;-moz-box-sizing:content-box;" +
-					"box-sizing:content-box;display:block;margin:0;border:0;padding:0";
+				marginDiv.style.cssText = div.style.cssText = divReset;
 				marginDiv.style.marginRight = marginDiv.style.width = "0";
 				div.style.width = "1px";
 				docElem.appendChild( container );
@@ -13720,6 +13685,9 @@ function addGetHookIf( conditionFn, hookFn ) {
 				ret = !parseFloat( window.getComputedStyle( marginDiv, null ).marginRight );
 
 				docElem.removeChild( container );
+
+				// Clean up the div for other support tests.
+				div.innerHTML = "";
 
 				return ret;
 			}
@@ -13759,8 +13727,8 @@ var
 
 	cssShow = { position: "absolute", visibility: "hidden", display: "block" },
 	cssNormalTransform = {
-		letterSpacing: "0",
-		fontWeight: "400"
+		letterSpacing: 0,
+		fontWeight: 400
 	},
 
 	cssPrefixes = [ "Webkit", "O", "Moz", "ms" ];
@@ -13907,10 +13875,13 @@ function showHide( elements, show ) {
 				values[ index ] = data_priv.access( elem, "olddisplay", defaultDisplay(elem.nodeName) );
 			}
 		} else {
-			hidden = isHidden( elem );
 
-			if ( display !== "none" || !hidden ) {
-				data_priv.set( elem, "olddisplay", hidden ? display : jQuery.css( elem, "display" ) );
+			if ( !values[ index ] ) {
+				hidden = isHidden( elem );
+
+				if ( display && display !== "none" || !hidden ) {
+					data_priv.set( elem, "olddisplay", hidden ? display : jQuery.css(elem, "display") );
+				}
 			}
 		}
 	}
@@ -13949,8 +13920,6 @@ jQuery.extend({
 	cssNumber: {
 		"columnCount": true,
 		"fillOpacity": true,
-		"flexGrow": true,
-		"flexShrink": true,
 		"fontWeight": true,
 		"lineHeight": true,
 		"opacity": true,
@@ -14015,6 +13984,9 @@ jQuery.extend({
 
 			// If a hook was provided, use that value, otherwise just set the specified value
 			if ( !hooks || !("set" in hooks) || (value = hooks.set( elem, value, extra )) !== undefined ) {
+				// Support: Chrome, Safari
+				// Setting style to blank string required to delete "style: x !important;"
+				style[ name ] = "";
 				style[ name ] = value;
 			}
 
@@ -14070,7 +14042,7 @@ jQuery.each([ "height", "width" ], function( i, name ) {
 			if ( computed ) {
 				// certain elements can have dimension info if we invisibly show them
 				// however, it must have a current display style that would benefit from this
-				return rdisplayswap.test( jQuery.css( elem, "display" ) ) && elem.offsetWidth === 0 ?
+				return elem.offsetWidth === 0 && rdisplayswap.test( jQuery.css( elem, "display" ) ) ?
 					jQuery.swap( elem, cssShow, function() {
 						return getWidthOrHeight( elem, name, extra );
 					}) :
@@ -14391,7 +14363,7 @@ function createTween( value, prop, animation ) {
 
 function defaultPrefilter( elem, props, opts ) {
 	/* jshint validthis: true */
-	var prop, value, toggle, tween, hooks, oldfire, display, checkDisplay,
+	var prop, value, toggle, tween, hooks, oldfire, display,
 		anim = this,
 		orig = {},
 		style = elem.style,
@@ -14435,12 +14407,13 @@ function defaultPrefilter( elem, props, opts ) {
 		// Set display property to inline-block for height/width
 		// animations on inline elements that are having width/height animated
 		display = jQuery.css( elem, "display" );
+		// Get default display if display is currently "none"
+		if ( display === "none" ) {
+			display = defaultDisplay( elem.nodeName );
+		}
+		if ( display === "inline" &&
+				jQuery.css( elem, "float" ) === "none" ) {
 
-		// Test default display if display is currently "none"
-		checkDisplay = display === "none" ?
-			data_priv.get( elem, "olddisplay" ) || defaultDisplay( elem.nodeName ) : display;
-
-		if ( checkDisplay === "inline" && jQuery.css( elem, "float" ) === "none" ) {
 			style.display = "inline-block";
 		}
 	}
@@ -14470,10 +14443,6 @@ function defaultPrefilter( elem, props, opts ) {
 				}
 			}
 			orig[ prop ] = dataShow && dataShow[ prop ] || jQuery.style( elem, prop );
-
-		// Any non-fx value stops us from restoring the original display value
-		} else {
-			display = undefined;
 		}
 	}
 
@@ -14516,10 +14485,6 @@ function defaultPrefilter( elem, props, opts ) {
 				}
 			}
 		}
-
-	// If this is a noop like .hide().hide(), restore an overwritten display value
-	} else if ( (display === "none" ? defaultDisplay( elem.nodeName ) : display) === "inline" ) {
-		style.display = display;
 	}
 }
 
@@ -15412,16 +15377,6 @@ jQuery.fn.extend({
 
 jQuery.extend({
 	valHooks: {
-		option: {
-			get: function( elem ) {
-				var val = jQuery.find.attr( elem, "value" );
-				return val != null ?
-					val :
-					// Support: IE10-11+
-					// option.text throws exceptions (#14686, #14858)
-					jQuery.trim( jQuery.text( elem ) );
-			}
-		},
 		select: {
 			get: function( elem ) {
 				var value, option,
@@ -15468,7 +15423,7 @@ jQuery.extend({
 
 				while ( i-- ) {
 					option = options[ i ];
-					if ( (option.selected = jQuery.inArray( option.value, values ) >= 0) ) {
+					if ( (option.selected = jQuery.inArray( jQuery(option).val(), values ) >= 0) ) {
 						optionSet = true;
 					}
 				}
@@ -16675,15 +16630,10 @@ jQuery.ajaxTransport(function( options ) {
 				// Create the abort callback
 				callback = xhrCallbacks[ id ] = callback("abort");
 
-				try {
-					// Do send the request (this may raise an exception)
-					xhr.send( options.hasContent && options.data || null );
-				} catch ( e ) {
-					// #14683: Only rethrow if this hasn't been notified as an error yet
-					if ( callback ) {
-						throw e;
-					}
-				}
+				// Do send the request
+				// This may raise an exception which is actually
+				// handled in jQuery.ajax (so no try/catch here)
+				xhr.send( options.hasContent && options.data || null );
 			},
 
 			abort: function() {
@@ -16890,7 +16840,7 @@ jQuery.fn.load = function( url, params, callback ) {
 		off = url.indexOf(" ");
 
 	if ( off >= 0 ) {
-		selector = jQuery.trim( url.slice( off ) );
+		selector = url.slice( off );
 		url = url.slice( 0, off );
 	}
 
@@ -17198,12 +17148,6 @@ jQuery.fn.andSelf = jQuery.fn.addBack;
 // derived from file names, and jQuery is normally delivered in a lowercase
 // file name. Do this after creating the global so that if an AMD module wants
 // to call noConflict to hide this version of jQuery, it will work.
-
-// Note that for maximum portability, libraries that are not jQuery should
-// declare themselves as anonymous modules, and avoid setting a global if an
-// AMD loader is present. jQuery is a special case. For more information, see
-// https://github.com/jrburke/requirejs/wiki/Updating-existing-libraries#wiki-anon
-
 if ( typeof define === "function" && define.amd ) {
 	define( "jquery", [], function() {
 		return jQuery;
@@ -24297,13 +24241,14 @@ define(function (require) {
 	var async = require('./async');
 
 	return makePromise({
-		scheduler: new Scheduler(async)
+		scheduler: new Scheduler(async),
+		monitor: typeof console !== 'undefined' ? console : void 0
 	});
 
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./async":31,"./makePromise":41,"./scheduler":42}],29:[function(require,module,exports){
+},{"./async":30,"./makePromise":38,"./scheduler":39}],29:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24376,34 +24321,6 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 },{}],30:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function() {
-
-	/**
-	 * Custom error type for promises rejected by promise.timeout
-	 * @param {string} message
-	 * @constructor
-	 */
-	function TimeoutError (message) {
-		Error.call(this);
-		this.message = message;
-		this.name = TimeoutError.name;
-		if (typeof Error.captureStackTrace === 'function') {
-			Error.captureStackTrace(this, TimeoutError);
-		}
-	}
-
-	TimeoutError.prototype = Object.create(Error.prototype);
-	TimeoutError.prototype.constructor = TimeoutError;
-
-	return TimeoutError;
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-},{}],31:[function(require,module,exports){
 (function (process){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
@@ -24468,7 +24385,7 @@ define(function(require) {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":17}],32:[function(require,module,exports){
+},{"FWaASH":17}],31:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24550,8 +24467,6 @@ define(function() {
 		 * @param {array} promises
 		 * @param {number} n
 		 * @returns {Promise} promise for the earliest n fulfillment values
-		 *
-		 * @deprecated
 		 */
 		function some(promises, n) {
 			return new Promise(function(resolve, reject, notify) {
@@ -24663,19 +24578,21 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
 
 (function(define) { 'use strict';
-define(function() {
+define(function(require) {
+
+	var setTimer = require('../timer').set;
 
 	return function flow(Promise) {
 
+		var resolve = Promise.resolve;
 		var reject = Promise.reject;
 		var origCatch = Promise.prototype['catch'];
-		var nil = Promise.nil;
 
 		/**
 		 * Handle the ultimate fulfillment value or rejection reason, and assume
@@ -24688,9 +24605,31 @@ define(function() {
 		 */
 		Promise.prototype.done = function(onResult, onError) {
 			var h = this._handler;
-			h.when({ resolve: this._maybeFatal, notify: noop, context: this,
-				receiver: h.receiver, arg: nil, fulfilled: onResult, rejected: onError,
-				progress: void 0 });
+			h.when(this._maybeFatal, noop, this, h.receiver, onResult, onError);
+		};
+
+		/**
+		 * Check if x is a rejected promise, and if so, delegate to this._fatal
+		 * @private
+		 * @param {*} x
+		 */
+		Promise.prototype._maybeFatal = function(x) {
+			if((typeof x === 'object' || typeof x === 'function') && x !== null) {
+				// Delegate to promise._fatal in case it has been overridden
+				resolve(x)._handler.chain(this, void 0, this._fatal);
+			}
+		};
+
+		/**
+		 * Propagate fatal errors to the host environment.
+		 * @private
+		 */
+		Promise.prototype._fatal = function(e) {
+			if(this._handler._isMonitored()) {
+				this._handler.join()._fatal(e);
+			} else {
+				setTimer(function() { throw e; }, 0);
+			}
 		};
 
 		/**
@@ -24813,32 +24752,9 @@ define(function() {
 	function noop() {}
 
 });
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{}],34:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-/** @author Jeff Escalante */
-
-(function(define) { 'use strict';
-define(function() {
-
-	return function fold(Promise) {
-
-		Promise.prototype.fold = function(fn, arg) {
-			var promise = this._beget();
-			this._handler.fold(promise._handler, fn, arg);
-			return promise;
-		};
-
-		return Promise;
-	};
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-
-},{}],35:[function(require,module,exports){
+},{"../timer":40}],33:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24858,7 +24774,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],36:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24887,9 +24803,17 @@ define(function() {
 		 *  condition returns true
 		 */
 		function iterate(f, condition, handler, x) {
-			return unfold(function(x) {
-				return [x, f(x)];
-			}, condition, handler, x);
+			return resolve(x).then(function(x) {
+				return resolve(condition(x)).then(function(done) {
+					return done ? x : next(x);
+				});
+			});
+
+			function next(nextValue) {
+				return resolve(handler(nextValue)).then(function() {
+					return iterate(f, condition, handler, f(nextValue));
+				});
+			}
 		}
 
 		/**
@@ -24923,7 +24847,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],37:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24948,7 +24872,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],38:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24957,7 +24881,6 @@ define(function() {
 define(function(require) {
 
 	var timer = require('../timer');
-	var TimeoutError = require('../TimeoutError');
 
 	return function timed(Promise) {
 		/**
@@ -24968,11 +24891,13 @@ define(function(require) {
 		 */
 		Promise.prototype.delay = function(ms) {
 			var p = this._beget();
-			var h = p._handler;
 
-			this._handler.chain(h, function delay(x) {
+			this._handler.chain(p._handler,
+				function delay(x) {
+					var h = this; // this = p._handler
 					timer.set(function() { h.resolve(x); }, ms);
-				}, h.reject, h.notify);
+				},
+				p._handler.reject, p._handler.notify);
 
 			return p;
 		};
@@ -24989,11 +24914,10 @@ define(function(require) {
 		Promise.prototype.timeout = function(ms, reason) {
 			var hasReason = arguments.length > 1;
 			var p = this._beget();
-			var h = p._handler;
 
 			var t = timer.set(onTimeout, ms);
 
-			this._handler.chain(h,
+			this._handler.chain(p._handler,
 				function onFulfill(x) {
 					timer.clear(t);
 					this.resolve(x); // this = p._handler
@@ -25002,113 +24926,24 @@ define(function(require) {
 					timer.clear(t);
 					this.reject(x); // this = p._handler
 				},
-				h.notify);
+				p._handler.notify);
 
 			return p;
 
 			function onTimeout() {
-				h.reject(hasReason
-					? reason : new TimeoutError('timed out after ' + ms + 'ms'));
+				p._handler.reject(hasReason
+					? reason : new Error('timed out after ' + ms + 'ms'));
 			}
 		};
 
 		return Promise;
+
 	};
 
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../TimeoutError":30,"../timer":43}],39:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var timer = require('../timer');
-
-	var logError = (function() {
-		if(typeof console !== 'undefined') {
-			if(typeof console.error !== 'undefined') {
-				return function(e) {
-					console.error(e);
-				};
-			}
-
-			if(typeof console.log !== 'undefined') {
-				return function(e) {
-					console.log(e);
-				};
-			}
-		}
-
-		return noop;
-	}());
-
-	return function unhandledRejection(Promise, enqueue) {
-		var unhandledRejections = [];
-
-		if(typeof enqueue !== 'function') {
-			enqueue = function(f) {
-				timer.set(f, 0);
-			};
-		}
-
-		function reportUnhandledRejections() {
-			unhandledRejections.forEach(function (r) {
-				if(!r.handled) {
-					logError('Potentially unhandled rejection ' + formatError(r.value));
-				}
-			});
-			unhandledRejections = [];
-		}
-
-		Promise.onPotentiallyUnhandledRejection = function(rejection) {
-			if(unhandledRejections.length === 0) {
-				enqueue(reportUnhandledRejections);
-			}
-			unhandledRejections.push(rejection);
-		};
-
-		Promise.onFatalRejection = function(rejection) {
-			enqueue(function() {
-				throw rejection.value;
-			});
-		};
-
-		return Promise;
-	};
-
-	function formatError(e) {
-		var s;
-		if(typeof e === 'object' && e.stack) {
-			s = e.stack;
-		} else {
-			s = String(e);
-			if(s === '[object Object]' && typeof JSON !== 'undefined') {
-				s = tryStringify(e, s);
-			}
-		}
-
-		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
-	}
-
-	function tryStringify(e, defaultValue) {
-		try {
-			return JSON.stringify(e);
-		} catch(e) {
-			// Ignore. Cannot JSON.stringify e, stick with String(e)
-			return defaultValue;
-		}
-	}
-
-	function noop() {}
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"../timer":43}],40:[function(require,module,exports){
+},{"../timer":40}],37:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25142,7 +24977,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 
-},{}],41:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25253,7 +25088,7 @@ define(function() {
 		/**
 		 * Creates an internal {promise, resolver} pair
 		 * @private
-		 * @returns {Promise}
+		 * @returns {{_handler: DeferredHandler, promise: Promise}}
 		 */
 		function defer() {
 			return promiseFromHandler(new DeferredHandler());
@@ -25281,31 +25116,18 @@ define(function() {
 		 * for the transformed result.  If the promise cannot be fulfilled, onRejected
 		 * is called with the reason.  onProgress *may* be called with updates toward
 		 * this promise's fulfillment.
-		 * @param {function=} onFulfilled fulfillment handler
-		 * @param {function=} onRejected rejection handler
-		 * @deprecated @param {function=} onProgress progress handler
+		 * @param [onFulfilled] {Function} fulfillment handler
+		 * @param [onRejected] {Function} rejection handler
+		 * @param [onProgress] {Function} progress handler
 		 * @return {Promise} new promise
 		 */
-		Promise.prototype.then = function(onFulfilled, onRejected) {
-			var parent = this._handler;
-
-			if (typeof onFulfilled !== 'function' && parent.join().state > 0) {
-				// Short circuit: value will not change, simply share handler
-				return promiseFromHandler(parent);
-			}
-
+		Promise.prototype.then = function(onFulfilled, onRejected, onProgress) {
 			var p = this._beget();
+			var parent = this._handler;
 			var child = p._handler;
 
-			parent.when({
-				resolve: child.resolve,
-				notify: child.notify,
-				context: child,
-				receiver: parent.receiver,
-				fulfilled: onFulfilled,
-				rejected: onRejected,
-				progress: arguments.length > 2 ? arguments[2] : void 0
-			});
+			parent.when(child.resolve, child.notify, child,
+				parent.receiver, onFulfilled, onRejected, onProgress);
 
 			return p;
 		};
@@ -25343,23 +25165,6 @@ define(function() {
 			return configurePromise(child, p);
 		};
 
-		/**
-		 * Check if x is a rejected promise, and if so, delegate to handler._fatal
-		 * @private
-		 * @param {*} x
-		 */
-		Promise.prototype._maybeFatal = function(x) {
-			if(!maybeThenable(x)) {
-				return;
-			}
-
-			var handler = getHandlerUnchecked(x);
-			handler.context = this._handler.context;
-			handler.chain(handler, void 0, function() {
-				this._fatal(this.context);
-			});
-		};
-
 		// Array combinators
 
 		Promise.all = all;
@@ -25373,37 +25178,26 @@ define(function() {
 		 * @returns {Promise} promise for array of fulfillment values
 		 */
 		function all(promises) {
-			/*jshint maxcomplexity:8*/
+			/*jshint maxcomplexity:6*/
 			var resolver = new DeferredHandler();
-			var pending = promises.length >>> 0;
-			var results = new Array(pending);
+			var len = promises.length >>> 0;
+			var pending = len;
+			var results = [];
+			var i, h;
 
-			var i, h, x;
-			for (i = 0; i < promises.length; ++i) {
-				x = promises[i];
-
-				if (x === void 0 && !(i in promises)) {
-					--pending;
-					continue;
-				}
-
-				if (maybeThenable(x)) {
-					h = x instanceof Promise
-						? x._handler.join()
-						: getHandlerUntrusted(x);
-
-					if (h.state === 0) {
+			for (i = 0; i < len; ++i) {
+				if (i in promises) {
+					h = getHandlerUnchecked(promises[i]);
+					if(h.state === 0) {
 						resolveOne(resolver, results, h, i);
-					} else if (h.state > 0) {
+					} else if (h.state === 1) {
 						results[i] = h.value;
 						--pending;
 					} else {
-						resolver.reject(h.value);
+						h.chain(resolver, void 0, resolver.reject);
 						break;
 					}
-
 				} else {
-					results[i] = x;
 					--pending;
 				}
 			}
@@ -25446,13 +25240,10 @@ define(function() {
 			}
 
 			var h = new DeferredHandler();
-			var i, x;
-			for(i=0; i<promises.length; ++i) {
-				x = promises[i];
-				if (x !== void 0 && i in promises) {
-					getHandler(x).chain(h, h.resolve, h.reject);
-				}
+			for(var i=0; i<promises.length; ++i) {
+				getHandler(promises[i]).chain(h, h.resolve, h.reject);
 			}
+
 			return promiseFromHandler(h);
 		}
 
@@ -25468,8 +25259,7 @@ define(function() {
 		 */
 		function getHandler(x, h) {
 			if(x instanceof Promise) {
-				var xh = x._handler.join();
-				return h === xh ? promiseCycleHandler() : xh;
+				return getHandlerChecked(x, h);
 			}
 			return maybeThenable(x) ? getHandlerUntrusted(x) : new FulfilledHandler(x);
 		}
@@ -25488,6 +25278,17 @@ define(function() {
 		}
 
 		/**
+		 * Get x's handler, checking for cycles
+		 * @param {Promise} x
+		 * @param {object?} h handler to check for cycles
+		 * @returns {object} handler
+		 */
+		function getHandlerChecked(x, h) {
+			var xh = x._handler.join();
+			return h === xh ? promiseCycleHandler() : xh;
+		}
+
+		/**
 		 * Get a handler for potentially untrusted thenable x
 		 * @param {*} x
 		 * @returns {object} handler
@@ -25501,19 +25302,6 @@ define(function() {
 			} catch(e) {
 				return new RejectedHandler(e);
 			}
-		}
-
-		/**
-		 * Recursively collapse handler chain to find the handler
-		 * nearest to the fully resolved value.
-		 * @param {Handler} h
-		 * @returns {*}
-		 */
-		function join(h) {
-			while(h.handler !== void 0) {
-				h = h.handler;
-			}
-			return h;
 		}
 
 		/**
@@ -25536,26 +25324,29 @@ define(function() {
 
 		Handler.prototype.inspect = toPendingState;
 
-		Handler.prototype.join = function() { return join(this); };
+		Handler.prototype.join = function() { return this; };
 
-		Handler.prototype.chain = function(to, fulfilled, rejected, progress) {
-			this.when({
-				resolve: noop,
-				notify: noop,
-				context: void 0,
-				receiver: to,
-				fulfilled: fulfilled,
-				rejected: rejected,
-				progress: progress
-			});
+		Handler.prototype.chain = function(to, f, r, u) {
+			this.when(noop, noop, void 0, to, f, r, u);
 		};
 
-		Handler.prototype.fold = function(to, f, z) {
-			join(this).chain(to, function(x) {
-				getHandler(z).chain(this, function(z) {
-					this.resolve(tryCatchReject2(f, z, x, this.receiver));
-				}, this.reject, this.notify);
-			}, to.reject, to.notify);
+		Handler.prototype._env = environment.monitor || Promise;
+		Handler.prototype._isMonitored = function() {
+			return typeof this._env.promiseMonitor !== 'undefined';
+		};
+
+		Handler.prototype._createContext = function(fromContext) {
+			var parent = fromContext || executionContext[executionContext.length - 1];
+			this.context = { stack: void 0, parent: parent };
+			this._env.promiseMonitor.captureStack(this.context, this.constructor);
+		};
+
+		Handler.prototype._enterContext = function() {
+			executionContext.push(this.context);
+		};
+
+		Handler.prototype._exitContext = function() {
+			executionContext.pop();
 		};
 
 		/**
@@ -25564,13 +25355,14 @@ define(function() {
 		 * @constructor
 		 */
 		function DeferredHandler(receiver, inheritedContext) {
-			Promise.createContext(this, inheritedContext);
-
 			this.consumers = [];
 			this.receiver = receiver;
 			this.handler = void 0;
 			this.resolved = false;
 			this.state = 0;
+			if(this._isMonitored()) {
+				this._createContext(inheritedContext);
+			}
 		}
 
 		inherit(Handler, DeferredHandler);
@@ -25580,20 +25372,17 @@ define(function() {
 		};
 
 		DeferredHandler.prototype.resolve = function(x) {
-			if(!this.resolved) {
-				this._resolve(getHandler(x, this));
-			}
+			this._join(getHandler(x, this));
 		};
 
 		DeferredHandler.prototype.reject = function(x) {
-			if(!this.resolved) {
-				this._resolve(new RejectedHandler(x));
-			}
+			this._join(new RejectedHandler(x));
 		};
 
 		DeferredHandler.prototype.join = function() {
 			if (this.resolved) {
-				return this.handler = join(this.handler);
+				this.handler = this.handler.join();
+				return this.handler;
 			} else {
 				return this;
 			}
@@ -25601,29 +25390,36 @@ define(function() {
 
 		DeferredHandler.prototype.run = function() {
 			var q = this.consumers;
-			var handler = this.handler.join();
+			var handler = this.handler = this.handler.join();
 			this.consumers = void 0;
 
-			for (var i = 0; i < q.length; ++i) {
-				handler.when(q[i]);
+			for (var i = 0; i < q.length; i+=7) {
+				handler.when(q[i], q[i+1], q[i+2], q[i+3], q[i+4], q[i+5], q[i+6]);
 			}
 		};
 
-		DeferredHandler.prototype._resolve = function(handler) {
+		DeferredHandler.prototype._join = function(handler) {
+			if(this.resolved) {
+				return;
+			}
+
 			this.resolved = true;
 			this.handler = handler;
 			tasks.enqueue(this);
 
-			if(this.context !== void 0) {
+			if(this._isMonitored()) {
 				handler._reportTrace(this.context);
+				this.context = void 0;
 			}
 		};
 
-		DeferredHandler.prototype.when = function(continuation) {
+		DeferredHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
+			if(this._isMonitored()) { this.context = void 0; }
+
 			if(this.resolved) {
-				tasks.enqueue(new ContinuationTask(continuation, this.handler));
+				tasks.enqueue(new RunHandlerTask(resolve, notify, t, receiver, f, r, u, this.handler));
 			} else {
-				this.consumers.push(continuation);
+				this.consumers.push(resolve, notify, t, receiver, f, r, u);
 			}
 		};
 
@@ -25641,11 +25437,6 @@ define(function() {
 			this.resolved && this.handler.join()._removeTrace();
 		};
 
-		DeferredHandler.prototype._fatal = function(context) {
-			var c = typeof context === 'undefined' ? this.context : context;
-			this.resolved && this.handler.join()._fatal(c);
-		};
-
 		/**
 		 * Abstract base for handler that delegates to another handler
 		 * @private
@@ -25658,6 +25449,10 @@ define(function() {
 		}
 
 		inherit(Handler, DelegateHandler);
+
+		DelegateHandler.prototype.join = function() {
+			return this.handler.join();
+		};
 
 		DelegateHandler.prototype.inspect = function() {
 			return this.join().inspect();
@@ -25683,8 +25478,8 @@ define(function() {
 
 		inherit(DelegateHandler, AsyncHandler);
 
-		AsyncHandler.prototype.when = function(continuation) {
-			tasks.enqueue(new ContinuationTask(continuation, this.join()));
+		AsyncHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
+			tasks.enqueue(new RunHandlerTask(resolve, notify, t, receiver, f, r, u, this.join()));
 		};
 
 		/**
@@ -25701,15 +25496,15 @@ define(function() {
 
 		inherit(DelegateHandler, BoundHandler);
 
-		BoundHandler.prototype.when = function(continuation) {
+		BoundHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
 			// Because handlers are allowed to be shared among promises,
 			// each of which possibly having a different receiver, we have
 			// to insert our own receiver into the chain if it has been set
 			// so that callbacks (f, r, u) will be called using our receiver
 			if(this.receiver !== void 0) {
-				continuation.receiver = this.receiver;
+				receiver = this.receiver;
 			}
-			this.join().when(continuation);
+			this.join().when(resolve, notify, t, receiver, f, r, u);
 		};
 
 		/**
@@ -25728,29 +25523,30 @@ define(function() {
 
 		inherit(DeferredHandler, ThenableHandler);
 
-		ThenableHandler.prototype.when = function(continuation) {
+		ThenableHandler.prototype.when = function(resolve, notify, t, receiver, f, r, u) {
 			if(!this.assimilated) {
 				this.assimilated = true;
-				assimilate(this);
+				this._assimilate();
 			}
-			DeferredHandler.prototype.when.call(this, continuation);
+			DeferredHandler.prototype.when.call(this, resolve, notify, t, receiver, f, r, u);
 		};
 
-		function assimilate(h) {
-			tryAssimilate(h.untrustedThen, h.thenable, _resolve, _reject, _notify);
+		ThenableHandler.prototype._assimilate = function() {
+			var h = this;
+			this._try(this.untrustedThen, this.thenable, _resolve, _reject, _notify);
 
 			function _resolve(x) { h.resolve(x); }
 			function _reject(x)  { h.reject(x); }
 			function _notify(x)  { h.notify(x); }
-		}
+		};
 
-		function tryAssimilate(then, thenable, resolve, reject, notify) {
+		ThenableHandler.prototype._try = function(then, thenable, resolve, reject, notify) {
 			try {
 				then.call(thenable, resolve, reject, notify);
 			} catch (e) {
 				reject(e);
 			}
-		}
+		};
 
 		/**
 		 * Handler for a fulfilled promise
@@ -25759,10 +25555,12 @@ define(function() {
 		 * @constructor
 		 */
 		function FulfilledHandler(x) {
-			Promise.createContext(this);
-
 			this.value = x;
 			this.state = 1;
+
+			if(this._isMonitored()) {
+				this._createContext();
+			}
 		}
 
 		inherit(Handler, FulfilledHandler);
@@ -25771,18 +25569,16 @@ define(function() {
 			return { state: 'fulfilled', value: this.value };
 		};
 
-		FulfilledHandler.prototype.when = function(cont) {
-			var x;
+		FulfilledHandler.prototype.when = function(resolve, notify, t, receiver, f) {
+			if(this._isMonitored()) { this._enterContext(); }
 
-			if (typeof cont.fulfilled === 'function') {
-				Promise.enterContext(this);
-				x = tryCatchReject(cont.fulfilled, this.value, cont.receiver);
-				Promise.exitContext();
-			} else {
-				x = this.value;
-			}
+			var x = typeof f === 'function'
+				? tryCatchReject(f, this.value, receiver)
+				: this.value;
 
-			cont.resolve.call(cont.context, x);
+			if(this._isMonitored()) { this._exitContext(); }
+
+			resolve.call(t, x);
 		};
 
 		/**
@@ -25792,13 +25588,14 @@ define(function() {
 		 * @constructor
 		 */
 		function RejectedHandler(x) {
-			Promise.createContext(this);
-
 			this.value = x;
 			this.state = -1;
-			this.handled = false;
 
-			this._reportTrace();
+			if(this._isMonitored()) {
+				this.id = errorId++;
+				this._createContext();
+				this._reportTrace();
+			}
 		}
 
 		inherit(Handler, RejectedHandler);
@@ -25807,46 +25604,37 @@ define(function() {
 			return { state: 'rejected', reason: this.value };
 		};
 
-		RejectedHandler.prototype.when = function(cont) {
-			var x;
-
-			if (typeof cont.rejected === 'function') {
+		RejectedHandler.prototype.when = function(resolve, notify, t, receiver, f, r) {
+			if(this._isMonitored()) {
 				this._removeTrace();
-				Promise.enterContext(this);
-				x = tryCatchReject(cont.rejected, this.value, cont.receiver);
-				Promise.exitContext();
-			} else {
-				x = promiseFromHandler(this);
+				this._enterContext();
 			}
 
+			var x = typeof r === 'function'
+				? tryCatchReject(r, this.value, receiver)
+				: promiseFromHandler(this);
 
-			cont.resolve.call(cont.context, x);
+			if(this._isMonitored()) { this._exitContext(); }
+
+			resolve.call(t, x);
 		};
 
 		RejectedHandler.prototype._reportTrace = function(context) {
-			Promise.onPotentiallyUnhandledRejection(this, context);
+			this._env.promiseMonitor.addTrace(this, context);
 		};
 
 		RejectedHandler.prototype._removeTrace = function() {
-			this.handled = true;
-			Promise.onPotentiallyUnhandledRejectionHandled(this);
+			this._env.promiseMonitor.removeTrace(this);
 		};
 
-		RejectedHandler.prototype._fatal = function(context) {
-			Promise.onFatalRejection(this, context);
+		RejectedHandler.prototype._fatal = function() {
+			this._env.promiseMonitor.fatal(this);
 		};
 
-		// Unhandled rejection hooks
-		// By default, everything is a noop
+		// Execution context tracking for long stack traces
 
-		// TODO: Better names: "annotate"?
-		Promise.createContext
-			= Promise.enterContext
-			= Promise.exitContext
-			= Promise.onPotentiallyUnhandledRejection
-			= Promise.onPotentiallyUnhandledRejectionHandled
-			= Promise.onFatalRejection
-			= noop;
+		var executionContext = [];
+		var errorId = 0;
 
 		// Errors and singletons
 
@@ -25875,13 +25663,13 @@ define(function() {
 		 * @private
 		 * @constructor
 		 */
-		function ContinuationTask(continuation, handler) {
-			this.continuation = continuation;
+		function RunHandlerTask(a, b, c, d, e, f, g, handler) {
+			this.a=a;this.b=b;this.c=c;this.d=d;this.e=e;this.f=f;this.g=g;
 			this.handler = handler;
 		}
 
-		ContinuationTask.prototype.run = function() {
-			this.handler.join().when(this.continuation);
+		RunHandlerTask.prototype.run = function() {
+			this.handler.join().when(this.a,this.b,this.c,this.d,this.e,this.f,this.g);
 		};
 
 		/**
@@ -25897,17 +25685,17 @@ define(function() {
 		ProgressTask.prototype.run = function() {
 			var q = this.q;
 			// First progress handler is at index 1
-			for (var i = 0; i < q.length; ++i) {
-				this._notify(q[i]);
+			for (var i = 1; i < q.length; i+=7) {
+				this._notify(q[i], q[i+1], q[i+2], q[i+5]);
 			}
 		};
 
-		ProgressTask.prototype._notify = function(continuation) {
-			var x = typeof continuation.progress === 'function'
-				? tryCatchReturn(continuation.progress, this.value, continuation.receiver)
+		ProgressTask.prototype._notify = function(notify, t, receiver, u) {
+			var x = typeof u === 'function'
+				? tryCatchReturn(u, this.value, receiver)
 				: this.value;
 
-			continuation.notify.call(continuation.context, x);
+			notify.call(t, x);
 		};
 
 		// Other helpers
@@ -25928,18 +25716,6 @@ define(function() {
 		function tryCatchReject(f, x, thisArg) {
 			try {
 				return f.call(thisArg, x);
-			} catch(e) {
-				return reject(e);
-			}
-		}
-
-		/**
-		 * Same as above, but includes the extra argument parameter.
-		 * @private
-		 */
-		function tryCatchReject2(f, x, y, thisArg) {
-			try {
-				return f.call(thisArg, x, y);
 			} catch(e) {
 				return reject(e);
 			}
@@ -25969,7 +25745,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],42:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25998,10 +25774,9 @@ define(function(require) {
 	 * @param {function} task
 	 */
 	Scheduler.prototype.enqueue = function(task) {
-		if(this._handlerQueue.length === 0) {
+		if(this._handlerQueue.push(task) === 1) {
 			this._enqueue(this.drainQueue);
 		}
-		this._handlerQueue.push(task);
 	};
 
 	/**
@@ -26021,7 +25796,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"./Queue":29}],43:[function(require,module,exports){
+},{"./Queue":29}],40:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -26050,26 +25825,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{}],44:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var PromiseMonitor = require('./monitor/PromiseMonitor');
-	var ConsoleReporter = require('./monitor/ConsoleReporter');
-
-	var promiseMonitor = new PromiseMonitor(new ConsoleReporter());
-
-	return function(Promise) {
-		return promiseMonitor.monitor(Promise);
-	};
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"./monitor/ConsoleReporter":45,"./monitor/PromiseMonitor":46}],45:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -26091,7 +25847,7 @@ define(function(require) {
 		if(traces.length === 0) {
 			if(this._previouslyReported) {
 				this._previouslyReported = false;
-				this.msg(allHandledMsg);
+				this.warn(allHandledMsg);
 			}
 			return;
 		}
@@ -26112,20 +25868,15 @@ define(function(require) {
 	};
 
 	function initDefaultLogging() {
-		/*jshint maxcomplexity:7*/
-		var log, warn, groupStart, groupEnd;
+		var warn, groupStart, groupEnd;
 
 		if(typeof console === 'undefined') {
-			log = warn = consoleNotAvailable;
+			warn = consoleNotAvailable;
 		} else {
 			if(typeof console.error === 'function'
 				&& typeof console.dir === 'function') {
 				warn = function(s) {
 					console.error(s);
-				};
-
-				log = function(s) {
-					console.log(s);
 				};
 
 				if(typeof console.groupCollapsed === 'function') {
@@ -26142,20 +25893,14 @@ define(function(require) {
 				// Credit to webpro (https://github.com/webpro) for this idea
 				if (typeof console.log ==='function'
 					&& typeof JSON !== 'undefined') {
-					log = warn = function (x) {
-						if(typeof x !== 'string') {
-							try {
-								x = JSON.stringify(x);
-							} catch(e) {}
-						}
-						console.log(x);
+					warn = function (x) {
+						console.log(typeof x === 'string' ? x : JSON.stringify(x));
 					};
 				}
 			}
 		}
 
 		return {
-			msg: log,
 			warn: warn,
 			groupStart: groupStart || warn,
 			groupEnd: groupEnd || consoleNotAvailable
@@ -26169,7 +25914,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"./error":48}],46:[function(require,module,exports){
+},{"./error":44}],42:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -26178,26 +25923,24 @@ define(function(require) {
 define(function(require) {
 
 	var defaultStackJumpSeparator = 'from execution context:';
-	var defaultStackFilter = /[\s\(\/\\](node|module|timers)\.js:|when([\/\\]{1,2}(lib|monitor|es6-shim)[\/\\]{1,2}|\.js)|(new\sPromise)\b|(\b(PromiseMonitor|ConsoleReporter|Scheduler|RunHandlerTask|ProgressTask|Promise|.*Handler)\.[\w_]\w\w+\b)|\b(tryCatch\w+|getHandler\w*)\b/i;
+	var defaultStackFilter = /(node|module|timers)\.js:|when([\/\\]{1,2}(lib|monitor|es6-shim)[\/\\]{1,2}|\.js)|(new\sPromise)\b|(\b(PromiseMonitor|ConsoleReporter|Scheduler|RunHandlerTask|ProgressTask|Promise|.*Handler)\.[\w_]\w\w+\b)|\b(tryCatch\w+|getHandler\w*)\b/i;
 
 	var setTimer = require('../lib/timer').set;
 	var error = require('./error');
 
-	var executionContext = [];
-
 	function PromiseMonitor(reporter) {
-		this.logDelay = 0;
+		this._traces = {};
+		this.traceTask = 0;
+		this.logDelay = 100;
 		this.stackFilter = defaultStackFilter;
 		this.stackJumpSeparator = defaultStackJumpSeparator;
 		this.filterDuplicateFrames = true;
 
 		this._reporter = reporter;
+
 		if(typeof reporter.configurePromiseMonitor === 'function') {
 			reporter.configurePromiseMonitor(this);
 		}
-
-		this._traces = [];
-		this._traceTask = 0;
 
 		var self = this;
 		this._doLogTraces = function() {
@@ -26205,99 +25948,62 @@ define(function(require) {
 		};
 	}
 
-	PromiseMonitor.prototype.monitor = function(Promise) {
-		var self = this;
-		Promise.createContext = function(p, context) {
-			p.context = self.createContext(p, context);
-		};
-
-		Promise.enterContext = function(p) {
-			executionContext.push(p.context);
-		};
-
-		Promise.exitContext = function() {
-			executionContext.pop();
-		};
-
-		Promise.onPotentiallyUnhandledRejection = function(rejection, extraContext) {
-			return self.addTrace(rejection, extraContext);
-		};
-
-		Promise.onPotentiallyUnhandledRejectionHandled = function(rejection) {
-			return self.removeTrace(rejection);
-		};
-
-		Promise.onFatalRejection = function(rejection, extraContext) {
-			return self.fatal(rejection, extraContext);
-		};
-
-		return this;
-	};
-
-	PromiseMonitor.prototype.createContext = function(at, parentContext) {
-		var context = {
-			parent: parentContext || executionContext[executionContext.length - 1],
-			stack: void 0
-		};
-		error.captureStack(context, at.constructor);
-		return context;
+	PromiseMonitor.prototype.captureStack = function(host, at) {
+		return error.captureStack(host, at);
 	};
 
 	PromiseMonitor.prototype.addTrace = function(handler, extraContext) {
-		var t, i;
-
-		for(i = this._traces.length-1; i >= 0; --i) {
-			t = this._traces[i];
-			if(t.handler === handler) {
-				break;
-			}
-		}
-
-		if(i >= 0) {
-			t.extraContext = extraContext;
-		} else {
-			this._traces.push({
-				handler: handler,
-				extraContext: extraContext
-			});
-		}
-
+		this._traces[handler.id] = {
+			error: handler.value,
+			context: handler.context,
+			extraContext: extraContext
+		};
 		this.logTraces();
 	};
 
-	PromiseMonitor.prototype.removeTrace = function(/*handler*/) {
-		this.logTraces();
+	PromiseMonitor.prototype.removeTrace = function(handler) {
+		if(handler.id in this._traces) {
+			delete this._traces[handler.id];
+			this.logTraces();
+		}
 	};
 
-	PromiseMonitor.prototype.fatal = function(handler, extraContext) {
+	PromiseMonitor.prototype.fatal = function(handler) {
 		var err = new Error();
-		err.stack = this._createLongTrace(handler.value, handler.context, extraContext).join('\n');
+		err.stack = this._createLongTrace(handler.value, handler.context).join('\n');
 		setTimer(function() {
 			throw err;
 		}, 0);
 	};
 
 	PromiseMonitor.prototype.logTraces = function() {
-		if(!this._traceTask) {
-			this._traceTask = setTimer(this._doLogTraces, this.logDelay);
+		if(!this.traceTask) {
+			this.traceTask = setTimer(this._doLogTraces, this.logDelay);
 		}
 	};
 
 	PromiseMonitor.prototype._logTraces = function() {
-		this._traceTask = void 0;
-		this._traces = this._traces.filter(filterHandled);
+		this.traceTask = void 0;
 		this._reporter.log(this.formatTraces(this._traces));
 	};
 
 
 	PromiseMonitor.prototype.formatTraces = function(traces) {
-		return traces.map(function(t) {
-			return this._createLongTrace(t.handler.value, t.handler.context, t.extraContext);
-		}, this);
+		var keys = Object.keys(traces);
+		var formatted = [];
+		var longTrace, t, i;
+
+		for(i=0; i<keys.length; ++i) {
+			t = traces[keys[i]];
+			longTrace = this._createLongTrace(t.error, t.context, t.extraContext);
+			formatted.push(longTrace);
+		}
+
+		return formatted;
 	};
 
 	PromiseMonitor.prototype._createLongTrace = function(e, context, extraContext) {
-		var trace = error.parse(e) || [String(e) + ' (WARNING: non-Error used)'];
+		var trace = error.parse(e) || [];
 		trace = filterFrames(this.stackFilter, trace, 0);
 		this._appendContext(trace, context);
 		this._appendContext(trace, extraContext);
@@ -26360,15 +26066,11 @@ define(function(require) {
 		});
 	}
 
-	function filterHandled(t) {
-		return !t.handler.handled;
-	}
-
 	return PromiseMonitor;
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../lib/timer":43,"./error":48}],47:[function(require,module,exports){
+},{"../lib/timer":40,"./error":44}],43:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -26376,15 +26078,21 @@ define(function(require) {
 (function(define) { 'use strict';
 define(function(require) {
 
-	var monitor = require('../monitor');
-	var Promise = require('../when').Promise;
+	var PromiseMonitor = require('./PromiseMonitor');
+	var ConsoleReporter = require('./ConsoleReporter');
 
-	return monitor(Promise);
+	var promiseMonitor = new PromiseMonitor(new ConsoleReporter());
+
+	if(typeof console !== 'undefined') {
+		console.promiseMonitor = promiseMonitor;
+	}
+
+	return promiseMonitor;
 
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../monitor":44,"../when":49}],48:[function(require,module,exports){
+},{"./ConsoleReporter":41,"./PromiseMonitor":42}],44:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -26472,7 +26180,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],49:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 
 /**
@@ -26480,7 +26188,7 @@ define(function() {
  * when is part of the cujoJS family of libraries (http://cujojs.com/)
  * @author Brian Cavalier
  * @author John Hann
- * @version 3.2.1
+ * @version 3.1.0
  */
 (function(define) { 'use strict';
 define(function (require) {
@@ -26488,20 +26196,17 @@ define(function (require) {
 	var timed = require('./lib/decorators/timed');
 	var array = require('./lib/decorators/array');
 	var flow = require('./lib/decorators/flow');
-	var fold = require('./lib/decorators/fold');
 	var inspect = require('./lib/decorators/inspect');
 	var generate = require('./lib/decorators/iterate');
 	var progress = require('./lib/decorators/progress');
 	var withThis = require('./lib/decorators/with');
-	var unhandledRejection = require('./lib/decorators/unhandledRejection');
-	var TimeoutError = require('./lib/TimeoutError');
 
-	var Promise = [array, flow, fold, generate, progress,
-		inspect, withThis, timed, unhandledRejection]
-		.reduce(function(Promise, feature) {
+	var Promise = [array, flow, generate, progress, inspect, withThis, timed]
+		.reduceRight(function(Promise, feature) {
 			return feature(Promise);
 		}, require('./lib/Promise'));
 
+	var resolve = Promise.resolve;
 	var slice = Array.prototype.slice;
 
 	// Public API
@@ -26511,8 +26216,8 @@ define(function (require) {
 	when.reject      = Promise.reject;       // Create a rejected promise
 
 	when.lift        = lift;                 // lift a function to return promises
-	when['try']      = attempt;              // call a function and return a promise
-	when.attempt     = attempt;              // alias for when.try
+	when['try']      = tryCall;              // call a function and return a promise
+	when.attempt     = tryCall;              // alias for when.try
 
 	when.iterate     = Promise.iterate;      // Generate a stream of promises
 	when.unfold      = Promise.unfold;       // Generate a stream of promises
@@ -26534,12 +26239,8 @@ define(function (require) {
 	when.Promise     = Promise;              // Promise constructor
 	when.defer       = defer;                // Create a {promise, resolve, reject} tuple
 
-	// Error types
-
-	when.TimeoutError = TimeoutError;
-
 	/**
-	 * Get a trusted promise for x, or by transforming x with onFulfilled
+	 * When x, which may be a promise, thenable, or non-promise value,
 	 *
 	 * @param {*} x
 	 * @param {function?} onFulfilled callback to be called when x is
@@ -26547,21 +26248,15 @@ define(function (require) {
 	 *   will be invoked immediately.
 	 * @param {function?} onRejected callback to be called when x is
 	 *   rejected.
-	 * @deprecated @param {function?} onProgress callback to be called when progress updates
+	 * @param {function?} onProgress callback to be called when progress updates
 	 *   are issued for x.
 	 * @returns {Promise} a new promise that will fulfill with the return
 	 *   value of callback or errback or the completion value of promiseOrValue if
 	 *   callback and/or errback is not supplied.
 	 */
-	function when(x, onFulfilled, onRejected) {
-		var p = Promise.resolve(x);
-		if(arguments.length < 2) {
-			return p;
-		}
-
-		return arguments.length > 3
-			? p.then(onFulfilled, onRejected, arguments[3])
-			: p.then(onFulfilled, onRejected);
+	function when(x, onFulfilled, onRejected, onProgress) {
+		var p = resolve(x);
+		return arguments.length < 2 ? p : p.then(onFulfilled, onRejected, onProgress);
 	}
 
 	/**
@@ -26591,7 +26286,7 @@ define(function (require) {
 	 * @param {function} f
 	 * @returns {Promise}
 	 */
-	function attempt(f /*, args... */) {
+	function tryCall(f /*, args... */) {
 		/*jshint validthis:true */
 		return _apply(f, this, slice.call(arguments, 1));
 	}
@@ -26600,9 +26295,9 @@ define(function (require) {
 	 * try/lift helper that allows specifying thisArg
 	 * @private
 	 */
-	function _apply(f, thisArg, args) {
+	function _apply(func, thisArg, args) {
 		return Promise.all(args).then(function(args) {
-			return f.apply(thisArg, args);
+			return func.apply(thisArg, args);
 		});
 	}
 
@@ -26731,7 +26426,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./lib/Promise":28,"./lib/TimeoutError":30,"./lib/decorators/array":32,"./lib/decorators/flow":33,"./lib/decorators/fold":34,"./lib/decorators/inspect":35,"./lib/decorators/iterate":36,"./lib/decorators/progress":37,"./lib/decorators/timed":38,"./lib/decorators/unhandledRejection":39,"./lib/decorators/with":40}],"asq":[function(require,module,exports){
+},{"./lib/Promise":28,"./lib/decorators/array":31,"./lib/decorators/flow":32,"./lib/decorators/inspect":33,"./lib/decorators/iterate":34,"./lib/decorators/progress":35,"./lib/decorators/timed":36,"./lib/decorators/with":37}],"asq":[function(require,module,exports){
 module.exports=require('qzqC+2');
 },{}],"qzqC+2":[function(require,module,exports){
 /** @module previewer/asq.js
@@ -26839,12 +26534,50 @@ function generatesampleData(mode) {
   if ('presenter' === mode) {
     // Progress bar for presenter
     $('.asq-exercise').each(function() {
+      var $info = $(this).find('.asq-progress-info');
+      var items = $info.find('.progress > .progress-bar').length;
       var audience = Math.floor(Math.random() * (347 - 5 + 1) + 5);
-      var done = Math.floor(Math.random() * (audience - 1 + 1) + 1);
-      $(this).find('.progress-bar').attr('style', 'width:' +
-        Math.round(done / audience * 100).toString() + '%;')
-      $(this).find('.progressNum').text(done + '/' + audience +
-        ' answers received.');
+      //var total = 2 * audience + peerTotal;
+
+      // Answer
+      var answers = Math.floor(Math.random() * (audience + 1));
+      var answerProgress = (answers / audience) * 100;
+      // Progress bar
+      $info.find('.progress > .asq-progress-answers')
+        .css('width', (answerProgress / items) + '%');
+      // Label
+      $info.find('.asq-progress-details > .row > .asq-label-answers > span')
+      .html('Answers: ' + answers + '/' + audience + ' (' +
+        Math.floor(answerProgress) + '%)');
+
+      // Self-assessment
+      var self = -1;
+      if ($info.find('.progress > .asq-progress-self').length > 0) {
+        self = Math.floor(Math.random() * (answers + 1));
+         var selfProgress = (self / audience) * 100;
+        // Progress bar
+        $info.find('.progress > .asq-progress-self')
+          .css('width', ( selfProgress / items) + '%');
+        // Label
+        $info.find('.asq-progress-details > .row > .asq-label-self  > span')
+          .html('Self-assessments: ' + self + '/' + audience + ' (' +
+            Math.floor(selfProgress) + '%)');
+      }
+
+      // Peer-assessment
+      if ($info.find('.progress > .asq-progress-peer').length > 0) {
+        var p = self > -1 ? self : answers;
+        var peer = Math.floor(Math.random() * (p * p - p + 1));
+        var peerTotal = (audience * audience - audience);
+        var peerProgress = (peer / peerTotal) * 100;
+        // Progress bar
+        $info.find('.progress > .asq-progress-peer')
+          .css('width', (peerProgress / items) + '%');
+        // Label
+        $info.find('.asq-progress-details > .row > .asq-label-peer  > span')
+          .html('Peer-assessment: ' + peer + '/' + peerTotal + ' (' +
+            Math.floor(peerProgress) + '%)');
+      }
     });
   }
 }
@@ -26906,11 +26639,11 @@ function handleSubmit(exercises) {
               $btn.css('top',(-$btn.offset().top) + 'px');
             })
             $(out).insertAfter($exercise).hide().fadeIn(600, function() {
-                $(this).find('.asq-flex-handle').drags();
-                console.log('should not be called twice')
-                var $btn = $('.step.present').find('.asq-rubric-expand');
-                if ($btn.length === 0) { return; }
-                $btn.css('top', '400px');
+              $(this).find('.asq-flex-handle').drags();
+              console.log('should not be called twice')
+              var $btn = $('.step.present').find('.asq-rubric-expand');
+              if ($btn.length === 0) { return; }
+              $btn.css('top', '400px');
             });
           }
       });
@@ -27070,7 +26803,7 @@ function handleRubrics(data) {
 module.exports = {
   init: init
 };
-},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"dustjs-helpers":20,"dustjs-linkedin":24,"lodash":26,"when":49,"when/monitor/console":47}],"dust":[function(require,module,exports){
+},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"dustjs-helpers":20,"dustjs-linkedin":24,"lodash":26,"when":45,"when/monitor/console":43}],"dust":[function(require,module,exports){
 module.exports=require('RzcaG4');
 },{}],"RzcaG4":[function(require,module,exports){
 (function (process){
