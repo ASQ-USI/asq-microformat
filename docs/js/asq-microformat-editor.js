@@ -53,6 +53,11 @@ function init(){
       editor.session.selection.clearSelection();
   })
 
+  $('.options-section').on('change', 'input[type="checkbox"]', function checkboxChanged(event){
+    console.log("I am in")
+    process();
+  })
+
   //load first question
   $('#question-type-list .list-group-item').eq(0).trigger('click');
 }
@@ -107,11 +112,36 @@ function injectHtmltoIframe(iframeEl, html){
   doc.close();   
 
   //append css
-  var $head = $(iframeEl).contents().find("head");                
-$head.append($("<link/>", 
-    { rel: "stylesheet", href: "css/asq-default-theme.css", type: "text/css" }));
-$head.append($("<link/>", 
-    { rel: "stylesheet", href: "css/bootstrap.min.css", type: "text/css" })); 
+  var asqCss = $('#asq-theme-css-chk')[0].checked; 
+  var btsrpCss = $('#bootstrap-css-chk')[0].checked; 
+  var btsrpJs = $('#bootstrap-js-chk')[0].checked; 
+
+  console.log(asqCss, btsrpCss , btsrpJs)
+
+  //check if we have to inject sth
+  if(!asqCss && !btsrpCss && !btsrpJs) return;
+
+  var $head = $(iframeEl).contents().find("head"); 
+  var $body = $(iframeEl).contents().find("body");
+  if(asqCss){
+    $head.append($('<link/>', 
+    { rel: 'stylesheet', href: 'css/asq-default-theme.css', type: 'text/css' }));
+  }            
+  if(btsrpCss){
+    $head.append($('<link/>', 
+    { rel: 'stylesheet', href: 'css/bootstrap.min.css', type: 'text/css' }));
+  }
+  if(btsrpJs){
+    $body.append($('<script></script>', 
+    { src: 'js/jquery.js', type: 'text/javascript' }));
+    $body.append($('<script></script>', 
+    { src: 'js/bootstrap.min.js', type: 'text/javascript' }));
+    // var script = document.createElement('script');
+    // script.type = 'text/javascript';
+    // script.src = 'js/boostrap.min.js';
+    // $body.append(script);
+  }
+ 
 }
 
 
