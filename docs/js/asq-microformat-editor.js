@@ -285,7 +285,10 @@ function configure4Node_(){
   logger = console;
 
   getRootHTML = function($, $root) {
-    return $.html()
+    console.log('ROOT');
+    console.log($root.html());
+    console.log('=======')
+    return $root.html();
   };
 }
 
@@ -371,7 +374,8 @@ var MarkupGenerator = module.exports = function(dustInstance){
 
     //setup dom manipulation
     var $ = isBrowser ? jQuery : cheerio.load(wrappedHtml)
-      , $root = isBrowser ? $(wrappedHtml) : $;
+      , $root = isBrowser ? $(wrappedHtml) : $($.root()[0]);
+
 
     if(typeof options !== 'undefined'){
       _.extend(this.options, this.defaultOptions, options);
@@ -433,28 +437,30 @@ var MarkupGenerator = module.exports = function(dustInstance){
         console.log($root.html());
         return self.renderModal($);
       })*/.then(function wrapUpRendering() {
-        //inject dust vars for socket params in body data attrs
-        // $('body').attr('asq-host', '{host}');
-        // $('body').attr('asq-port', '{port}');
-        // $('body').attr('asq-session-id', '{id}');
-        // $('body').attr('asq-socket-mode', '{mode}');
+        if(self.options.mode !== 'preview'){
+          //inject dust vars for socket params in body data attrs
+          $('body').attr('asq-host', '{host}');
+          $('body').attr('asq-port', '{port}');
+          $('body').attr('asq-session-id', '{id}');
+          $('body').attr('asq-socket-mode', '{mode}');
 
-        //remove black-listed scripts
-        // $('script').each(function(){
-        //   var src = $(this).attr('src')
-        //   if (src && src.match(blacklistRegex)){
-        //      $(this).remove();
-        //   }
-        // })
+          //remove black-listed scripts
+          $('script').each(function(){
+            var src = $(this).attr('src')
+            if (src && src.match(blacklistRegex)){
+               $(this).remove();
+            }
+          })
 
-        //include presenter or viewer script
-        var asqScript = '/js/asq-' + userType + '.js';
+          //include presenter or viewer script
+          var asqScript = '/js/asq-' + userType + '.js';
 
-        // $('script[src$="impress.js"]')
-        //   //first add vendor scripts
-        //   .before('<script src="/js/asq-vendor-presentation.js"></script>')
-        //   //and then replace impress with asqScript
-        //   .attr('src', asqScript );
+          $('script[src$="impress.js"]')
+            //first add vendor scripts
+            .before('<script src="/js/asq-vendor-presentation.js"></script>')
+            //and then replace impress with asqScript
+            .attr('src', asqScript );
+        }
 
       }).catch(function(error){
         throw error;
@@ -750,7 +756,7 @@ var Parser = module.exports = function(loggerInstance){
 
     //configure dom selector lib implementation
     $ = isBrowser ? jQuery : cheerio.load(wrappedHtml);
-    $root = isBrowser ? $(wrappedHtml) : $
+    $root = isBrowser ? $(wrappedHtml) : $($.root()[0]);
 
     this.errors    = []; // Reinitialize errors;
     this.exercises = []; // Reinitialize exercises;
@@ -1064,7 +1070,6 @@ var Parser = module.exports = function(loggerInstance){
       if (types.indexOf('peer') > -1) {
         questionsMap[rubric.question].assessment.push('peer')
       }
-      console.dir(questionsMap[rubric.question]);
     }
 
     // Parse the rubric according to its type.
