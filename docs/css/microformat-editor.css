@@ -25,6 +25,28 @@ header h4 > span {
 #logo {
   height: 30px;
 }
+/* options */
+.options-section {
+  position: relative;
+  width: 100%;
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  margin-top: 10px;
+  padding: 0 10px;
+}
+.options-section > h4 {
+  font-family: 'HelveticaNeue-Light';
+  display: inline-block;
+  margin: 0;
+  color: #666;
+}
+.options-section label {
+  font-weight: normal;
+  margin-left: 10px;
+}
 /* editor */
 .editor-section {
   position: relative;
