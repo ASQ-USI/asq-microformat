@@ -1,29 +1,29 @@
 {! Expect rated to indicate the object being rated and a optional rating !}
 {! value which will be show and the inputs will be disabled !}
-<span class="asq-rating{@if cond="1<={ratin} && {ratin} <= 5"} disabled{/if}">
+<span class="asq-rating{@if cond="1<={val} && {val} <= 5"} disabled{/if}">
       <!-- 5 stars rating -->
-      <input type="radio" id="asq-rating-{rated}-5" value="5"
-            class="asq-rating-input" name="asq-rating-{rated}"
-            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=5} checked {/eq}{/if}>
-      <label for="asq-rating-{rated}-5" class="asq-rating-star"></label>
+      <input type="radio" id="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-5" value="5"
+            class="asq-rating-input" name="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-5"
+            {@if cond="1<={val} && {val} <= 5"} disabled{@eq key=val value=5} checked {/eq}{/if}>
+      <label for="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-5" class="asq-rating-star"></label>
       <!-- 4 stars rating -->
-      <input type="radio" id="asq-rating-{rated}-4" value="4"
-            class="asq-rating-input" name="asq-rating-{rated}"
-            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=4} checked {/eq}{/if}>
-      <label for="asq-rating-{rated}-4" class="asq-rating-star"></label>
+      <input type="radio" id="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-4" value="4"
+            class="asq-rating-input" name="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-4"
+            {@if cond="1<={val} && {val} <= 5"} disabled{@eq key=val value=4} checked {/eq}{/if}>
+      <label for="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-4" class="asq-rating-star"></label>
       <!-- 3 stars rating -->
-      <input type="radio" id="asq-rating-{rated}-3" value="3"
-            class="asq-rating-input" name="asq-rating-{rated}"
-            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=3} checked {/eq}{/if}>
-      <label for="asq-rating-{rated}-3" class="asq-rating-star"></label>
+      <input type="radio" id="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-3" value="3"
+            class="asq-rating-input" name="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-3"
+            {@if cond="1<={val} && {val} <= 5"} disabled{@eq key=val value=3} checked {/eq}{/if}>
+      <label for="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-3" class="asq-rating-star"></label>
       <!-- 2 stars rating -->
-      <input type="radio" id="asq-rating-{rated}-2" value="2"
-            class="asq-rating-input" name="asq-rating-{rated}"
-            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=2} checked {/eq}{/if}>
-      <label for="asq-rating-{rated}-2" class="asq-rating-star"></label>
+      <input type="radio" id="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-2" value="2"
+            class="asq-rating-input" name="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-2"
+            {@if cond="1<={val} && {val} <= 5"} disabled{@eq key=val value=2} checked {/eq}{/if}>
+      <label for="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-2" class="asq-rating-star"></label>
       <!-- 1 star rating -->
-      <input type="radio" id="asq-rating-{rated}-1" value="1"
-            class="asq-rating-input" name="asq-rating-{rated}"
-            {@if cond="1<={ratin} && {ratin} <= 5"} disabled{@eq key=ratin value=1} checked {/eq}{/if}>
-      <label for="asq-rating-{rated}-1" class="asq-rating-star"></label>
+      <input type="radio" id="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-1" value="1"
+            class="asq-rating-input" name="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-1"
+            {@if cond="1<={val} && {val} <= 5"} disabled{@eq key=val value=1} checked {/eq}{/if}>
+      <label for="asq-rating-{@if cond="1<={val} && {val} <= 5"}disabled-{/if}{rated}-1" class="asq-rating-star"></label>
 </span>

@@ -40,6 +40,14 @@
   z-index: 998;
   display: none;
 }
+.asq-resubmit-btn {
+  position: fixed;
+  top: 88%;
+  right: 5%;
+  min-width: 15%;
+  text-align: center;
+  z-index: 998;
+}
 .asq-spinner {
   display: inline-block;
   vertical-align: bottom;
@@ -57,7 +65,15 @@ lesshat-selector {
 }
 /* asq (asq-) */
 /* viewer presentation modal */
-#asq-rubric-expanded-container {
+.asq-slide-expand {
+  position: fixed;
+  top: 20%;
+  right: 0%;
+  color: gray;
+  background: #FFF;
+  border: 0;
+}
+#asq-slide-expanded-container {
   display: block;
   position: fixed;
   top: 0;
@@ -68,7 +84,7 @@ lesshat-selector {
   background: rgba(29, 29, 29, 0.8);
   pointer-events: auto;
 }
-#asq-rubric-expanded {
+#asq-slide-expanded {
   margin: 5%;
   /* min-height: 80%; */
   background: #ffffff;
@@ -79,7 +95,7 @@ lesshat-selector {
   display: block;
   overflow-y: auto;
 }
-#asq-rubric-reduce {
+#asq-slide-reduce {
   z-index: 1000;
   position: fixed;
   top: 0;
@@ -196,7 +212,7 @@ lesshat-selector {
 .asq-rating-input {
   display: none;
 }
-.asq-rating-input:checked:not(disabled) ~ .asq-rating-star:before {
+.asq-rating-input:checked ~ .asq-rating-star:before {
   content: "\2605";
 }
 /* asq-microformat rubric */

@@ -8,9 +8,9 @@
   <span class="asq-rating-widget">
     <span class="asq-confidence-label">Confidence:</span>
     {?confidence}
-      {>rating rated="{id}" ratin=confidence/}
+      {>rating rated="{id}" val=confidence/}
     {:else}
-      {>rating rated="{id}" ratin=0/}
+      {>rating rated="{id}" val=0/}
     {/confidence}
   </span>
 </p>

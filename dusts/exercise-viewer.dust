@@ -1,7 +1,7 @@
 <form action="">
 {! Autoescaping is off, only use fully trusted content !}
   {exerciseContent|s}
-  <input type="hidden" name="exercise-id" value={id}>
+  <input type="hidden" name="exercise-id" value="{id}">
   <p class="text-right">
     <button type="submit" class="btn btn-success">Submit</button>
   </p>

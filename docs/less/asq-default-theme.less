@@ -38,25 +38,42 @@
 
 /*------------ Submit answers ------------*/
 .asq-submit-wait, .asq-submit-success {
-    position: fixed;
-    top: 50%;
-    left: 0%;
-    text-align: center;
-    width: 100%;
-    z-index: 998;
-    display: none;
+  position: fixed;
+  top: 50%;
+  left: 0%;
+  text-align: center;
+  width: 100%;
+  z-index: 998;
+  display: none;
+}
+.asq-resubmit-btn {
+  position: fixed;
+  top: 88%;
+  right: 5%;
+  min-width: 15%;
+  text-align: center;
+  z-index: 998;
 }
 .asq-spinner {
-    display: inline-block;
-    vertical-align: bottom;
-    .animation(spin 2s infinite linear);
+  display: inline-block;
+  vertical-align: bottom;
+  .animation(spin 2s infinite linear);
 }
 
 .keyframes(~'spin, 0%{transform: rotate(0deg)} 100%{ transform: rotate(359deg) }');
 
 /* asq (asq-) */
 /* viewer presentation modal */
-#asq-rubric-expanded-container {
+.asq-slide-expand {
+  position: fixed;
+  top: 20%;
+  right: 0%;
+  color: gray;
+  background: #FFF;
+  border: 0;
+}
+
+#asq-slide-expanded-container {
   display:block;
   position:fixed;
   top:0;
@@ -67,7 +84,7 @@
   background: rgba(29, 29, 29, 0.8);
   pointer-events: auto;
 }
-#asq-rubric-expanded {
+#asq-slide-expanded {
   margin: 5%;
   /* min-height: 80%; */
   background: rgba(255, 255, 255, 1);
@@ -79,7 +96,7 @@
   overflow-y: auto;
 }
 
-#asq-rubric-reduce {
+#asq-slide-reduce {
   z-index: 1000;
   position: fixed;
   top: 0;
@@ -218,7 +235,7 @@
 .asq-rating-input{
   display: none;
 
-  &:checked:not(disabled) ~ .asq-rating-star:before {
+  &:checked ~ .asq-rating-star:before {
     content: "\2605";
   }
 }

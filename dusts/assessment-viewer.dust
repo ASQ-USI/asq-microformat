@@ -1,7 +1,7 @@
  {! Assessment for an exercise which made of an answer and rubrics. !}
 <div class="asq-assessment-container">
 {#exercises}
-  <div class="asq-assessment-outer">
+  <div class="asq-assessment-outer" data-asq-exercise="{_id}">
     <div class="asq-assessment">
       <form class="asq-assessment-inner">
         {#questions}
@@ -16,7 +16,7 @@
         </div>
         {/questions}
         <p class="text-right">
-          <span class="asq-confidence-label">Confidence:</span> {>rating rated=_id ratin="7"/}
+          <span class="asq-confidence-label">Confidence:</span> {>rating rated=_id val="7"/}
           <button type="submit" class="btn btn-success">Submit</button>
         </p>
       </form>
