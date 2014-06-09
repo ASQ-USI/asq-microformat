@@ -53,7 +53,6 @@ function init(){
   })
 
   $('.options-section').on('change', 'input[type="checkbox"]', function checkboxChanged(event){
-    console.log("I am in")
     process();
   })
 
@@ -67,6 +66,7 @@ function init(){
 */
 function process(){
   var parsed = parser.parse(editor.getValue());
+
   when.all([ 
     mGen1.render(parsed.html, parsed.exercises, parsed.rubrics, {mode:'preview', userType: 'viewer'}),
     mGen2.render(parsed.html, parsed.exercises, parsed.rubrics, {mode:'preview', userType: 'presenter'})
@@ -80,9 +80,6 @@ function process(){
                       indent_size: 2 ,
                       preserve_newlines: true });
 
-    // $('#render-viewer').html(viewerHtml)
-
-  // var iframe = $("#render-viewer")[0];
 
   injectHtmltoIframe(viewerIframe, viewerHtml)
   injectHtmltoIframe(presenterIframe, presenterHtml)
@@ -114,8 +111,6 @@ function injectHtmltoIframe(iframeEl, html){
   var asqCss = $('#asq-theme-css-chk')[0].checked; 
   var btsrpCss = $('#bootstrap-css-chk')[0].checked; 
   var btsrpJs = $('#bootstrap-js-chk')[0].checked; 
-
-  console.log(asqCss, btsrpCss , btsrpJs)
 
   //check if we have to inject sth
   if(!asqCss && !btsrpCss && !btsrpJs) return;
