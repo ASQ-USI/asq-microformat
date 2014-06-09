@@ -120,7 +120,7 @@ module.exports = function(grunt) {
       },
       js: {
         files:['lib/**/*.js',
-                'docs/**/*.js',                
+                'docs/js/_src/**/*.js',                
                 'previewer/*.js'],
         tasks: ['browserify'],
         options: {
