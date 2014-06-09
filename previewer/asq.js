@@ -31,6 +31,8 @@ function start($el, userType, cb) {
     generatesampleData(userType);
     var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
     handleSubmit(exercises);
+    $('body').append('<div id="impress"></div>');
+    $('#impress').html($('.step, .asq-rubric-expanded-container'));
     if (typeof cb !== 'undefined' && typeof cb === 'function') {
       cb.call(this, null, out)
     }
@@ -176,6 +178,7 @@ function handleSubmit(exercises) {
       var selected = [];
       for(i = 0, len = exercises.length; i < len; i++) {
         if ($exercise.attr('id') === exercises[i].htmlId) {
+          exercises[i]._id = exercises[i].htmlId;
           selected.push(exercises[i]);
         }
       }
@@ -196,7 +199,9 @@ function handleSubmit(exercises) {
       $exercise.fadeOut(600);
       // Remove wait message
       $exercise.siblings('.asq-submit-wait').fadeOut(600).remove();
-      dust.render('assessment-viewer', { exercises : exercises },
+      console.dir(exercises);
+      dust.render('assessment-viewer', { assessee: 'assessee-' +
+        Math.floor(Math.random() * 347 + 1), exercises : exercises },
         function onRender(err, out) {
           if (err) { console.error(err); }
           else {
@@ -251,30 +256,59 @@ function handleSubmit(exercises) {
   // Handler for rubric submit logic
   $(document).on('click', '.asq-assessment button[type="submit"]', function rubricSubmitHandler(evt) {
     evt.preventDefault();
+    var $assessment = $(evt.target).closest('.asq-assessment-inner');
+    var assessee = $assessment.attr('data-asq-assessee');
+    var exercise = $assessment.attr('data-asq-exercise');
+    var confidence = parseInt($assessment.find('input.asq-rating-input:checked')
+      .val()) || 0;
+    var assessments = [];
+    $assessment.find('.asq-rubric[data-asq-target-question]').each(
+      function processQuestion() {
+        var questionId = $(this).attr('data-asq-target-question');
+        $(this).find('[data-asq-rubric]').each(
+          function processRubric() {
+            var rubricId = $(this).attr('data-asq-rubric');
+            var submission = [];
+            $(this).find('.asq-rubric-list .list-group-item').each(
+              function processRubricElem() {
+                submission.push(
+                  $(this).find('.asq-rubric-elem input').is(':checked'));
+            });
+            assessments.push({
+              rubric     : rubricId,
+              submission : submission,
+              assessee   : assessee,
+              confidence : confidence,
+              exercise   : exercise,
+              question   : questionId
+            });
+        });
+      });
+    console.log(assessments);
 
     // Get Submission
-    var submission  = [];
-    var $assessment = $(evt.target).closest('.asq-assessment-inner');
-    $assessment.find('.asq-flex-box').each(function() {
+    // var submission  = [];
+    // var $assessment = $(evt.target).closest('.asq-assessment-inner');
+    // $assessment.find('.asq-flex-box').each(function() {
 
-      // submission per question
-      var qId = $(this).attr('data-question');
-      submission[qId] = [];
-      $(this).children('.asq-rubric').find('[data-rubric]').each(function() {
+    //   // submission per question
+    //   var qId = $(this).attr('data-question');
+    //   submission[qId] = [];
+    //   $(this).children('.asq-rubric').find('[data-rubric]').each(function() {
 
-        // Rubric for each question
-        var rId     = $(this).attr('data-rubric');
-        var rubric  = {};
-        rubric[rId] = [];
+    //     // Rubric for each question
+    //     var rId     = $(this).attr('data-rubric');
+    //     var rubric  = {};
+    //     rubric[rId] = [];
 
-        // Selected rubric for questions
-        $(this).find('input[type=checkbox], input[type=radio]').each(function() {
-          rubric[rId].push([$(this).is(':checked'), $(this).val()]);
-        });
-        submission[qId].push(rubric);
-      });
-    });
-    console.dir(submission);
+    //     // Selected rubric for questions
+    //     $(this).find('input[type=checkbox], input[type=radio]').each(function() {
+    //       rubric[rId].push([$(this).is(':checked'), $(this).val()]);
+    //     });
+    //     submission[qId].push(rubric);
+    //   });
+    // });
+    // console.dir(submission);
 
     // disable inputs
     $assessment.find(':input').attr('disabled', true);

@@ -1,16 +1,16 @@
  {! Assessment for an exercise which made of an answer and rubrics. !}
 <div class="asq-assessment-container">
 {#exercises}
-  <div class="asq-assessment-outer" data-asq-exercise="{_id}">
+  <div class="asq-assessment-outer">
     <div class="asq-assessment">
-      <form class="asq-assessment-inner">
+      <form class="asq-assessment-inner" data-asq-exercise="{_id}" data-asq-assessee="{assessee}">
         {#questions}
         <div class="asq-flex-box" data-question="{_id}">
           <div class="asq-flex-col asq-question-preview">
             {>"question-viewer"/} {! Select question template according to question type !}
           </div>
           <div class="asq-flex-handle"></div>
-          <div class="asq-flex-col asq-rubric">
+          <div class="asq-flex-col asq-rubric" data-asq-target-question="{_id}">
             {>rubric-viewer question=_id/}
           </div>
         </div>

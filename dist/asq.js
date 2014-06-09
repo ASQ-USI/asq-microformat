@@ -4,7 +4,7 @@ module.exports = function (dust) {
 	// answer.dust
 	(function(){dust.register("answer",body_0);function body_0(chk,ctx){return chk.reference(ctx.getPath(false,["question","stem"]),ctx,"h",["s"]).write("<ul class=\"nav nav-tabs\">").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_1},null).exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_2},null).exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_3},null).exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_4},null).exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_5},null).write("</ul><div class=\"tab-content\"><!--  Displays correct solution -->").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_6},null).write("<!-- Displays Pie-Chart Right vs. Wrong -->").exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_10},null).write("<!-- Display distinct answers -->").exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_11},null).write("<!-- Display distinct options  -->").exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_12},null).write("<!-- Display correctness  -->").exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_13},null).write("</div>");}function body_1(chk,ctx){return chk.write("<li class=\"active\"><a href=\"#answersolutions-").reference(ctx.get("statId"),ctx,"h").write("\"  data-toggle=\"tab\">Correct Answer</a></li>");}function body_2(chk,ctx){return chk.write("<li><a href=\"#rvsw-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Right vs. Wrong</a></li>");}function body_3(chk,ctx){return chk.write("<li><a href=\"#mscstats-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Answers</a></li>");}function body_4(chk,ctx){return chk.write("<li><a href=\"#diffAns-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Options</a></li>");}function body_5(chk,ctx){return chk.write("<li><a href=\"#asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Correctness</a></li>");}function body_6(chk,ctx){return chk.write("<div class=\"tab-pane answersolutions active\" id='answersolutions-").reference(ctx.get("statId"),ctx,"h").write("'>").exists(ctx.getPath(false,["question","correctAnswer"]),ctx,{"else":body_7,"block":body_9},null).write("</div>");}function body_7(chk,ctx){return chk.write("<ol>").section(ctx.getPath(false,["question","questionOptions"]),ctx,{"block":body_8},{"formButtonType":ctx.getPath(false,["question","formButtonType"]),"htmlId":ctx.getPath(false,["question","htmlId"])}).write("</ol>");}function body_8(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" ><label class=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\"><input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"").reference(ctx.get("htmlId"),ctx,"h").write("\" value=\"").reference(ctx.get("$idx"),ctx,"h").write("\" disabled> ").reference(ctx.get("text"),ctx,"h",["s"]).write("</label></li>\n");}function body_9(chk,ctx){return chk;}function body_10(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"rvsw-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"rvswChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"rvswChart\" style=\"width: 100%; height: 500px;\"></div></div>");}function body_11(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"mscstats-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"mscstatChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"distinctAnswers\" style=\"height:500px\"></div></div>");}function body_12(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"diffAns-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"diffAnsChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"distinctOptions\" style=\"height:500px\"></div></div>");}function body_13(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\"><div class=\"asq-viz-graph\" data-width=\"").reference(ctx.get("width"),ctx,"h").write("\" data-height=\"").reference(ctx.get("height"),ctx,"h").write("\" data-margin=\"").reference(ctx.get("margin"),ctx,"h",["js"]).write("\"></div></div>");}return body_0;})();
 	 // assessment-viewer.dust
-	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"asq-assessment-container\">").section(ctx.get("exercises"),ctx,{"block":body_1},null).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"asq-assessment-outer\" data-asq-exercise=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-assessment\"><form class=\"asq-assessment-inner\">").section(ctx.get("questions"),ctx,{"block":body_2},null).write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("_id"),"val":"7"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form></div></div>");}function body_2(chk,ctx){return chk.write("<div class=\"asq-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-flex-col asq-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"asq-flex-handle\"></div><div class=\"asq-flex-col asq-rubric\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("</div></div>");}return body_0;})();
+	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"asq-assessment-container\">").section(ctx.get("exercises"),ctx,{"block":body_1},null).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"asq-assessment-outer\"><div class=\"asq-assessment\"><form class=\"asq-assessment-inner\" data-asq-exercise=\"").reference(ctx.get("_id"),ctx,"h").write("\" data-asq-assessee=\"").reference(ctx.get("assessee"),ctx,"h").write("\">").section(ctx.get("questions"),ctx,{"block":body_2},null).write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("_id"),"val":"7"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form></div></div>");}function body_2(chk,ctx){return chk.write("<div class=\"asq-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-flex-col asq-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"asq-flex-handle\"></div><div class=\"asq-flex-col asq-rubric\" data-asq-target-question=\"").reference(ctx.get("_id"),ctx,"h").write("\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("</div></div>");}return body_0;})();
 	 // exercise-presenter.dust
 	(function(){dust.register("exercise-presenter",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).partial("progress-bar",ctx,null).write("</form>");}return body_0;})();
 	 // exercise-viewer.dust
@@ -34,9 +34,9 @@ module.exports = function (dust) {
 	 // rubric-footer-viewer.dust
 	(function(){dust.register("rubric-footer-viewer",body_0);function body_0(chk,ctx){return chk.write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("rated"),"ratin":"9"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p>");}return body_0;})();
 	 // rubric-multi-choice-viewer.dust
-	(function(){dust.register("rubric-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel panel-default\" data-rubric=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"panel-heading\"><h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse-").reference(ctx.get("_id"),ctx,"h").write("\">").reference(ctx.get("stemText"),ctx,"h").write("</a><span class=\"label label-default asq-rubric-grade\"></span></h4></div><div id=\"collapse-").reference(ctx.get("_id"),ctx,"h").write("\" class=\"panel-collapse collapse in\"><div class=\"panel-body\"><div class=\"input-group asq-rubric-group\"><ul class=\"asq-rubric-list list-group\">").section(ctx.get("criteria"),ctx,{"block":body_1},null).write("</ul></div></div></div></div>");}function body_1(chk,ctx){return chk.write("<li class=\"list-group-item\"><div class=\"asq-rubric-elem\"><input type=\"radio\" name=\"collaspe-").reference(ctx.get("_id"),ctx,"h").write("\" value=\"").reference(ctx.get("points"),ctx,"h").write("\"/><span class=\"label label-default\">").reference(ctx.get("label"),ctx,"h").write("</span></div><div class=\"asq-rubric-elem\">").reference(ctx.get("desc"),ctx,"h").write("</div></li>");}return body_0;})();
+	(function(){dust.register("rubric-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-heading\"><h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse-").reference(ctx.get("_id"),ctx,"h").write("\">").reference(ctx.get("stemText"),ctx,"h").write("</a><span class=\"label label-default asq-rubric-grade\"></span></h4></div><div id=\"collapse-").reference(ctx.get("_id"),ctx,"h").write("\" class=\"panel-collapse collapse in\"><div class=\"panel-body\"><div class=\"input-group asq-rubric-group\"><ul class=\"asq-rubric-list list-group\">").section(ctx.get("criteria"),ctx,{"block":body_1},null).write("</ul></div></div></div>");}function body_1(chk,ctx){return chk.write("<li class=\"list-group-item\"><div class=\"asq-rubric-elem\"><input type=\"radio\" name=\"collaspe-").reference(ctx.get("_id"),ctx,"h").write("\" value=\"").reference(ctx.get("points"),ctx,"h").write("\"/><span class=\"label label-default\">").reference(ctx.get("label"),ctx,"h").write("</span></div><div class=\"asq-rubric-elem\">").reference(ctx.get("desc"),ctx,"h").write("</div></li>");}return body_0;})();
 	 // rubric-viewer.dust
-	(function(){dust.register("rubric-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-group\">").section(ctx.get("rubrics"),ctx,{"block":body_1},{"question":ctx.get("question")}).write("</div>");}function body_1(chk,ctx){return chk.partial(body_2,ctx,null);}function body_2(chk,ctx){return chk.write("rubric-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}return body_0;})();
+	(function(){dust.register("rubric-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-group\">").section(ctx.get("rubrics"),ctx,{"block":body_1},{"question":ctx.get("question")}).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"panel panel-default\" data-asq-rubric=\"").reference(ctx.get("_id"),ctx,"h").write("\">").partial(body_2,ctx,null).write("</div>");}function body_2(chk,ctx){return chk.write("rubric-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}return body_0;})();
 	 // stats.dust
 	(function(){dust.register("stats",body_0);function body_0(chk,ctx){return chk.reference(ctx.getPath(false,["question","stem"]),ctx,"h",["s"]).write("<ul class=\"nav nav-tabs\">").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_1},null).exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_2},null).exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_3},null).exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_4},null).exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_5},null).write("</ul><div class=\"tab-content\"><!--  Displays correct solution -->").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_6},null).write("<!-- Displays Pie-Chart Right vs. Wrong -->").exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_9},null).write("<!-- Display distinct answers -->").exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_10},null).write("<!-- Display distinct options  -->").exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_11},null).write("<!-- Display correctness  -->").exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_12},null).write("</div>");}function body_1(chk,ctx){return chk.write("<li class=\"active\"><a href=\"#answersolutions-").reference(ctx.get("statId"),ctx,"h").write("\"  data-toggle=\"tab\">Correct Answer</a></li>");}function body_2(chk,ctx){return chk.write("<li><a href=\"#rvsw-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Right vs. Wrong</a></li>");}function body_3(chk,ctx){return chk.write("<li><a href=\"#mscstats-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Answers</a></li>");}function body_4(chk,ctx){return chk.write("<li><a href=\"#diffAns-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Options</a></li>");}function body_5(chk,ctx){return chk.write("<li><a href=\"#asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Correctness</a></li>");}function body_6(chk,ctx){return chk.write("<div class=\"tab-pane active\" id='answersolutions-").reference(ctx.get("statId"),ctx,"h").write("'>").exists(ctx.getPath(false,["question","correctAnswer"]),ctx,{"else":body_7,"block":body_8},null).write("</div>");}function body_7(chk,ctx){return chk.partial("questionList-stats",ctx,null);}function body_8(chk,ctx){return chk.write("<p>Solution: ").reference(ctx.getPath(false,["question","correctAnswer"]),ctx,"h").write("</p><br/>");}function body_9(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"rvsw-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"rvswChart\" class=\"rvswChart\" style=\"width: 100%; height: 500px;\"></div></div>");}function body_10(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"mscstats-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"mscstatChart\" class=\"distinctAnswers\" style=\"height:500px\"></div></div>");}function body_11(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"diffAns-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"diffAnsChart\" class=\"distinctOptions\" style=\"height:500px\"></div></div>");}function body_12(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\"><div class=\"asq-viz-graph\" data-width=\"").reference(ctx.get("width"),ctx,"h").write("\" data-height=\"").reference(ctx.get("height"),ctx,"h").write("\" data-margin=\"").reference(ctx.get("margin"),ctx,"h",["js"]).write("\"></div></div>");}return body_0;})();
 	 // welcomeScreen-presenter.dust
@@ -26432,9 +26432,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./lib/Promise":28,"./lib/decorators/array":31,"./lib/decorators/flow":32,"./lib/decorators/inspect":33,"./lib/decorators/iterate":34,"./lib/decorators/progress":35,"./lib/decorators/timed":36,"./lib/decorators/with":37}],"asq":[function(require,module,exports){
-module.exports=require('qzqC+2');
-},{}],"qzqC+2":[function(require,module,exports){
+},{"./lib/Promise":28,"./lib/decorators/array":31,"./lib/decorators/flow":32,"./lib/decorators/inspect":33,"./lib/decorators/iterate":34,"./lib/decorators/progress":35,"./lib/decorators/timed":36,"./lib/decorators/with":37}],"qzqC+2":[function(require,module,exports){
 /** @module previewer/asq.js
     @description Previewer for ASQ microformat
 */
@@ -26468,6 +26466,8 @@ function start($el, userType, cb) {
     generatesampleData(userType);
     var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
     handleSubmit(exercises);
+    $('body').append('<div id="impress"></div>');
+    $('#impress').html($('.step, .asq-rubric-expanded-container'));
     if (typeof cb !== 'undefined' && typeof cb === 'function') {
       cb.call(this, null, out)
     }
@@ -26613,6 +26613,7 @@ function handleSubmit(exercises) {
       var selected = [];
       for(i = 0, len = exercises.length; i < len; i++) {
         if ($exercise.attr('id') === exercises[i].htmlId) {
+          exercises[i]._id = exercises[i].htmlId;
           selected.push(exercises[i]);
         }
       }
@@ -26633,7 +26634,9 @@ function handleSubmit(exercises) {
       $exercise.fadeOut(600);
       // Remove wait message
       $exercise.siblings('.asq-submit-wait').fadeOut(600).remove();
-      dust.render('assessment-viewer', { exercises : exercises },
+      console.dir(exercises);
+      dust.render('assessment-viewer', { assessee: 'assessee-' +
+        Math.floor(Math.random() * 347 + 1), exercises : exercises },
         function onRender(err, out) {
           if (err) { console.error(err); }
           else {
@@ -26688,30 +26691,59 @@ function handleSubmit(exercises) {
   // Handler for rubric submit logic
   $(document).on('click', '.asq-assessment button[type="submit"]', function rubricSubmitHandler(evt) {
     evt.preventDefault();
+    var $assessment = $(evt.target).closest('.asq-assessment-inner');
+    var assessee = $assessment.attr('data-asq-assessee');
+    var exercise = $assessment.attr('data-asq-exercise');
+    var confidence = parseInt($assessment.find('input.asq-rating-input:checked')
+      .val()) || 0;
+    var assessments = [];
+    $assessment.find('.asq-rubric[data-asq-target-question]').each(
+      function processQuestion() {
+        var questionId = $(this).attr('data-asq-target-question');
+        $(this).find('[data-asq-rubric]').each(
+          function processRubric() {
+            var rubricId = $(this).attr('data-asq-rubric');
+            var submission = [];
+            $(this).find('.asq-rubric-list .list-group-item').each(
+              function processRubricElem() {
+                submission.push(
+                  $(this).find('.asq-rubric-elem input').is(':checked'));
+            });
+            assessments.push({
+              rubric     : rubricId,
+              submission : submission,
+              assessee   : assessee,
+              confidence : confidence,
+              exercise   : exercise,
+              question   : questionId
+            });
+        });
+      });
+    console.log(assessments);
 
     // Get Submission
-    var submission  = [];
-    var $assessment = $(evt.target).closest('.asq-assessment-inner');
-    $assessment.find('.asq-flex-box').each(function() {
+    // var submission  = [];
+    // var $assessment = $(evt.target).closest('.asq-assessment-inner');
+    // $assessment.find('.asq-flex-box').each(function() {
 
-      // submission per question
-      var qId = $(this).attr('data-question');
-      submission[qId] = [];
-      $(this).children('.asq-rubric').find('[data-rubric]').each(function() {
+    //   // submission per question
+    //   var qId = $(this).attr('data-question');
+    //   submission[qId] = [];
+    //   $(this).children('.asq-rubric').find('[data-rubric]').each(function() {
 
-        // Rubric for each question
-        var rId     = $(this).attr('data-rubric');
-        var rubric  = {};
-        rubric[rId] = [];
+    //     // Rubric for each question
+    //     var rId     = $(this).attr('data-rubric');
+    //     var rubric  = {};
+    //     rubric[rId] = [];
 
-        // Selected rubric for questions
-        $(this).find('input[type=checkbox], input[type=radio]').each(function() {
-          rubric[rId].push([$(this).is(':checked'), $(this).val()]);
-        });
-        submission[qId].push(rubric);
-      });
-    });
-    console.dir(submission);
+    //     // Selected rubric for questions
+    //     $(this).find('input[type=checkbox], input[type=radio]').each(function() {
+    //       rubric[rId].push([$(this).is(':checked'), $(this).val()]);
+    //     });
+    //     submission[qId].push(rubric);
+    //   });
+    // });
+    // console.dir(submission);
 
     // disable inputs
     $assessment.find(':input').attr('disabled', true);
@@ -26809,7 +26841,9 @@ function handleRubrics(data) {
 module.exports = {
   init: init
 };
-},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"dustjs-helpers":20,"dustjs-linkedin":24,"lodash":26,"when":45,"when/monitor/console":43}],"dust":[function(require,module,exports){
+},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"dustjs-helpers":20,"dustjs-linkedin":24,"lodash":26,"when":45,"when/monitor/console":43}],"asq":[function(require,module,exports){
+module.exports=require('qzqC+2');
+},{}],"dust":[function(require,module,exports){
 module.exports=require('RzcaG4');
 },{}],"RzcaG4":[function(require,module,exports){
 (function (process){

@@ -1,5 +1,7 @@
 <div class="panel-group">
   {#rubrics question=question}
+    <div class="panel panel-default" data-asq-rubric="{_id}">
     {>"rubric-{questionType}-viewer"/}
+    </div>
   {/rubrics}
 </div>
