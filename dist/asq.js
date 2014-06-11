@@ -225,7 +225,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
     // in a div so that we can use 'children" functions for
     // the root as well
     var wrappedHtml = '<div>' + html + '</div>'
- 
+
     //setup dom manipulation
     var $ = isBrowser ? jQuery : cheerio.load(wrappedHtml)
       , $root = isBrowser ? $(wrappedHtml) : $;
@@ -357,8 +357,8 @@ var MarkupGenerator = module.exports = function(dustInstance){
       deferred.reject(new Error('Invalid template'));
     }
     exercise.exerciseContent = $el.html()
-    exercise.self = exercise.assessment.indexOf('self') > -1;
-    exercise.peer = exercise.assessment.indexOf('peer') > -1;
+    exercise.self = exercise.assessmentTypes.indexOf('self') > -1;
+    exercise.peer = exercise.assessmentTypes.indexOf('peer') > -1;
     //render preserving content
     this.dust.render(template, exercise, function onExRender(err, out) {
       if(err) {
@@ -709,7 +709,7 @@ var Parser = module.exports = function(loggerInstance){
     if ($rubrics.length > 0) {
       // If we have rubrics, check which types of assessment we have
       // Self and peer assessment
-      var $types = $rubric.attr('data-asq-assessment')
+      var $types = $el.attr('data-asq-assessment')
       if ($types) {
         var types = $types.split(/[ ,]+/);
         if (types.indexOf('self') > -1) {
@@ -719,7 +719,7 @@ var Parser = module.exports = function(loggerInstance){
           assessmentTypes.push('peer')
         }
       }
-      var i, max, types;
+      var i, max;
       for (i = 0, max = $rubrics.length; i < max; i++){
         this.parseRubric($, $rubrics.eq(i), questionsMap);
       }
