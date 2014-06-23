@@ -1,9 +1,9 @@
 <ol>
   {#questionOptions}
     <li class="{classList}" >
-      <label class="{formButtonType}">
+      <label class="{formButtonType}">{~n}
         <input type="{formButtonType}" name="{htmlId}" value="{$idx}"
-        {?submission} disabled{?submission[$idx]} checked{/submission[$idx]}{/submission}> {text|s}
+        {?submission} disabled{?submission[$idx]} checked{/submission[$idx]}{/submission}> {text|s}{~n}
       </label>
     </li>{~n}
   {/questionOptions}

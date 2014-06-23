@@ -11,10 +11,10 @@
       {#criteria}
         <li class="list-group-item">
           <div class="asq-rubric-elem">
-            <input type="radio" name="collaspe-{_id}" value="{points}"/>
+            <input type="{formButtonType}" name="collaspe-{_id}" value="{points}"/>
             <span class="label label-default">{label}</span>
           </div>
-          <div class="asq-rubric-elem">{desc}</div>
+          <div class="asq-rubric-elem">{desc|s}</div>
         </li>
       {/criteria}
       </ul>

@@ -4,7 +4,7 @@ module.exports = function (dust) {
 	// answer.dust
 	(function(){dust.register("answer",body_0);function body_0(chk,ctx){return chk.reference(ctx.getPath(false,["question","stem"]),ctx,"h",["s"]).write("<ul class=\"nav nav-tabs\">").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_1},null).exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_2},null).exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_3},null).exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_4},null).exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_5},null).write("</ul><div class=\"tab-content\"><!--  Displays correct solution -->").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_6},null).write("<!-- Displays Pie-Chart Right vs. Wrong -->").exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_10},null).write("<!-- Display distinct answers -->").exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_11},null).write("<!-- Display distinct options  -->").exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_12},null).write("<!-- Display correctness  -->").exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_13},null).write("</div>");}function body_1(chk,ctx){return chk.write("<li class=\"active\"><a href=\"#answersolutions-").reference(ctx.get("statId"),ctx,"h").write("\"  data-toggle=\"tab\">Correct Answer</a></li>");}function body_2(chk,ctx){return chk.write("<li><a href=\"#rvsw-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Right vs. Wrong</a></li>");}function body_3(chk,ctx){return chk.write("<li><a href=\"#mscstats-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Answers</a></li>");}function body_4(chk,ctx){return chk.write("<li><a href=\"#diffAns-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Options</a></li>");}function body_5(chk,ctx){return chk.write("<li><a href=\"#asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Correctness</a></li>");}function body_6(chk,ctx){return chk.write("<div class=\"tab-pane answersolutions active\" id='answersolutions-").reference(ctx.get("statId"),ctx,"h").write("'>").exists(ctx.getPath(false,["question","correctAnswer"]),ctx,{"else":body_7,"block":body_9},null).write("</div>");}function body_7(chk,ctx){return chk.write("<ol>").section(ctx.getPath(false,["question","questionOptions"]),ctx,{"block":body_8},{"formButtonType":ctx.getPath(false,["question","formButtonType"]),"htmlId":ctx.getPath(false,["question","htmlId"])}).write("</ol>");}function body_8(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" ><label class=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\"><input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"").reference(ctx.get("htmlId"),ctx,"h").write("\" value=\"").reference(ctx.get("$idx"),ctx,"h").write("\" disabled> ").reference(ctx.get("text"),ctx,"h",["s"]).write("</label></li>\n");}function body_9(chk,ctx){return chk;}function body_10(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"rvsw-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"rvswChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"rvswChart\" style=\"width: 100%; height: 500px;\"></div></div>");}function body_11(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"mscstats-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"mscstatChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"distinctAnswers\" style=\"height:500px\"></div></div>");}function body_12(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"diffAns-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"diffAnsChart-").reference(ctx.get("statId"),ctx,"h").write("\" class=\"distinctOptions\" style=\"height:500px\"></div></div>");}function body_13(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\"><div class=\"asq-viz-graph\" data-width=\"").reference(ctx.get("width"),ctx,"h").write("\" data-height=\"").reference(ctx.get("height"),ctx,"h").write("\" data-margin=\"").reference(ctx.get("margin"),ctx,"h",["js"]).write("\"></div></div>");}return body_0;})();
 	 // assessment-viewer.dust
-	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"asq-assessment-container\">").section(ctx.get("exercises"),ctx,{"block":body_1},null).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"asq-assessment-outer\"><div class=\"asq-assessment\"><form class=\"asq-assessment-inner\" data-asq-exercise=\"").reference(ctx.get("_id"),ctx,"h").write("\" data-asq-assessee=\"").reference(ctx.get("assessee"),ctx,"h").write("\">").section(ctx.get("questions"),ctx,{"block":body_2},null).write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("_id"),"val":"7"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p></form></div></div>");}function body_2(chk,ctx){return chk.write("<div class=\"asq-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-flex-col asq-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"asq-flex-handle\"></div><div class=\"asq-flex-col asq-rubric\" data-asq-target-question=\"").reference(ctx.get("_id"),ctx,"h").write("\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("</div></div>");}return body_0;})();
+	(function(){dust.register("assessment-viewer",body_0);function body_0(chk,ctx){return chk.write(" <div class=\"asq-assessment-container\"><h1>").helper("eq",ctx,{"block":body_1},{"key":ctx.getPath(false,["exercises","0","type"]),"value":"self"}).helper("eq",ctx,{"block":body_2},{"key":ctx.getPath(false,["exercises","0","type"]),"value":"peer"}).write("</h1>").section(ctx.get("exercises"),ctx,{"block":body_3},null).write("</div>");}function body_1(chk,ctx){return chk.write("Self Assessment");}function body_2(chk,ctx){return chk.write("Peer Assessment");}function body_3(chk,ctx){return chk.write("<div class=\"asq-assessment-outer\"><div class=\"asq-assessment\"><form class=\"asq-assessment-inner\" data-asq-exercise=\"").reference(ctx.get("_id"),ctx,"h").write("\" data-asq-assessee=\"").reference(ctx.get("assessee"),ctx,"h").write("\">").section(ctx.get("questions"),ctx,{"block":body_4},{"exercise":ctx.get("_id")}).write("<div class=\"asq-flex-box\"><span class=\"pull-right \"><button type=\"submit\" class=\"btn btn-block btn-success\">Submit</button></span></div></form></div></div>");}function body_4(chk,ctx){return chk.write("<div class=\"asq-flex-box\" data-question=\"").reference(ctx.get("_id"),ctx,"h").write("\"><div class=\"asq-flex-col asq-question-preview\">").partial("question-viewer",ctx,null).write(" </div><div class=\"asq-flex-handle\"></div><div class=\"asq-flex-col asq-rubric\" data-asq-target-question=\"").reference(ctx.get("_id"),ctx,"h").write("\">").partial("rubric-viewer",ctx,{"question":ctx.get("_id")}).write("<span class=\"pull-right\"><span>Grade: <span class=\"label label-default asq-rubrics-grade\">0</span> </span><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":body_5,"val":"7"}).write("</span></div></div>");}function body_5(chk,ctx){return chk.reference(ctx.get("_id"),ctx,"h").write("-").reference(ctx.get("exercise"),ctx,"h");}return body_0;})();
 	 // exercise-presenter.dust
 	(function(){dust.register("exercise-presenter",body_0);function body_0(chk,ctx){return chk.write("<form action=\"\">").reference(ctx.get("exerciseContent"),ctx,"h",["s"]).partial("progress-bar",ctx,null).write("</form>");}return body_0;})();
 	 // exercise-viewer.dust
@@ -20,7 +20,7 @@ module.exports = function (dust) {
 	 // question-multi-choice-stats.dust
 	(function(){dust.register("question-multi-choice-stats",body_0);function body_0(chk,ctx){return chk.write("<form><ol>").section(ctx.getPath(false,["question","questionOptions"]),ctx,{"block":body_1},{"formButtonType":ctx.getPath(false,["question","formButtonType"]),"htmlId":ctx.getPath(false,["question","htmlId"])}).write("</ol></form>");}function body_1(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" ><label class=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\"><input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"").reference(ctx.get("htmlId"),ctx,"h").write("\" value=\"").reference(ctx.get("$idx"),ctx,"h").write("\" ").exists(ctx.get("correct"),ctx,{"block":body_2},null).write(" disabled> ").reference(ctx.get("text"),ctx,"h",["s"]).write("</label></li>\n");}function body_2(chk,ctx){return chk.write(" checked ");}return body_0;})();
 	 // question-multi-choice-viewer.dust
-	(function(){dust.register("question-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<ol>").section(ctx.get("questionOptions"),ctx,{"block":body_1},null).write("</ol>");}function body_1(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" ><label class=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\"><input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"").reference(ctx.get("htmlId"),ctx,"h").write("\" value=\"").reference(ctx.get("$idx"),ctx,"h").write("\"").exists(ctx.get("submission"),ctx,{"block":body_2},null).write("> ").reference(ctx.get("text"),ctx,"h",["s"]).write("</label></li>\n");}function body_2(chk,ctx){return chk.write(" disabled").exists(ctx.getPath(false,["submission",ctx.get("$idx")]),ctx,{"block":body_3},null);}function body_3(chk,ctx){return chk.write(" checked");}return body_0;})();
+	(function(){dust.register("question-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<ol>").section(ctx.get("questionOptions"),ctx,{"block":body_1},null).write("</ol>");}function body_1(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" ><label class=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\">\n<input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"").reference(ctx.get("htmlId"),ctx,"h").write("\" value=\"").reference(ctx.get("$idx"),ctx,"h").write("\"").exists(ctx.get("submission"),ctx,{"block":body_2},null).write("> ").reference(ctx.get("text"),ctx,"h",["s"]).write("\n</label></li>\n");}function body_2(chk,ctx){return chk.write(" disabled").exists(ctx.getPath(false,["submission",ctx.get("$idx")]),ctx,{"block":body_3},null);}function body_3(chk,ctx){return chk.write(" checked");}return body_0;})();
 	 // question-presenter.dust
 	(function(){dust.register("question-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("stem"),ctx,"h",["s"]).partial(body_1,ctx,null).write(" ");}function body_1(chk,ctx){return chk.write("question-").reference(ctx.get("questionType"),ctx,"h").write("-presenter");}return body_0;})();
 	 // question-text-input-presenter.dust
@@ -34,9 +34,9 @@ module.exports = function (dust) {
 	 // rubric-footer-viewer.dust
 	(function(){dust.register("rubric-footer-viewer",body_0);function body_0(chk,ctx){return chk.write("<p class=\"text-right\"><span class=\"asq-confidence-label\">Confidence:</span> ").partial("rating",ctx,{"rated":ctx.get("rated"),"ratin":"9"}).write("<button type=\"submit\" class=\"btn btn-success\">Submit</button></p>");}return body_0;})();
 	 // rubric-multi-choice-viewer.dust
-	(function(){dust.register("rubric-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-heading\"><h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse-").reference(ctx.get("_id"),ctx,"h").write("\">").reference(ctx.get("stemText"),ctx,"h").write("</a><span class=\"label label-default asq-rubric-grade\"></span></h4></div><div id=\"collapse-").reference(ctx.get("_id"),ctx,"h").write("\" class=\"panel-collapse collapse in\"><div class=\"panel-body\"><div class=\"input-group asq-rubric-group\"><ul class=\"asq-rubric-list list-group\">").section(ctx.get("criteria"),ctx,{"block":body_1},null).write("</ul></div></div></div>");}function body_1(chk,ctx){return chk.write("<li class=\"list-group-item\"><div class=\"asq-rubric-elem\"><input type=\"radio\" name=\"collaspe-").reference(ctx.get("_id"),ctx,"h").write("\" value=\"").reference(ctx.get("points"),ctx,"h").write("\"/><span class=\"label label-default\">").reference(ctx.get("label"),ctx,"h").write("</span></div><div class=\"asq-rubric-elem\">").reference(ctx.get("desc"),ctx,"h").write("</div></li>");}return body_0;})();
+	(function(){dust.register("rubric-multi-choice-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-heading\"><h4 class=\"panel-title\"><a data-toggle=\"collapse\" href=\"#collapse-").reference(ctx.get("_id"),ctx,"h").write("\">").reference(ctx.get("stemText"),ctx,"h").write("</a><span class=\"label label-default asq-rubric-grade\"></span></h4></div><div id=\"collapse-").reference(ctx.get("_id"),ctx,"h").write("\" class=\"panel-collapse collapse in\"><div class=\"panel-body\"><div class=\"input-group asq-rubric-group\"><ul class=\"asq-rubric-list list-group\">").section(ctx.get("criteria"),ctx,{"block":body_1},null).write("</ul></div></div></div>");}function body_1(chk,ctx){return chk.write("<li class=\"list-group-item\"><div class=\"asq-rubric-elem\"><input type=\"").reference(ctx.get("formButtonType"),ctx,"h").write("\" name=\"collaspe-").reference(ctx.get("_id"),ctx,"h").write("\" value=\"").reference(ctx.get("points"),ctx,"h").write("\"/><span class=\"label label-default\">").reference(ctx.get("label"),ctx,"h").write("</span></div><div class=\"asq-rubric-elem\">").reference(ctx.get("desc"),ctx,"h",["s"]).write("</div></li>");}return body_0;})();
 	 // rubric-viewer.dust
-	(function(){dust.register("rubric-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-group\">").section(ctx.get("rubrics"),ctx,{"block":body_1},{"question":ctx.get("question")}).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"panel panel-default\" data-asq-rubric=\"").reference(ctx.get("_id"),ctx,"h").write("\">").partial(body_2,ctx,null).write("</div>");}function body_2(chk,ctx){return chk.write("rubric-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}return body_0;})();
+	(function(){dust.register("rubric-viewer",body_0);function body_0(chk,ctx){return chk.write("<div class=\"panel-group\">").section(ctx.get("rubrics"),ctx,{"block":body_1},{"question":ctx.get("question")}).write("</div>");}function body_1(chk,ctx){return chk.write("<div class=\"panel panel-default\" data-asq-rubric=\"").reference(ctx.get("_id"),ctx,"h").write("\" data-asq-score=\"0\" data-asq-maxScore=\"").reference(ctx.get("maxScore"),ctx,"h").write("\" data-asq-deduct-points=\"").reference(ctx.get("deductPoints"),ctx,"h").write("\"\">").partial(body_2,ctx,null).write("</div>");}function body_2(chk,ctx){return chk.write("rubric-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}return body_0;})();
 	 // stats.dust
 	(function(){dust.register("stats",body_0);function body_0(chk,ctx){return chk.reference(ctx.getPath(false,["question","stem"]),ctx,"h",["s"]).write("<ul class=\"nav nav-tabs\">").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_1},null).exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_2},null).exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_3},null).exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_4},null).exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_5},null).write("</ul><div class=\"tab-content\"><!--  Displays correct solution -->").exists(ctx.getPath(false,["activePanes","correct"]),ctx,{"block":body_6},null).write("<!-- Displays Pie-Chart Right vs. Wrong -->").exists(ctx.getPath(false,["activePanes","right-vs-wrong"]),ctx,{"block":body_9},null).write("<!-- Display distinct answers -->").exists(ctx.getPath(false,["activePanes","distinct-answers"]),ctx,{"block":body_10},null).write("<!-- Display distinct options  -->").exists(ctx.getPath(false,["activePanes","distinct-options"]),ctx,{"block":body_11},null).write("<!-- Display correctness  -->").exists(ctx.getPath(false,["activePanes","correctness"]),ctx,{"block":body_12},null).write("</div>");}function body_1(chk,ctx){return chk.write("<li class=\"active\"><a href=\"#answersolutions-").reference(ctx.get("statId"),ctx,"h").write("\"  data-toggle=\"tab\">Correct Answer</a></li>");}function body_2(chk,ctx){return chk.write("<li><a href=\"#rvsw-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Right vs. Wrong</a></li>");}function body_3(chk,ctx){return chk.write("<li><a href=\"#mscstats-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Answers</a></li>");}function body_4(chk,ctx){return chk.write("<li><a href=\"#diffAns-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Distinct Options</a></li>");}function body_5(chk,ctx){return chk.write("<li><a href=\"#asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\" data-toggle=\"tab\">Correctness</a></li>");}function body_6(chk,ctx){return chk.write("<div class=\"tab-pane active\" id='answersolutions-").reference(ctx.get("statId"),ctx,"h").write("'>").exists(ctx.getPath(false,["question","correctAnswer"]),ctx,{"else":body_7,"block":body_8},null).write("</div>");}function body_7(chk,ctx){return chk.partial("questionList-stats",ctx,null);}function body_8(chk,ctx){return chk.write("<p>Solution: ").reference(ctx.getPath(false,["question","correctAnswer"]),ctx,"h").write("</p><br/>");}function body_9(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"rvsw-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"rvswChart\" class=\"rvswChart\" style=\"width: 100%; height: 500px;\"></div></div>");}function body_10(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"mscstats-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"mscstatChart\" class=\"distinctAnswers\" style=\"height:500px\"></div></div>");}function body_11(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"diffAns-").reference(ctx.get("statId"),ctx,"h").write("\"><div id=\"diffAnsChart\" class=\"distinctOptions\" style=\"height:500px\"></div></div>");}function body_12(chk,ctx){return chk.write("<div class=\"tab-pane\" id=\"asq-viz-tab-").reference(ctx.get("statId"),ctx,"h").write("\"><div class=\"asq-viz-graph\" data-width=\"").reference(ctx.get("width"),ctx,"h").write("\" data-height=\"").reference(ctx.get("height"),ctx,"h").write("\" data-margin=\"").reference(ctx.get("margin"),ctx,"h",["js"]).write("\"></div></div>");}return body_0;})();
 	 // welcomeScreen-presenter.dust
@@ -114,8 +114,7 @@ var isBrowser = require('./utils').isBrowser()
 , jQuery
 , cheerio
 , dust
-, logger
-, getRootHTML;
+, logger;
 
 function configure4Node_(){
   //avoid browserify cause cheerio is incompatible
@@ -125,21 +124,12 @@ function configure4Node_(){
   //  TODO:: Allow logger argument
   // logger = require('../logger').appLogger;
   logger = console;
-
-  getRootHTML = function($, $root) {
-    //return html of first div
-    // we do not use $root.html() because it's the same as using $.html()
-    return $('div').eq(0).html()
-  };
 }
 
 function configure4Browser_(){
   jQuery = require('jquery');
   logger = console;
   dust  =  require('../dusts/compiled/templates')(require('dustjs-linkedin'));
-  getRootHTML = function($, $root) {
-    return $root.html();
-  };
 }
 
 //private function to initialize environment
@@ -228,7 +218,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
 
     //setup dom manipulation
     var $ = isBrowser ? jQuery : cheerio.load(wrappedHtml)
-      , $root = isBrowser ? $(wrappedHtml) : $;
+      , $root = isBrowser ? $(wrappedHtml) : $('div').eq(0);
 
     // // NOTE: no need to wrap the html here, it is done during parsing.
     // //setup dom manipulation
@@ -245,7 +235,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
       });
     }else{
       this.renderAll.call(this, $, $root, exercises).then(function renderedFinished() {
-        deferred.resolve(getRootHTML($, $root));
+        deferred.resolve($root.html());
       })
       .catch(function(err){
         deferred.reject(err);
@@ -550,6 +540,7 @@ function configure4Browser_(){
   jQuery = require('jquery');
 
   getOuterHTML = function($el) {
+    console.log($el.html());
     return $($('<div></div>').html($el.clone())).html();
   };
 }
@@ -624,7 +615,7 @@ var Parser = module.exports = function(loggerInstance){
 
     //configure dom selector lib implementation
     $ = isBrowser ? jQuery : cheerio.load(wrappedHtml);
-    $root = isBrowser ? $(wrappedHtml) : $;
+    $root = isBrowser ? $(wrappedHtml) : $('div').eq(0);
 
     console.log($root)
 
@@ -808,7 +799,7 @@ var Parser = module.exports = function(loggerInstance){
       questionOptions.push({
         text: $this.html(),
         classList: $this.attr('class'),
-        correct: $this.attr('data-correct') === 'true' ? true:false
+        correct: $this.attr('data-asq-correct') === 'true' ? true:false
       });
     });
 
@@ -826,6 +817,9 @@ var Parser = module.exports = function(loggerInstance){
     if($slideParent.length>0){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
+
+    console.log('stem');
+    console.log(getOuterHTML($el.find('.stem')))
 
     var question = {
       stem : getOuterHTML($el.find('.stem')),
@@ -949,6 +943,8 @@ var Parser = module.exports = function(loggerInstance){
 
   this.parseMCQRubric = function($, $rubric, rubric) {
     var criteria = [];
+    var formButtonType = this.getFormButtonType($rubric);
+    console.log('formButtonType', formButtonType);
 
     //criteria are list items with the option class
     var $criteria = $rubric.children('.asq-options').children('.asq-option')
@@ -979,10 +975,24 @@ var Parser = module.exports = function(loggerInstance){
       } else if (positive === null) {
         positive = points[i] > 0;
         maxScore = positive ? points[i] : - points[i]
-      } else if (positive && points[i] > 0) {
-        maxScore += points[i];
-      } else if (!positive && points[i] < 0) {
-        maxScore -= points[i];
+      } else if (positive && points[i] > 0 &&
+        formButtonType === this.options.inputTypeSelectors['choose-0-n']) {
+          maxScore += points[i];
+      } else if (positive && points[i] > 0 &&
+        formButtonType === this.options.inputTypeSelectors['choose-1-n']) {
+          maxScore += points[i];
+      } else if (positive && points[i] > 0 &&
+        formButtonType === this.options.inputTypeSelectors['choose-1']) {
+        maxScore = points[i] > maxScore ? points[i] : maxScore;
+      } else if (!positive && points[i] < 0 &&
+        formButtonType === this.options.inputTypeSelectors['choose-0-n']) {
+          maxScore -= points[i];
+       } else if (!positive && points[i] < 0 &&
+        formButtonType === this.options.inputTypeSelectors['choose-1-n']) {
+          maxScore -= points[i];
+       } else if (!positive && points[i] < 0 &&
+        formButtonType === this.options.inputTypeSelectors['choose-1']) {
+          maxScore = -points[i] > maxScore ? -points[i] : maxScore;
       } else {
         this.pushError('Mixed signs for criteria scores for rubric ' +
           rubric.stemText);
@@ -991,7 +1001,8 @@ var Parser = module.exports = function(loggerInstance){
 
     rubric.criteria       = criteria;
     rubric.maxScore       = maxScore;
-    rubric.formButtonType = this.getFormButtonType($rubric);
+    rubric.deductPoints   = !positive;
+    rubric.formButtonType = formButtonType;
     rubric.statTypes      = ['rubric-mcq']; // Setting specific stats for rubrics
     return rubric;
   }
@@ -26439,7 +26450,9 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./lib/Promise":28,"./lib/decorators/array":31,"./lib/decorators/flow":32,"./lib/decorators/inspect":33,"./lib/decorators/iterate":34,"./lib/decorators/progress":35,"./lib/decorators/timed":36,"./lib/decorators/with":37}],"qzqC+2":[function(require,module,exports){
+},{"./lib/Promise":28,"./lib/decorators/array":31,"./lib/decorators/flow":32,"./lib/decorators/inspect":33,"./lib/decorators/iterate":34,"./lib/decorators/progress":35,"./lib/decorators/timed":36,"./lib/decorators/with":37}],"asq":[function(require,module,exports){
+module.exports=require('qzqC+2');
+},{}],"qzqC+2":[function(require,module,exports){
 /** @module previewer/asq.js
     @description Previewer for ASQ microformat
 */
@@ -26474,7 +26487,7 @@ function start($el, userType, cb) {
     var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
     handleSubmit(exercises);
     $('body').append('<div id="impress"></div>');
-    $('#impress').html($('.step, .asq-rubric-expanded-container'));
+    $('#impress').html($('.step, .asq-slide-expanded-container'));
     if (typeof cb !== 'undefined' && typeof cb === 'function') {
       cb.call(this, null, out)
     }
@@ -26597,7 +26610,7 @@ function generatesampleData(mode) {
 
 function handleSubmit(exercises) {
   // Inject empty modal for rubrics
-  $('<div id="asq-rubric-expanded-container"><button id="asq-rubric-reduce"><i class="glyphicon glyphicon-remove"></i></button><div id="asq-rubric-expanded"></div></div>')
+  $('<div id="asq-slide-expanded-container"><button id="asq-slide-reduce"><i class="glyphicon glyphicon-remove"></i></button><div id="asq-slide-expanded"></div></div>')
     .appendTo($('body')).hide(); // Modal for expanded rubrics
 
   // Handler for question submit button
@@ -26621,6 +26634,7 @@ function handleSubmit(exercises) {
       for(i = 0, len = exercises.length; i < len; i++) {
         if ($exercise.attr('id') === exercises[i].htmlId) {
           exercises[i]._id = exercises[i].htmlId;
+          exercises[i].type = 'peer';
           selected.push(exercises[i]);
         }
       }
@@ -26647,19 +26661,12 @@ function handleSubmit(exercises) {
         function onRender(err, out) {
           if (err) { console.error(err); }
           else {
-            out = '<button class="asq-rubric-expand"><i class="glyphicon glyphicon-fullscreen"></i></button>' + out;
-            $(window).on('resize', function displayExpandBtn() {
-              console.log('resize');
-              var $btn = $('.step.present').find('.asq-rubric-expand');
-              if ($btn.length === 0) { return; }
-              $btn.css('top',(-$btn.offset().top) + 'px');
-            })
+            out = '<button class="asq-slide-expand"><i class="glyphicon glyphicon-fullscreen"></i></button>' + out;
             $(out).insertAfter($exercise).hide().fadeIn(600, function() {
               $(this).find('.asq-flex-handle').drags();
               console.log('should not be called twice')
-              var $btn = $('.step.present').find('.asq-rubric-expand');
+              var $btn = $('.step.present').find('.asq-slide-expand');
               if ($btn.length === 0) { return; }
-              $btn.css('top', '400px');
             });
           }
       });
@@ -26670,29 +26677,29 @@ function handleSubmit(exercises) {
   // Expand rubric logic
   var restoreId = null;
   // Expand handler
-  $(document).on('click', '.asq-rubric-expand', function expandRubric(evt) {
+  $(document).on('click', '.asq-slide-expand', function expandRubric(evt) {
     var $slide = $(evt.target).parent().siblings('.asq-assessment-container');
 
     // Restore existing content to slide from modal.
     if (restoreId) {
-      $('#' + restoreId).append($('#asq-rubric-expanded').html($slide));
+      $('#' + restoreId).append($('#asq-slide-expanded').html($slide));
     }
 
     // Set content of modal from slide and dispaly modal
     restoreId = $slide.closest('.step').attr('id');
-    $('#asq-rubric-expanded').html($slide);
-    $('#asq-rubric-expanded-container').fadeIn(600);
+    $('#asq-slide-expanded').html($slide);
+    $('#asq-slide-expanded-container').fadeIn(600);
   });
 
   // Reduce rubric handler
-  $(document).on('click', '#asq-rubric-reduce', function reduceRubric(evt) {
+  $(document).on('click', '#asq-slide-reduce', function reduceRubric(evt) {
     if (restoreId) { // Restore existing content to slide from modal.
-      $('#' + restoreId).append($('#asq-rubric-expanded').html());
+      $('#' + restoreId).append($('#asq-slide-expanded').html());
     }
     // Empty modal, reset restore id and hide modal..
-    $('#asq-rubric-expanded').html('');
+    $('#asq-slide-expanded').html('');
     restoreId = null;
-    $('#asq-rubric-expanded-container').fadeOut(600);
+    $('#asq-slide-expanded-container').fadeOut(600);
   });
 
   // Handler for rubric submit logic
@@ -26767,6 +26774,36 @@ function handleSubmit(exercises) {
 // Add interaction for modal
 // (This is done automatically in Asq with the help of sockets.)
 function handleRubrics(data) {
+  // Rubrics listeners
+  $(document).change('.asq-rubric-elem input', function udpateRubricScores(e) {
+    var $panel =  $(e.target).closest('.panel')
+    var maxScore = parseInt($panel.attr('data-asq-maxScore'));
+    var val = 0;
+    if ($(e.target).attr('type') === 'radio') {
+      val = parseInt(e.target.value);
+    } else if ($(e.target).attr('type') === 'checkbox') {
+      console.log('checkbox score')
+      $(e.target).closest('.asq-rubric-list')
+      .find('.asq-rubric-elem > input[type=checkbox]:checked').each(function getRubricScore() {
+        val += parseInt(this.value);
+      });
+    }
+    console.log('val', val);
+    var deduct = $panel.attr('data-asq-deduct-points');
+    val = deduct ? maxScore + val : val;
+    $panel.attr('data-asq-score', val);
+    $panel.find('span.label.asq-rubric-grade').html(val + '/' + maxScore);
+    var totalScore = 0;
+    var totalMaxScore = 0;
+    var $group = $panel.closest('.panel-group');
+    $group.children('.panel').each( function getAllRubricScores() {
+      totalScore += parseInt($(this).attr('data-asq-score'));
+      totalMaxScore += parseInt($(this).attr('data-asq-maxScore'));
+    });
+    $group.siblings('.pull-right').find('.asq-rubrics-grade').html(totalScore + '/' + totalMaxScore);
+
+
+  });
   var exercises = data.exercises;
   var rubrics   = data.rubrics;
   var i = exercises.length;
@@ -26848,9 +26885,7 @@ function handleRubrics(data) {
 module.exports = {
   init: init
 };
-},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"dustjs-helpers":20,"dustjs-linkedin":24,"lodash":26,"when":45,"when/monitor/console":43}],"asq":[function(require,module,exports){
-module.exports=require('qzqC+2');
-},{}],"dust":[function(require,module,exports){
+},{"../lib/assessment":2,"../lib/markupGenerator":3,"../lib/parser":4,"dustjs-helpers":20,"dustjs-linkedin":24,"lodash":26,"when":45,"when/monitor/console":43}],"dust":[function(require,module,exports){
 module.exports=require('RzcaG4');
 },{}],"RzcaG4":[function(require,module,exports){
 (function (process){

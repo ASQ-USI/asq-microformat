@@ -57,7 +57,7 @@
   animation: spin 2s infinite linear;
 }
 lesshat-selector {
-  -lh-property: 0; } 
+  -lh-property: 0; }
 @-webkit-keyframes spin{ 0%{-webkit-transform: rotate(0deg)} 100%{ -webkit-transform: rotate(359deg) }}
 @-moz-keyframes spin{ 0%{-moz-transform: rotate(0deg)} 100%{ -moz-transform: rotate(359deg) }}
 @-o-keyframes spin{ 0%{-o-transform: rotate(0deg)} 100%{ -o-transform: rotate(359deg) }}
@@ -85,11 +85,16 @@ lesshat-selector {
   pointer-events: auto;
 }
 #asq-slide-expanded {
-  margin: 5%;
-  /* min-height: 80%; */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   background: #ffffff;
   border: 4px solid #3a3a3a;
-  border-top-width: 0px;
   max-height: 90%;
   width: 90%;
   display: block;
@@ -109,7 +114,6 @@ lesshat-selector {
 .asq-assessment-container {
   display: table;
   width: 100%;
-  height: 100%;
 }
 .asq-assessment-outer {
   display: table-row;
@@ -122,14 +126,45 @@ lesshat-selector {
 .asq-assessment-inner {
   display: block;
   /*   max-height: 500px;*/
+  display: -webkit-box;
+  display: -moz-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-direction: normal;
+  -moz-box-direction: normal;
+  -webkit-box-orient: vertical;
+  -moz-box-orient: vertical;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-flex-grow: 2;
+  flex-grow: 2;
+}
+.asq-assessment-inner > .asq-flex-box {
+  border: 0;
+  border-top: 2px solid #3a3a3a;
+  border-bottom: 2px solid #3a3a3a;
 }
 .asq-assessment-inner > .asq-flex-box:last-of-type {
-  border: 0px 2px solid #3a3a3a 2px solid #3a3a3a;
+  border-top-width: 0px;
+  border-bottom-width: 0px;
+  -webkit-box-pack: end;
+  -moz-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
 }
-.asq-assessment-inner > .asq-flex-box:first-of-type {
-  border-top: 4px solid #3a3a3a;
+.asq-assessment-inner > .asq-flex-box:last-of-type > .pull-right {
+  margin: 0.4em;
+  width: 22%;
 }
 .asq-flex-box {
+  -webkit-box-flex: 0;
+  -moz-box-flex: 0;
+  -webkit-flex: 0.5;
+  -ms-flex: 0.5;
+  flex: 0.5;
   display: -webkit-box;
   display: -moz-box;
   display: -webkit-flex;
@@ -137,10 +172,8 @@ lesshat-selector {
   display: flex;
   width: 100%;
   margin: 0;
-  /*background: rgba(255, 255, 255, 1);*/
   height: 100%;
-  max-height: 500px;
-  /* TODO FIX This! */
+  max-height: 33%;
 }
 .asq-flex-box .asq-flex-col {
   -webkit-box-flex: 0;
@@ -149,14 +182,12 @@ lesshat-selector {
   -ms-flex: 0.5;
   flex: 0.5;
   padding: 12px;
-  max-height: 550px;
-  /*TODO: Fix px height */
-  overflow-y: scroll;
-  overflow-x: hide;
+  max-height: 33%;
+  overflow-x: hidden;
 }
 .asq-flex-box .asq-flex-handle {
-  width: 5px;
-  background: #3a3a3a;
+  width: 2px;
+  background: #505050;
   text-align: center;
   color: white;
   transition: all ease-in 0.1s;

@@ -85,11 +85,12 @@
   pointer-events: auto;
 }
 #asq-slide-expanded {
-  margin: 5%;
-  /* min-height: 80%; */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  .transform(translate(-50%, -50%)); // Yeah, that's right!
   background: rgba(255, 255, 255, 1);
   border: 4px solid rgba(58, 58, 58, 1);
-  border-top-width: 0px;
   max-height: 90%;
   width: 90%;
   display: block;
@@ -111,7 +112,6 @@
 .asq-assessment-container {
   display: table;
   width: 100%;
-  height: 100%;
 }
 
 .asq-assessment-outer {
@@ -127,36 +127,44 @@
 .asq-assessment-inner {
   display: block;
 /*   max-height: 500px;*/
+  .display(flex);
+  .flex-direction(column);
+  .flex-grow(2);
 
   > .asq-flex-box{
+    border: 0;
+    border-top: 2px solid rgba(58, 58, 58, 1);
+    border-bottom: 2px solid rgba(58, 58, 58, 1);
     &:last-of-type {
-      border: 0px 2px solid rgba(58, 58, 58, 1) 2px solid rgba(58, 58, 58, 1);
-    }
-    &:first-of-type {
-      border-top: 4px solid rgba(58, 58, 58, 1);
+      border-top-width: 0px;
+      border-bottom-width: 0px;
+      .justify-content(flex-end);
+      > .pull-right {
+        margin: 0.4em;
+        width: 22%;
+      }
     }
   }
 }
 
 .asq-flex-box {
+  .flex(0.5);
   .display(flex);
   width: 100%;
   margin: 0;
-  /*background: rgba(255, 255, 255, 1);*/
   height: 100%;
-  max-height: 500px; /* TODO FIX This! */
+  max-height: 33%;
 
   .asq-flex-col {
     .flex(0.5);
     padding: 12px;
-    max-height: 550px;       /*TODO: Fix px height */
-    overflow-y: scroll;
-    overflow-x: hide;
+    max-height: 33%;
+    overflow-x: hidden;
   }
 
   .asq-flex-handle {
-    width: 5px;
-    background: rgba(58, 58, 58, 1);
+    width: 2px;
+    background: rgba(80, 80, 80, 1);
     text-align: center;
     color: white;
     transition: all ease-in 0.1s;

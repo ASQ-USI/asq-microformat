@@ -1,6 +1,6 @@
 <div class="panel-group">
   {#rubrics question=question}
-    <div class="panel panel-default" data-asq-rubric="{_id}">
+    <div class="panel panel-default" data-asq-rubric="{_id}" data-asq-score="0" data-asq-maxScore="{maxScore}" data-asq-deduct-points="{deductPoints}"">
     {>"rubric-{questionType}-viewer"/}
     </div>
   {/rubrics}

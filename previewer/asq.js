@@ -32,7 +32,7 @@ function start($el, userType, cb) {
     var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
     handleSubmit(exercises);
     $('body').append('<div id="impress"></div>');
-    $('#impress').html($('.step, .asq-rubric-expanded-container'));
+    $('#impress').html($('.step, .asq-slide-expanded-container'));
     if (typeof cb !== 'undefined' && typeof cb === 'function') {
       cb.call(this, null, out)
     }
@@ -155,7 +155,7 @@ function generatesampleData(mode) {
 
 function handleSubmit(exercises) {
   // Inject empty modal for rubrics
-  $('<div id="asq-rubric-expanded-container"><button id="asq-rubric-reduce"><i class="glyphicon glyphicon-remove"></i></button><div id="asq-rubric-expanded"></div></div>')
+  $('<div id="asq-slide-expanded-container"><button id="asq-slide-reduce"><i class="glyphicon glyphicon-remove"></i></button><div id="asq-slide-expanded"></div></div>')
     .appendTo($('body')).hide(); // Modal for expanded rubrics
 
   // Handler for question submit button
@@ -179,6 +179,7 @@ function handleSubmit(exercises) {
       for(i = 0, len = exercises.length; i < len; i++) {
         if ($exercise.attr('id') === exercises[i].htmlId) {
           exercises[i]._id = exercises[i].htmlId;
+          exercises[i].type = 'peer';
           selected.push(exercises[i]);
         }
       }
@@ -205,19 +206,12 @@ function handleSubmit(exercises) {
         function onRender(err, out) {
           if (err) { console.error(err); }
           else {
-            out = '<button class="asq-rubric-expand"><i class="glyphicon glyphicon-fullscreen"></i></button>' + out;
-            $(window).on('resize', function displayExpandBtn() {
-              console.log('resize');
-              var $btn = $('.step.present').find('.asq-rubric-expand');
-              if ($btn.length === 0) { return; }
-              $btn.css('top',(-$btn.offset().top) + 'px');
-            })
+            out = '<button class="asq-slide-expand"><i class="glyphicon glyphicon-fullscreen"></i></button>' + out;
             $(out).insertAfter($exercise).hide().fadeIn(600, function() {
               $(this).find('.asq-flex-handle').drags();
               console.log('should not be called twice')
-              var $btn = $('.step.present').find('.asq-rubric-expand');
+              var $btn = $('.step.present').find('.asq-slide-expand');
               if ($btn.length === 0) { return; }
-              $btn.css('top', '400px');
             });
           }
       });
@@ -228,29 +222,29 @@ function handleSubmit(exercises) {
   // Expand rubric logic
   var restoreId = null;
   // Expand handler
-  $(document).on('click', '.asq-rubric-expand', function expandRubric(evt) {
+  $(document).on('click', '.asq-slide-expand', function expandRubric(evt) {
     var $slide = $(evt.target).parent().siblings('.asq-assessment-container');
 
     // Restore existing content to slide from modal.
     if (restoreId) {
-      $('#' + restoreId).append($('#asq-rubric-expanded').html($slide));
+      $('#' + restoreId).append($('#asq-slide-expanded').html($slide));
     }
 
     // Set content of modal from slide and dispaly modal
     restoreId = $slide.closest('.step').attr('id');
-    $('#asq-rubric-expanded').html($slide);
-    $('#asq-rubric-expanded-container').fadeIn(600);
+    $('#asq-slide-expanded').html($slide);
+    $('#asq-slide-expanded-container').fadeIn(600);
   });
 
   // Reduce rubric handler
-  $(document).on('click', '#asq-rubric-reduce', function reduceRubric(evt) {
+  $(document).on('click', '#asq-slide-reduce', function reduceRubric(evt) {
     if (restoreId) { // Restore existing content to slide from modal.
-      $('#' + restoreId).append($('#asq-rubric-expanded').html());
+      $('#' + restoreId).append($('#asq-slide-expanded').html());
     }
     // Empty modal, reset restore id and hide modal..
-    $('#asq-rubric-expanded').html('');
+    $('#asq-slide-expanded').html('');
     restoreId = null;
-    $('#asq-rubric-expanded-container').fadeOut(600);
+    $('#asq-slide-expanded-container').fadeOut(600);
   });
 
   // Handler for rubric submit logic
@@ -325,6 +319,36 @@ function handleSubmit(exercises) {
 // Add interaction for modal
 // (This is done automatically in Asq with the help of sockets.)
 function handleRubrics(data) {
+  // Rubrics listeners
+  $(document).change('.asq-rubric-elem input', function udpateRubricScores(e) {
+    var $panel =  $(e.target).closest('.panel')
+    var maxScore = parseInt($panel.attr('data-asq-maxScore'));
+    var val = 0;
+    if ($(e.target).attr('type') === 'radio') {
+      val = parseInt(e.target.value);
+    } else if ($(e.target).attr('type') === 'checkbox') {
+      console.log('checkbox score')
+      $(e.target).closest('.asq-rubric-list')
+      .find('.asq-rubric-elem > input[type=checkbox]:checked').each(function getRubricScore() {
+        val += parseInt(this.value);
+      });
+    }
+    console.log('val', val);
+    var deduct = $panel.attr('data-asq-deduct-points');
+    val = deduct ? maxScore + val : val;
+    $panel.attr('data-asq-score', val);
+    $panel.find('span.label.asq-rubric-grade').html(val + '/' + maxScore);
+    var totalScore = 0;
+    var totalMaxScore = 0;
+    var $group = $panel.closest('.panel-group');
+    $group.children('.panel').each( function getAllRubricScores() {
+      totalScore += parseInt($(this).attr('data-asq-score'));
+      totalMaxScore += parseInt($(this).attr('data-asq-maxScore'));
+    });
+    $group.siblings('.pull-right').find('.asq-rubrics-grade').html(totalScore + '/' + totalMaxScore);
+
+
+  });
   var exercises = data.exercises;
   var rubrics   = data.rubrics;
   var i = exercises.length;

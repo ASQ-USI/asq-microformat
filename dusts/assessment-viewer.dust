@@ -1,10 +1,14 @@
  {! Assessment for an exercise which made of an answer and rubrics. !}
 <div class="asq-assessment-container">
+<h1>
+  {@eq key=exercises[0].type value="self"}Self Assessment{/eq}
+  {@eq key=exercises[0].type value="peer"}Peer Assessment{/eq}
+</h1>
 {#exercises}
   <div class="asq-assessment-outer">
     <div class="asq-assessment">
       <form class="asq-assessment-inner" data-asq-exercise="{_id}" data-asq-assessee="{assessee}">
-        {#questions}
+        {#questions exercise=_id}
         <div class="asq-flex-box" data-question="{_id}">
           <div class="asq-flex-col asq-question-preview">
             {>"question-viewer"/} {! Select question template according to question type !}
@@ -12,13 +16,18 @@
           <div class="asq-flex-handle"></div>
           <div class="asq-flex-col asq-rubric" data-asq-target-question="{_id}">
             {>rubric-viewer question=_id/}
+            <span class="pull-right">
+              <span>Grade: <span class="label label-default asq-rubrics-grade">0</span> </span>
+              <span class="asq-confidence-label">Confidence:</span> {>rating rated="-for-rubric-{_id}-{exercise}" val="7"/}
+            </span>
           </div>
         </div>
         {/questions}
-        <p class="text-right">
-          <span class="asq-confidence-label">Confidence:</span> {>rating rated=_id val="7"/}
-          <button type="submit" class="btn btn-success">Submit</button>
-        </p>
+        <div class="asq-flex-box">
+          <span class="pull-right ">
+            <button type="submit" class="btn btn-block btn-success">Submit</button>
+          </span>
+        </div>
       </form>
     </div>
   </div>
