@@ -30,11 +30,15 @@
   padding-left: 60px;
 }
 /*------------ Submit answers ------------*/
-.asq-submit-wait,
-.asq-submit-success {
+.asq-submit-label {
   position: fixed;
   top: 50%;
-  left: 0%;
+  left: 50%;
+  -webkit-transform: translate(-50%, -50%);
+  -moz-transform: translate(-50%, -50%);
+  -o-transform: translate(-50%, -50%);
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
   text-align: center;
   width: 100%;
   z-index: 998;
@@ -57,7 +61,7 @@
   animation: spin 2s infinite linear;
 }
 lesshat-selector {
-  -lh-property: 0; }
+  -lh-property: 0; } 
 @-webkit-keyframes spin{ 0%{-webkit-transform: rotate(0deg)} 100%{ -webkit-transform: rotate(359deg) }}
 @-moz-keyframes spin{ 0%{-moz-transform: rotate(0deg)} 100%{ -moz-transform: rotate(359deg) }}
 @-o-keyframes spin{ 0%{-o-transform: rotate(0deg)} 100%{ -o-transform: rotate(359deg) }}

@@ -346,8 +346,6 @@ function handleRubrics(data) {
       totalMaxScore += parseInt($(this).attr('data-asq-maxScore'));
     });
     $group.siblings('.pull-right').find('.asq-rubrics-grade').html(totalScore + '/' + totalMaxScore);
-
-
   });
   var exercises = data.exercises;
   var rubrics   = data.rubrics;

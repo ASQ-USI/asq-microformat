@@ -9,12 +9,12 @@
     <div class="asq-assessment">
       <form class="asq-assessment-inner" data-asq-exercise="{_id}" data-asq-assessee="{assessee}">
         {#questions exercise=_id}
-        <div class="asq-flex-box" data-question="{_id}">
-          <div class="asq-flex-col asq-question-preview">
+        <div class="asq-flex-box">
+          <div class="asq-flex-col asq-question-preview" data-asq-question="{_id}" data-asq-answer="{answer}">
             {>"question-viewer"/} {! Select question template according to question type !}
           </div>
           <div class="asq-flex-handle"></div>
-          <div class="asq-flex-col asq-rubric" data-asq-target-question="{_id}">
+          <div class="asq-flex-col asq-rubric" data-asq-target-question="{_id}" data-asq-target-answer="{answer}">
             {>rubric-viewer question=_id/}
             <span class="pull-right">
               <span>Grade: <span class="label label-default asq-rubrics-grade">0</span> </span>

@@ -37,10 +37,11 @@
 }
 
 /*------------ Submit answers ------------*/
-.asq-submit-wait, .asq-submit-success {
-  position: fixed;
+.asq-submit-label {
+    position: fixed;
   top: 50%;
-  left: 0%;
+  left: 50%;
+  .transform(translate(-50%, -50%)); // Yeah, that's right!
   text-align: center;
   width: 100%;
   z-index: 998;
