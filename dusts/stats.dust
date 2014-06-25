@@ -2,7 +2,7 @@
 <ul class="nav nav-tabs">
 
   {?activePanes.correct}
-  <li>
+  <li class="active">
     <a href="#answersolutions-{statId}"  data-toggle="tab">Correct Answer</a>
   </li>
   {/activePanes.correct}
@@ -27,7 +27,7 @@
   {?activePanes.correctness}
   <li>
     <a href="#asq-viz-tab-{statId}" data-toggle="tab">Correctness</a>
-  </li class="active">
+  </li>
   {/activePanes.correctness}
 </ul>
 
