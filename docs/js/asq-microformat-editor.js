@@ -484,23 +484,41 @@ function initCodeEditors(){
 }
 
 function initAssessmentGrids(eventBus){
+  var grids = Object.create(null);
   $('.asq-assess-grid-holder').each(function(){
-     var assessGridWdgt = new AssessmentGridWidget(this, {gradeStyle: "led"});
-     eventBus.on('asq:folo-connected', function(e){
-      assessGridWdgt.addUser(e.user);
-     });
-     eventBus.on('asq:folo-disconnected', function(e){
-      assessGridWdgt.removeUser(e.user);
-     })
-     eventBus.on('asq:new-assessment-job', function(e){
-      assessGridWdgt.setToNowAssessing(e.assessor.token, e.assessee.token);
-     })
-     eventBus.on('asq:idle-assessment-job', function(e){
-      assessGridWdgt.setToIde(e.assessor.token, e.assessee.token);
-     })
-     eventBus.on('asq:assessment', function(e){
-      assessGridWdgt.setGrade(e.assessor.token, e.assessee.token, e.grade);
-     })
+     var exercideId =  $(this).closest('.asq-exercise').dataset.asqExerciseId;
+     if("undefined" === typeof exercideId || exercideId === null) return;
+     grids[exercideId] = new AssessmentGridWidget(this, {gradeStyle: "led"});
+  });
+
+  eventBus.on('asq:folo-connected', function(e){
+    for (var key in grids){
+      grids[key].addUser(e.user);
+    }
+  });
+
+  eventBus.on('asq:folo-disconnected', function(e){
+    for (var key in grids){
+      grids[key].removeUser(e.user);
+    }
+  });
+
+  eventBus.on('asq:new-assessment-job', function(e){
+    if(grids[e.exerciseId]) {
+      grids[e.exerciseId].setToNowAssessing(e.assessor.token, e.assessee.token);
+    }
+  });
+
+  eventBus.on('asq:idle-assessment-job', function(e){
+    if(grids[e.exerciseId]) {
+      grids[e.exerciseId].setToIde(e.assessor.token, e.assessee.token);
+    }
+  });
+
+  eventBus.on('asq:assessment', function(e){
+    if(grids[e.exerciseId]) {
+      grids[e.exerciseId].setGrade(e.assessor.token, e.assessee.token, e.grade);
+    }
   });
 }
 
