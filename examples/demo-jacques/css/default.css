@@ -553,3 +553,8 @@ body.preview #copyright {display: none;}
  background-image: url("logo-info-en.gif");
  background-repeat: no-repeat;
 } */
+
+/* ASQ related stuff */
+.asq-assess-grid{
+  margin: 0 auto;
+}

@@ -1,6 +1,6 @@
 <form action="">
 {! Autoescaping is off, only use fully trusted content !}
   {exerciseContent|s}
-  {>progress-bar/}
   {>assessment-grid/}
+  {>progress-bar/}
 </form>

@@ -6,13 +6,16 @@
 
 
 require('when/monitor/console');
-var dust          = require('dustjs-linkedin')
-, when            = require('when')
-, Parser          = require('../lib/parser')
-, logger          = console
-, MarkupGenerator = require('../lib/markupGenerator')
-, assessment      = require('../lib/assessment')
-, _               = require('lodash');
+var dust              = require('dustjs-linkedin')
+  , when              = require('when')
+  , Parser            = require('../lib/parser')
+  , logger            = console
+  , MarkupGenerator   = require('../lib/markupGenerator')
+  , microformatClient = require('../lib/client')
+  , _                 = require('lodash')
+  , impressUtils      = require('../lib/impressUtils')
+  , EventEmitter2     = require('eventemitter2').EventEmitter2
+  , eventBus          = new EventEmitter2({delimiter: ':'})
 
 require('dustjs-helpers');
 
@@ -20,15 +23,17 @@ function start($el, userType, cb) {
   //parse
   var asqParser = new Parser();
   var parsedData = asqParser.parse($el[0].outerHTML)
-  parsedData = fakeDatabaseIds(parsedData);
   //render
   var asqRenderer = new MarkupGenerator()
   asqRenderer.render(parsedData.html, parsedData.exercises, parsedData.rubrics,
     { userType: userType, mode: 'preview' }).then(
   function(out) {
     $el[0].outerHTML = out;
-    assessment.initCodeEditors();
+
+    //setup components
+    microformatClient.setupMicroformatComponents(eventBus);
     generatesampleData(userType);
+    impressUtils.makeAssessmentGridsTogglable();
     var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
     handleSubmit(exercises);
     $('body').append('<div id="impress"></div>');
@@ -103,6 +108,40 @@ function fakeDatabaseIds(data) {
 
 function generatesampleData(mode) {
   if ('presenter' === mode) {
+
+    //assess grid users
+    var users = [
+      { nickname: "Vassilis", token:"a"},
+      { nickname: "Cesare", token:"b"},
+      { nickname: "Jacques", token:"c"},
+      { nickname: "Max", token:"d"},
+      { nickname: "Janina", token:"e"},
+      { nickname: "Masiar", token:"f"}
+    ]
+
+    users.forEach(function(user){
+      eventBus.emit('asq:folo-connected', {user: user});
+    });
+
+    function gradeAll(i, j){
+      var event = {
+        assessor: users[i],
+        assessee: users[j],
+        grade: ~~(100 * Math.random())
+      };
+
+      eventBus.emit('asq:assessment', event);
+      if(++j >= users.length){
+        j=0;
+        if( ++ i >= users.length){
+          return;
+        }
+      }
+      setTimeout(gradeAll, 350, i, j);
+    }
+
+    gradeAll(0,0);
+
     // Progress bar for presenter
     $('.asq-exercise').each(function() {
       var $info = $(this).find('.asq-progress-info');

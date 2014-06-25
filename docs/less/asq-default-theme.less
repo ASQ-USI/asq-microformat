@@ -292,3 +292,183 @@
     margin-top: .5em;
   }
 }
+
+/*------------ assessment grid ------------*/
+//variables
+@blue: #45A8FD; 
+@blue-dark:  darken(@blue, 10%);
+@blue-light: lighten(@blue, 10%);
+
+@green: #5cb85c;
+@red: #da3b36;
+
+@table-highlight-color: fade(lighten(@blue, 20%), 60%);
+
+@btn-size:12px;
+
+@keyframes new-row-or-col {
+  0% {
+    background-color: fade(@green, 0%);
+  }
+
+  100% {
+    background-color: fade(@green, 85%);
+  }
+}
+
+@keyframes to-be-removed-row-or-col {
+  0% {
+    background-color: fade(@red, 0%);
+  }
+
+  100% {
+    background-color: fade(@red, 85%);
+  }
+}
+
+@keyframes shadow-blue {
+  0% {
+    background-color: fade(@blue-dark, 20%);
+    box-shadow: none;
+  }
+
+  100% {
+    background-color: fade(@blue-light, 90%);
+    box-shadow: inset 0 -1px 9px #2E4383, 0 2px 10px #285FD5;
+  }
+}
+.asq-led {
+  display: inline-block;
+  background-color: rgba(64, 64, 64, 0.851);
+  padding: floor(@btn-size/7);
+  margin: 0;
+  border-radius: @btn-size;
+  box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.7), 1px 1px 1px rgba(255, 255, 255, 0.1);
+   
+  &:before {
+    content: "";
+    width: @btn-size;
+    height:  @btn-size;
+    display: block;
+    border-radius:  @btn-size;
+  }
+  
+  &.asq-led-blue:before{
+     background-color: @blue;
+  }
+  
+  &.asq-led-blue.init:before,  &.asq-led-blue.active:before {
+    background-color:  fade(@blue-dark, 20%);
+  }
+  
+  &.asq-led-blue.active:before {
+    animation: shadow-blue 1s ease-in-out infinite alternate;
+  }
+}
+
+.asq-assess-grid{
+  table-layout:fixed;
+  white-space: nowrap;
+  font-size: 0.625em;
+  border: 1px dotted grey;
+  
+  .hilite { background: @table-highlight-color; }
+  
+  .new-row { 
+    animation: new-row-or-col 1s ease-in-out infinite alternate;
+  }
+  
+  .new-col { 
+    animation: new-row-or-col 1s ease-in-out infinite alternate;
+  }
+  
+  .to-be-removed-row { 
+    animation: to-be-removed-row-or-col 1s ease-in-out infinite alternate;
+  }
+  
+  .to-be-removed-col { 
+    animation: to-be-removed-row-or-col 1s ease-in-out infinite alternate;
+  }
+  
+  .verticalText {
+    text-align: center;
+    vertical-align: middle;
+    width: 29px;
+    margin: 0px;
+    padding: 0px;
+    white-space: nowrap;
+    -webkit-transform: rotate(-90deg);
+    -moz-transform: rotate(-90deg);
+   }
+
+  > thead{
+    > tr{
+      background: #eaeaea;
+      > th{
+        overflow:hidden;
+        height: 100px;
+        padding: 0 0 8px 0;
+        text-align: center;
+        vertical-align: bottom;
+        border: 1px dotted grey;
+        
+        &:first-child{
+          color: white;
+          padding: 2px 4px;
+          position: relative;
+          >.verticalText{
+            position: absolute;
+            top: 50px;
+            right: 0px;
+            width: 20px;
+          }
+        }
+        
+        &.th-label{
+        }
+        
+        &.asq-diagonal-cell{
+          background: #999;
+        }
+      } 
+    } 
+  }
+  tbody{
+    > tr{
+   
+      &:hover{
+        background: @table-highlight-color;
+        > td:first-child{
+          background:  @table-highlight-color;
+        }
+      } 
+      
+      > td{
+        overflow:hidden;
+        text-align: center;
+        vertical-align: middle;
+        border: 1px dotted grey;
+        height:30px;
+        line-height:0;
+        
+      &:first-child{
+        line-height:1;
+        background: #eaeaea;
+      }
+
+        &.asq-diagonal-cell{
+          background: #999;
+        }
+      } 
+    } 
+  }
+}
+
+.generate-grade-colors(100);
+
+.generate-grade-colors(@n, @i: 0) when (@i =< @n) {
+  .asq-led-grade-@{i}:before {
+    background-color: rgb( ((100-@i) * (255/100)), (@i * (255/100)) , 0);
+  }
+  .generate-grade-colors(@n, (@i + 1));
+}

@@ -3,7 +3,7 @@
 */
 
 module.exports = {
-  assessment : require('./lib/assessment'),
+  client : require('./lib/client'),
   generator  : require('./lib/markupGenerator'),
   parser     : require('./lib/parser'),
   templates  : require('./dusts/compiled/templates')
