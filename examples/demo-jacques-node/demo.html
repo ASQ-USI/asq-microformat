@@ -30,7 +30,7 @@
   <div id="impress" data-transition-duration="500">
    <div id="title" class="step" data-x="0" data-y="0" data-scale="1" data-rotate="0">
     <div style="text-align:center;margin-top:15%;">
-    <h1><img style="width:32%;vertical-align:bottom;" src="img/ASQLogoBlack.png">Peer-Assessment</h1>
+    <h1><img style="width:32%;vertical-align:bottom;" src="img/ASQLogoBlack.png">Peer Assessment</h1>
     <hr style="width:80%;margin:0 auto;">
      <h2>Demo</h2>
      <p><strong>Student: </strong>Jacques Dafflon<br>
@@ -39,9 +39,9 @@
     </div>
     <article class="asq-welcome-screen"></article>
   </div>
-  <section id="s-110" class="step" data-x="1500" data-y="0">
+  <section id="question" class="step" data-x="1500" data-y="0">
     <section class="asq-exercise" id="ex-1" data-asq-assessment="self,peer">
-      <article id="q-110" class="asq-question multi-choice choose-0-n">
+      <article id="q1" class="asq-question multi-choice choose-0-n">
         <p class="stem"><strong>jQuery: </strong>Consider the following code and select correct statements:
         <small><code class="javascript">$('.foo.bar').append('Fizz', 'Buzz');</code></small></p>
         <ol class="asq-options">
@@ -50,10 +50,10 @@
           <li class="asq-option"><code>&#39;Buzz&#39;</code> will be appended to the last matched element and <code>&#39;Fizz&#39;</code> will be appended to the remaining matched elements</li>
           <li class="asq-option"><code>&#39;.foo.bar&#39;</code> will match all elements with the id <code>&#39;foo&#39;</code> or the id <code>&#39;bar&#39;</code>.</li>
           <li class="asq-option"><code>&#39;.foo.bar&#39;</code> will match all elements with the class <code>&#39;foo&#39;</code> or the class <code>&#39;bar&#39;</code> (or both).</li>
-          <li class="asq-option" data-correct="true"><code>&#39;.foo.bar&#39;</code> will match elements with both classes: <code>&#39;foo&#39;</code> and <code>&#39;bar&#39;</code>.</li>
+          <li class="asq-option" data-asq-correct="true"><code>&#39;.foo.bar&#39;</code> will match elements with both classes: <code>&#39;foo&#39;</code> and <code>&#39;bar&#39;</code>.</li>
         </ol>
       </article>
-      <div class="asq-rubric multi-choice choose-1" for="q-110">
+      <div class="asq-rubric multi-choice choose-1" for="q1">
         <p class="stem">jQuery .append()</p>
         <ol class="asq-options">
           <li class="asq-option" data-asq-rubric-label="Good" data-asq-rubric-points="0">
@@ -67,7 +67,7 @@
           </li>
         </ol>
       </div>
-      <div class="asq-rubric multi-choice choose-0-n" for="q-110">
+      <div class="asq-rubric multi-choice choose-0-n" for="q1">
         <p class="stem">jQuery Selector</p>
         <ol class="asq-options">
           <li class="asq-option" data-asq-rubric-points="0">
@@ -81,61 +81,10 @@
           </li>
         </ol>
       </div>
-      <!-- <article id="q-111" class="asq-question multi-choice choose-0-n">
-        <p class="stem"><strong>jQuery: </strong>Consider the following code and select correct statements:
-        <small><code class="javascript">$('.foo.bar').append('Fizz', 'Buzz');</code></small></p>
-        <ol class="asq-options">
-          <li class="asq-option"><code>&#39;Fizz&#39;</code> will be appended to the first matched element and <code>&#39;Buzz&#39;</code> will be appended to the remaining matched elements</li>
-          <li class="asq-option" data-asq-correct="true"><code>&#39;Fizz&#39;</code> and <code>&#39;Buzz&#39;</code> will be appended to all the matching elements</li>
-          <li class="asq-option"><code>&#39;Buzz&#39;</code> will be appended to the last matched element and <code>&#39;Fizz&#39;</code> will be appended to the remaining matched elements</li>
-          <li class="asq-option"><code>&#39;.foo.bar&#39;</code> will match all elements with the id <code>&#39;foo&#39;</code> or the id <code>&#39;bar&#39;</code>.</li>
-          <li class="asq-option"><code>&#39;.foo.bar&#39;</code> will match all elements with the class <code>&#39;foo&#39;</code> or the class <code>&#39;bar&#39;</code> (or both).</li>
-          <li class="asq-option" data-correct="true"><code>&#39;.foo.bar&#39;</code> will match elements with both classes: <code>&#39;foo&#39;</code> and <code>&#39;bar&#39;</code>.</li>
-        </ol>
-      </article>
-      <div class="asq-rubric multi-choice choose-1" data-asq-assessment="self,peer" for="q-111">
-        <p class="stem">Correctness</p>
-        <ol class="asq-options">
-         <li class="asq-option" data-asq-rubric-points="1" data-asq-rubric-label="Correct">The answer is correct</li>
-         <li class="asq-option" data-asq-rubric-points="0" data-asq-rubric-label="Incorrect">The answer is not correct</li>
-        </ol>
-      </div>
-      <div class="asq-rubric multi-choice choose-1" for="q-111">
-        <p class="stem">Second rubric</p>
-        <ol class="asq-options">
-         <li class="asq-option" data-asq-rubric-points="5" >The answer2 is correct</li>
-         <li class="asq-option" data-asq-rubric-points="3">The answer is not correct</li>
-        </ol>
-      </div>
-      <div class="asq-rubric multi-choice choose-1" for="q-111">
-        <p class="stem">Rubric the Third</p>
-        <ol class="asq-options">
-         <li class="asq-option" >The answer is correct</li>
-         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
-        </ol>
-      </div>
-      <div class="asq-rubric multi-choice choose-1" for="q-111">
-        <p class="stem">Rubric the Third</p>
-        <ol class="asq-options">
-         <li class="asq-option" >The answer is correct</li>
-         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
-        </ol>
-      </div>
-      <div class="asq-rubric multi-choice choose-1" for="q-111">
-        <p class="stem">Rubric the Third</p>
-        <ol class="asq-options">
-         <li class="asq-option" >The answer is correct</li>
-         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
-        </ol>
-      </div>
-      <div class="asq-rubric multi-choice choose-1" for="q-111">
-        <p class="stem">Rubric the Third</p>
-        <ol class="asq-options">
-         <li class="asq-option" >The answer is correct</li>
-         <li class="asq-option" data-asq-rubric-points="7">The answer is not correct</li>
-        </ol>
-      </div> -->
     </section>
+  </section>
+   <section class="step" id="stats" data-x="3000" data-y="0" data-scale="1.0" data-rotate="0">
+    <article class="asq-stats" data-target-asq-question="q1" id="stats-q1" data-width="800"></article>
   </section>
   <script src="js/impress.js"></script>
 <!-- <script src="js/console.js"></script> -->

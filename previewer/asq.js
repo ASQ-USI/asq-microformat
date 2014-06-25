@@ -123,7 +123,7 @@ function generatesampleData(mode) {
       eventBus.emit('asq:folo-connected', {user: user});
     });
 
-    function gradeAll(i, j){
+    var gradeAll = function(i, j){
       var event = {
         assessor: users[i],
         assessee: users[j],

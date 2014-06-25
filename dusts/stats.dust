@@ -2,23 +2,23 @@
 <ul class="nav nav-tabs">
 
   {?activePanes.correct}
-  <li class="active">
+  <li>
     <a href="#answersolutions-{statId}"  data-toggle="tab">Correct Answer</a>
   </li>
   {/activePanes.correct}
-  
+
   {?activePanes.right-vs-wrong}
   <li>
     <a href="#rvsw-{statId}" data-toggle="tab">Right vs. Wrong</a>
   </li>
   {/activePanes.right-vs-wrong}
-  
+
   {?activePanes.distinct-answers}
   <li>
     <a href="#mscstats-{statId}" data-toggle="tab">Distinct Answers</a>
   </li>
   {/activePanes.distinct-answers}
-  
+
   {?activePanes.distinct-options}
   <li>
     <a href="#diffAns-{statId}" data-toggle="tab">Distinct Options</a>
@@ -27,7 +27,7 @@
   {?activePanes.correctness}
   <li>
     <a href="#asq-viz-tab-{statId}" data-toggle="tab">Correctness</a>
-  </li>
+  </li class="active">
   {/activePanes.correctness}
 </ul>
 
@@ -36,22 +36,22 @@
   <!--  Displays correct solution -->
   {?activePanes.correct}
   <div class="tab-pane active" id='answersolutions-{statId}'>
-    
+
     {?question.correctAnswer}
     <p>
       Solution: {question.correctAnswer}
     </p>
     <br/>
     {:else}
-    	{>"questionList-stats"/}
+    	{>"question-multi-choice-stats"/}
     {/question.correctAnswer}
-    
+
   </div>
   {/activePanes.correct}
 
   <!-- Displays Pie-Chart Right vs. Wrong -->
   {?activePanes.right-vs-wrong}
-  
+
   <div class="tab-pane" id="rvsw-{statId}">
     <div id="rvswChart" class="rvswChart" style="width: 100%; height: 500px;"></div>
   </div>
@@ -73,7 +73,7 @@
   <!-- Display correctness  -->
   {?activePanes.correctness}
   <div class="tab-pane" id="asq-viz-tab-{statId}">
-    <div class="asq-viz-graph" data-width="{width}" data-height="{height}" data-margin="{margin|js}"></div>
+    <div class="asq-viz-graph" data-width="{width}" data-height="{height}" data-margin='{margin|s}'></div>
   </div>
   {/activePanes.correctness}
 </div>
