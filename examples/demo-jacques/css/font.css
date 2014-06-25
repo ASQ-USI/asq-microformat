@@ -1,0 +1,21 @@
+@font-face {
+  font-family: 'CMUSans';
+  font-style: normal;
+  font-weight: normal;
+  src: local('CMUSans'), url('../fonts/cmunssdc.woff');
+}
+
+@font-face {
+  font-family: 'AlteHassGrotesk';
+  font-style: normal;
+  font-weight: bold;
+  src: local('AlteHassGrotesk'), url('../fonts/AlteHassGroteskRegular.ttf');
+}
+
+
+@font-face {
+  font-family: 'AlteHassGrotesk';
+  font-style: normal;
+  font-weight: bold;
+  src: local('Delicious'), url('../fonts/AlteHassGroteskBold.ttf');
+}

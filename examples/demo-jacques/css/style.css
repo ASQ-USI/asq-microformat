@@ -1,0 +1,49 @@
+.step {
+  width: 1024px;
+  height: 768px;
+  font-size: 24pt;
+  font-family: 'AlteHaasGrotesk', 'Helvetica';
+}
+
+.asq-option {
+  vertical-align: middle;
+  margin-left: 45px;
+}
+
+.step .asq-option label {
+    font-size: 20pt;
+}
+
+.asq-option label {
+  font-weight: normal;
+
+  margin-left: 0px;
+  display: block;
+  /*vertical-align: middle;*/
+}
+
+.asq-option input {
+  vertical-align: bottom;
+  position: relative;
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.step .asq-option input {
+  top: 12px;
+}
+
+.step h1 {
+  font-size: 72pt;
+  font-family: 'CMUSans', 'Helvetica'
+}
+
+.step h2 {
+  font-size: 48pt;
+}
+
+
+strong{
+  font-weight: bold;
+}
