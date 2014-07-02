@@ -109,6 +109,7 @@ function injectHtmltoIframe(iframeEl, html){
 
   //append css
   var asqCss = $('#asq-theme-css-chk')[0].checked; 
+  var asqJs = $('#asq-theme-js-chk')[0].checked; 
   var btsrpCss = $('#bootstrap-css-chk')[0].checked; 
   var btsrpJs = $('#bootstrap-js-chk')[0].checked; 
 
@@ -116,24 +117,28 @@ function injectHtmltoIframe(iframeEl, html){
   if(!asqCss && !btsrpCss && !btsrpJs) return;
 
   var $head = $(iframeEl).contents().find("head"); 
-  var $body = $(iframeEl).contents().find("body");
-  if(asqCss){
-    $head.append($('<link/>', 
-    { rel: 'stylesheet', href: 'css/asq-default-theme.css', type: 'text/css' }));
-  }            
+  var $body = $(iframeEl).contents().find("body");         
   if(btsrpCss){
     $head.append($('<link/>', 
     { rel: 'stylesheet', href: 'css/bootstrap.min.css', type: 'text/css' }));
   }
   if(btsrpJs){
     $body.append($('<script></script>', 
-    { src: 'js/jquery.js', type: 'text/javascript' }));
+      { src: 'js/jquery.js', type: 'text/javascript' }));
     $body.append($('<script></script>', 
-    { src: 'js/bootstrap.min.js', type: 'text/javascript' }));
-    // var script = document.createElement('script');
-    // script.type = 'text/javascript';
-    // script.src = 'js/boostrap.min.js';
-    // $body.append(script);
+      { src: 'js/bootstrap.min.js', type: 'text/javascript' }));
+  }
+  if(asqCss){
+    $head.append($('<link/>', 
+      { rel: 'stylesheet', href: 'css/asq-default-theme.css', type: 'text/css' }));
+  }   
+  if(asqJs){
+    // if($body.find('script[src="js/jquery.js"]').length < 1){
+    //   $body.append($('<script></script>', 
+    //     { src: 'js/jquery.js', type: 'text/javascript' }));
+    // }
+    // $body.append($('<script></script>', 
+    //   { src: 'js/asq-microformat-editor-configure.js', type: 'text/javascript' }));
   }
  
 }

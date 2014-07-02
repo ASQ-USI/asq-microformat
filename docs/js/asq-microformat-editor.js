@@ -110,6 +110,7 @@ function injectHtmltoIframe(iframeEl, html){
 
   //append css
   var asqCss = $('#asq-theme-css-chk')[0].checked; 
+  var asqJs = $('#asq-theme-js-chk')[0].checked; 
   var btsrpCss = $('#bootstrap-css-chk')[0].checked; 
   var btsrpJs = $('#bootstrap-js-chk')[0].checked; 
 
@@ -117,24 +118,28 @@ function injectHtmltoIframe(iframeEl, html){
   if(!asqCss && !btsrpCss && !btsrpJs) return;
 
   var $head = $(iframeEl).contents().find("head"); 
-  var $body = $(iframeEl).contents().find("body");
-  if(asqCss){
-    $head.append($('<link/>', 
-    { rel: 'stylesheet', href: 'css/asq-default-theme.css', type: 'text/css' }));
-  }            
+  var $body = $(iframeEl).contents().find("body");         
   if(btsrpCss){
     $head.append($('<link/>', 
     { rel: 'stylesheet', href: 'css/bootstrap.min.css', type: 'text/css' }));
   }
   if(btsrpJs){
     $body.append($('<script></script>', 
-    { src: 'js/jquery.js', type: 'text/javascript' }));
+      { src: 'js/jquery.js', type: 'text/javascript' }));
     $body.append($('<script></script>', 
-    { src: 'js/bootstrap.min.js', type: 'text/javascript' }));
-    // var script = document.createElement('script');
-    // script.type = 'text/javascript';
-    // script.src = 'js/boostrap.min.js';
-    // $body.append(script);
+      { src: 'js/bootstrap.min.js', type: 'text/javascript' }));
+  }
+  if(asqCss){
+    $head.append($('<link/>', 
+      { rel: 'stylesheet', href: 'css/asq-default-theme.css', type: 'text/css' }));
+  }   
+  if(asqJs){
+    // if($body.find('script[src="js/jquery.js"]').length < 1){
+    //   $body.append($('<script></script>', 
+    //     { src: 'js/jquery.js', type: 'text/javascript' }));
+    // }
+    // $body.append($('<script></script>', 
+    //   { src: 'js/asq-microformat-editor-configure.js', type: 'text/javascript' }));
   }
  
 }
@@ -143,7 +148,7 @@ function injectHtmltoIframe(iframeEl, html){
 },{"../../../index":4,"../editor-question-templates":2,"brace":11,"brace/mode/html":12,"brace/theme/monokai":15,"ent":37,"js-beautify":40,"when":62}],2:[function(require,module,exports){
 
 module.exports = {
-  'multiple-choice' :'<article class="asq-question multi-choice choose-1" id="mc-1">\n\
+  'multiple-choice-radio' :'<article class="asq-question multi-choice choose-1" id="mc-1">\n\
   <h3 class="stem">Lugano is located in...</h3>\n\
   <ol class="asq-options">\n\
     <li class="asq-option" data-correct="true">\n\
@@ -157,6 +162,23 @@ module.exports = {
     </li>\n\
     <li class="asq-option">\n\
       Germany\n\
+     </li>\n\
+  </ol>\n\
+</article>',
+  'multiple-choice-checkbox' :'<article class="asq-question multi-choice choose-0-n" id="mc-1">\n\
+  <h3 class="stem">In Switzerland official languages include...</h3>\n\
+  <ol class="asq-options">\n\
+    <li class="asq-option" data-correct="true">\n\
+      German\n\
+    </li>\n\
+    <li class="asq-option" data-correct="true">\n\
+      French\n\
+    </li>\n\
+    <li class="asq-option">\n\
+      Portuguese\n\
+    </li>\n\
+    <li class="asq-option" data-correct="true">\n\
+      Italian\n\
      </li>\n\
   </ol>\n\
 </article>',
@@ -500,7 +522,7 @@ function configurureViewer (eventBus){
  
 
 //if we're not in a browser the rest have no meaning
-if('undefined' == typeof window) return
+// if('undefined' == typeof window) return
 var ace = require('brace');
 require('brace/mode/javascript');
 require('brace/theme/monokai');

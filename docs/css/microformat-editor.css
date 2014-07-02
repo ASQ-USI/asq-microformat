@@ -60,7 +60,7 @@ header h4 > span {
   padding: 0 10px;
 }
 #question-type-list {
-  width: 150px;
+  width: 200px;
 }
 #question-type-list a.active {
   background-color: #eb4c6b;

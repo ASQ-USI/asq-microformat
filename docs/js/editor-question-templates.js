@@ -1,6 +1,6 @@
 
 module.exports = {
-  'multiple-choice' :'<article class="asq-question multi-choice choose-1" id="mc-1">\n\
+  'multiple-choice-radio' :'<article class="asq-question multi-choice choose-1" id="mc-1">\n\
   <h3 class="stem">Lugano is located in...</h3>\n\
   <ol class="asq-options">\n\
     <li class="asq-option" data-correct="true">\n\
@@ -14,6 +14,23 @@ module.exports = {
     </li>\n\
     <li class="asq-option">\n\
       Germany\n\
+     </li>\n\
+  </ol>\n\
+</article>',
+  'multiple-choice-checkbox' :'<article class="asq-question multi-choice choose-0-n" id="mc-1">\n\
+  <h3 class="stem">In Switzerland official languages include...</h3>\n\
+  <ol class="asq-options">\n\
+    <li class="asq-option" data-correct="true">\n\
+      German\n\
+    </li>\n\
+    <li class="asq-option" data-correct="true">\n\
+      French\n\
+    </li>\n\
+    <li class="asq-option">\n\
+      Portuguese\n\
+    </li>\n\
+    <li class="asq-option" data-correct="true">\n\
+      Italian\n\
      </li>\n\
   </ol>\n\
 </article>',

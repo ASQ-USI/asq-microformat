@@ -43,6 +43,13 @@ module.exports = function(grunt) {
           debug: true
         }        
       },
+      editorConfigure:{
+        src: ['docs/js/_src/asq-microformat-editor-congigure.js'],
+        dest: 'docs/js/asq-microformat-editor-configure.js',
+        options: {
+          debug: true
+        }        
+      },
     },
 
     //dust task
