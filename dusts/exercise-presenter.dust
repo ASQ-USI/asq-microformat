@@ -1,6 +1,8 @@
 <form action="">
 {! Autoescaping is off, only use fully trusted content !}
   {exerciseContent|s}
-  {!{>assessment-grid/}!}
+  {@if cond="'{peer}'.length || '{self}'.length"}
+    {>assessment-grid/} 
+  {/if}
   {>progress-bar/}
 </form>

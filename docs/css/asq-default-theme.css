@@ -288,31 +288,26 @@ lesshat-selector {
   margin-top: .5em;
 }
 /*------------ assessment grid ------------*/
-@keyframes new-row-or-col {
-  0% {
-    background-color: rgba(92, 184, 92, 0);
-  }
-  100% {
-    background-color: rgba(92, 184, 92, 0.85);
-  }
+lesshat-selector {
+  -lh-property: 0; } 
+@-webkit-keyframes new-row-or-col{ 0% { background-color: rgba(92, 184, 92, 0); } 100% { background-color: rgba(92, 184, 92, 0.85);}}
+@-moz-keyframes new-row-or-col{ 0% { background-color: rgba(92, 184, 92, 0); } 100% { background-color: rgba(92, 184, 92, 0.85);}}
+@-o-keyframes new-row-or-col{ 0% { background-color: rgba(92, 184, 92, 0); } 100% { background-color: rgba(92, 184, 92, 0.85);}}
+@keyframes new-row-or-col{ 0% { background-color: rgba(92, 184, 92, 0); } 100% { background-color: rgba(92, 184, 92, 0.85);};
 }
-@keyframes to-be-removed-row-or-col {
-  0% {
-    background-color: rgba(218, 59, 54, 0);
-  }
-  100% {
-    background-color: rgba(218, 59, 54, 0.85);
-  }
+lesshat-selector {
+  -lh-property: 0; } 
+@-webkit-keyframes to-be-removed-row-or-col{ 0% { background-color: rgba(218, 59, 54, 0); } 100% { background-color: rgba(218, 59, 54, 0.85); }}
+@-moz-keyframes to-be-removed-row-or-col{ 0% { background-color: rgba(218, 59, 54, 0); } 100% { background-color: rgba(218, 59, 54, 0.85); }}
+@-o-keyframes to-be-removed-row-or-col{ 0% { background-color: rgba(218, 59, 54, 0); } 100% { background-color: rgba(218, 59, 54, 0.85); }}
+@keyframes to-be-removed-row-or-col{ 0% { background-color: rgba(218, 59, 54, 0); } 100% { background-color: rgba(218, 59, 54, 0.85); };
 }
-@keyframes shadow-blue {
-  0% {
-    background-color: rgba(19, 144, 252, 0.2);
-    box-shadow: none;
-  }
-  100% {
-    background-color: rgba(119, 192, 254, 0.9);
-    box-shadow: inset 0 -1px 9px #2e4383, 0 2px 10px #285fd5;
-  }
+lesshat-selector {
+  -lh-property: 0; } 
+@-webkit-keyframes shadow-blue{ 0% { background-color: rgba(19, 144, 252, 0.2); box-shadow: none; }  100% { background-color: rgba(119, 192, 254, 0.9); box-shadow: inset 0 -1px 9px #2E4383, 0 2px 10px #285FD5; }}
+@-moz-keyframes shadow-blue{ 0% { background-color: rgba(19, 144, 252, 0.2); box-shadow: none; }  100% { background-color: rgba(119, 192, 254, 0.9); box-shadow: inset 0 -1px 9px #2E4383, 0 2px 10px #285FD5; }}
+@-o-keyframes shadow-blue{ 0% { background-color: rgba(19, 144, 252, 0.2); box-shadow: none; }  100% { background-color: rgba(119, 192, 254, 0.9); box-shadow: inset 0 -1px 9px #2E4383, 0 2px 10px #285FD5; }}
+@keyframes shadow-blue{ 0% { background-color: rgba(19, 144, 252, 0.2); box-shadow: none; }  100% { background-color: rgba(119, 192, 254, 0.9); box-shadow: inset 0 -1px 9px #2E4383, 0 2px 10px #285FD5; };
 }
 .asq-led {
   display: inline-block;
@@ -337,6 +332,9 @@ lesshat-selector {
   background-color: rgba(19, 144, 252, 0.2);
 }
 .asq-led.asq-led-blue.active:before {
+  -webkit-animation: shadow-blue 1s ease-in-out infinite alternate;
+  -moz-animation: shadow-blue 1s ease-in-out infinite alternate;
+  -o-animation: shadow-blue 1s ease-in-out infinite alternate;
   animation: shadow-blue 1s ease-in-out infinite alternate;
 }
 .asq-assess-grid {
@@ -349,12 +347,21 @@ lesshat-selector {
   background: rgba(170, 215, 254, 0.6);
 }
 .asq-assess-grid .new-row {
+  -webkit-animation: new-row-or-col 1s ease-in-out infinite alternate;
+  -moz-animation: new-row-or-col 1s ease-in-out infinite alternate;
+  -o-animation: new-row-or-col 1s ease-in-out infinite alternate;
   animation: new-row-or-col 1s ease-in-out infinite alternate;
 }
 .asq-assess-grid .new-col {
+  -webkit-animation: new-row-or-col 1s ease-in-out infinite alternate;
+  -moz-animation: new-row-or-col 1s ease-in-out infinite alternate;
+  -o-animation: new-row-or-col 1s ease-in-out infinite alternate;
   animation: new-row-or-col 1s ease-in-out infinite alternate;
 }
 .asq-assess-grid .to-be-removed-row {
+  -webkit-animation: to-be-removed-row-or-col 1s ease-in-out infinite alternate;
+  -moz-animation: to-be-removed-row-or-col 1s ease-in-out infinite alternate;
+  -o-animation: to-be-removed-row-or-col 1s ease-in-out infinite alternate;
   animation: to-be-removed-row-or-col 1s ease-in-out infinite alternate;
 }
 .asq-assess-grid .to-be-removed-col {
@@ -375,7 +382,7 @@ lesshat-selector {
 }
 .asq-assess-grid > thead > tr > th {
   overflow: hidden;
-  height: 100px;
+  height: 250px;
   padding: 0 0 8px 0;
   text-align: center;
   vertical-align: bottom;
@@ -388,7 +395,7 @@ lesshat-selector {
 }
 .asq-assess-grid > thead > tr > th:first-child > .verticalText {
   position: absolute;
-  top: 50px;
+  top: 135px;
   right: 0px;
   width: 20px;
 }
@@ -412,310 +419,311 @@ lesshat-selector {
 .asq-assess-grid tbody > tr > td:first-child {
   line-height: 1;
   background: #eaeaea;
+  padding: 0 5px;
 }
 .asq-assess-grid tbody > tr > td.asq-diagonal-cell {
   background: #999;
 }
-.asq-led-grade-0:before {
+.asq-led-score-0:before {
   background-color: #ff0000;
 }
-.asq-led-grade-1:before {
+.asq-led-score-1:before {
   background-color: #fc0300;
 }
-.asq-led-grade-2:before {
+.asq-led-score-2:before {
   background-color: #fa0500;
 }
-.asq-led-grade-3:before {
+.asq-led-score-3:before {
   background-color: #f70800;
 }
-.asq-led-grade-4:before {
+.asq-led-score-4:before {
   background-color: #f50a00;
 }
-.asq-led-grade-5:before {
+.asq-led-score-5:before {
   background-color: #f20d00;
 }
-.asq-led-grade-6:before {
+.asq-led-score-6:before {
   background-color: #f00f00;
 }
-.asq-led-grade-7:before {
+.asq-led-score-7:before {
   background-color: #ed1200;
 }
-.asq-led-grade-8:before {
+.asq-led-score-8:before {
   background-color: #eb1400;
 }
-.asq-led-grade-9:before {
+.asq-led-score-9:before {
   background-color: #e81700;
 }
-.asq-led-grade-10:before {
+.asq-led-score-10:before {
   background-color: #e51a00;
 }
-.asq-led-grade-11:before {
+.asq-led-score-11:before {
   background-color: #e31c00;
 }
-.asq-led-grade-12:before {
+.asq-led-score-12:before {
   background-color: #e01f00;
 }
-.asq-led-grade-13:before {
+.asq-led-score-13:before {
   background-color: #de2100;
 }
-.asq-led-grade-14:before {
+.asq-led-score-14:before {
   background-color: #db2400;
 }
-.asq-led-grade-15:before {
+.asq-led-score-15:before {
   background-color: #d92600;
 }
-.asq-led-grade-16:before {
+.asq-led-score-16:before {
   background-color: #d62900;
 }
-.asq-led-grade-17:before {
+.asq-led-score-17:before {
   background-color: #d42b00;
 }
-.asq-led-grade-18:before {
+.asq-led-score-18:before {
   background-color: #d12e00;
 }
-.asq-led-grade-19:before {
+.asq-led-score-19:before {
   background-color: #cf3000;
 }
-.asq-led-grade-20:before {
+.asq-led-score-20:before {
   background-color: #cc3300;
 }
-.asq-led-grade-21:before {
+.asq-led-score-21:before {
   background-color: #c93600;
 }
-.asq-led-grade-22:before {
+.asq-led-score-22:before {
   background-color: #c73800;
 }
-.asq-led-grade-23:before {
+.asq-led-score-23:before {
   background-color: #c43b00;
 }
-.asq-led-grade-24:before {
+.asq-led-score-24:before {
   background-color: #c23d00;
 }
-.asq-led-grade-25:before {
+.asq-led-score-25:before {
   background-color: #bf4000;
 }
-.asq-led-grade-26:before {
+.asq-led-score-26:before {
   background-color: #bd4200;
 }
-.asq-led-grade-27:before {
+.asq-led-score-27:before {
   background-color: #ba4500;
 }
-.asq-led-grade-28:before {
+.asq-led-score-28:before {
   background-color: #b84700;
 }
-.asq-led-grade-29:before {
+.asq-led-score-29:before {
   background-color: #b54a00;
 }
-.asq-led-grade-30:before {
+.asq-led-score-30:before {
   background-color: #b34d00;
 }
-.asq-led-grade-31:before {
+.asq-led-score-31:before {
   background-color: #b04f00;
 }
-.asq-led-grade-32:before {
+.asq-led-score-32:before {
   background-color: #ad5200;
 }
-.asq-led-grade-33:before {
+.asq-led-score-33:before {
   background-color: #ab5400;
 }
-.asq-led-grade-34:before {
+.asq-led-score-34:before {
   background-color: #a85700;
 }
-.asq-led-grade-35:before {
+.asq-led-score-35:before {
   background-color: #a65900;
 }
-.asq-led-grade-36:before {
+.asq-led-score-36:before {
   background-color: #a35c00;
 }
-.asq-led-grade-37:before {
+.asq-led-score-37:before {
   background-color: #a15e00;
 }
-.asq-led-grade-38:before {
+.asq-led-score-38:before {
   background-color: #9e6100;
 }
-.asq-led-grade-39:before {
+.asq-led-score-39:before {
   background-color: #9c6300;
 }
-.asq-led-grade-40:before {
+.asq-led-score-40:before {
   background-color: #996600;
 }
-.asq-led-grade-41:before {
+.asq-led-score-41:before {
   background-color: #966900;
 }
-.asq-led-grade-42:before {
+.asq-led-score-42:before {
   background-color: #946b00;
 }
-.asq-led-grade-43:before {
+.asq-led-score-43:before {
   background-color: #916e00;
 }
-.asq-led-grade-44:before {
+.asq-led-score-44:before {
   background-color: #8f7000;
 }
-.asq-led-grade-45:before {
+.asq-led-score-45:before {
   background-color: #8c7300;
 }
-.asq-led-grade-46:before {
+.asq-led-score-46:before {
   background-color: #8a7500;
 }
-.asq-led-grade-47:before {
+.asq-led-score-47:before {
   background-color: #877800;
 }
-.asq-led-grade-48:before {
+.asq-led-score-48:before {
   background-color: #857a00;
 }
-.asq-led-grade-49:before {
+.asq-led-score-49:before {
   background-color: #827d00;
 }
-.asq-led-grade-50:before {
+.asq-led-score-50:before {
   background-color: #7f7f00;
 }
-.asq-led-grade-51:before {
+.asq-led-score-51:before {
   background-color: #7d8200;
 }
-.asq-led-grade-52:before {
+.asq-led-score-52:before {
   background-color: #7a8500;
 }
-.asq-led-grade-53:before {
+.asq-led-score-53:before {
   background-color: #788700;
 }
-.asq-led-grade-54:before {
+.asq-led-score-54:before {
   background-color: #758a00;
 }
-.asq-led-grade-55:before {
+.asq-led-score-55:before {
   background-color: #738c00;
 }
-.asq-led-grade-56:before {
+.asq-led-score-56:before {
   background-color: #708f00;
 }
-.asq-led-grade-57:before {
+.asq-led-score-57:before {
   background-color: #6e9100;
 }
-.asq-led-grade-58:before {
+.asq-led-score-58:before {
   background-color: #6b9400;
 }
-.asq-led-grade-59:before {
+.asq-led-score-59:before {
   background-color: #699600;
 }
-.asq-led-grade-60:before {
+.asq-led-score-60:before {
   background-color: #669900;
 }
-.asq-led-grade-61:before {
+.asq-led-score-61:before {
   background-color: #639c00;
 }
-.asq-led-grade-62:before {
+.asq-led-score-62:before {
   background-color: #619e00;
 }
-.asq-led-grade-63:before {
+.asq-led-score-63:before {
   background-color: #5ea100;
 }
-.asq-led-grade-64:before {
+.asq-led-score-64:before {
   background-color: #5ca300;
 }
-.asq-led-grade-65:before {
+.asq-led-score-65:before {
   background-color: #59a600;
 }
-.asq-led-grade-66:before {
+.asq-led-score-66:before {
   background-color: #57a800;
 }
-.asq-led-grade-67:before {
+.asq-led-score-67:before {
   background-color: #54ab00;
 }
-.asq-led-grade-68:before {
+.asq-led-score-68:before {
   background-color: #52ad00;
 }
-.asq-led-grade-69:before {
+.asq-led-score-69:before {
   background-color: #4fb000;
 }
-.asq-led-grade-70:before {
+.asq-led-score-70:before {
   background-color: #4db300;
 }
-.asq-led-grade-71:before {
+.asq-led-score-71:before {
   background-color: #4ab500;
 }
-.asq-led-grade-72:before {
+.asq-led-score-72:before {
   background-color: #47b800;
 }
-.asq-led-grade-73:before {
+.asq-led-score-73:before {
   background-color: #45ba00;
 }
-.asq-led-grade-74:before {
+.asq-led-score-74:before {
   background-color: #42bd00;
 }
-.asq-led-grade-75:before {
+.asq-led-score-75:before {
   background-color: #40bf00;
 }
-.asq-led-grade-76:before {
+.asq-led-score-76:before {
   background-color: #3dc200;
 }
-.asq-led-grade-77:before {
+.asq-led-score-77:before {
   background-color: #3bc400;
 }
-.asq-led-grade-78:before {
+.asq-led-score-78:before {
   background-color: #38c700;
 }
-.asq-led-grade-79:before {
+.asq-led-score-79:before {
   background-color: #36c900;
 }
-.asq-led-grade-80:before {
+.asq-led-score-80:before {
   background-color: #33cc00;
 }
-.asq-led-grade-81:before {
+.asq-led-score-81:before {
   background-color: #30cf00;
 }
-.asq-led-grade-82:before {
+.asq-led-score-82:before {
   background-color: #2ed100;
 }
-.asq-led-grade-83:before {
+.asq-led-score-83:before {
   background-color: #2bd400;
 }
-.asq-led-grade-84:before {
+.asq-led-score-84:before {
   background-color: #29d600;
 }
-.asq-led-grade-85:before {
+.asq-led-score-85:before {
   background-color: #26d900;
 }
-.asq-led-grade-86:before {
+.asq-led-score-86:before {
   background-color: #24db00;
 }
-.asq-led-grade-87:before {
+.asq-led-score-87:before {
   background-color: #21de00;
 }
-.asq-led-grade-88:before {
+.asq-led-score-88:before {
   background-color: #1fe000;
 }
-.asq-led-grade-89:before {
+.asq-led-score-89:before {
   background-color: #1ce300;
 }
-.asq-led-grade-90:before {
+.asq-led-score-90:before {
   background-color: #1ae500;
 }
-.asq-led-grade-91:before {
+.asq-led-score-91:before {
   background-color: #17e800;
 }
-.asq-led-grade-92:before {
+.asq-led-score-92:before {
   background-color: #14eb00;
 }
-.asq-led-grade-93:before {
+.asq-led-score-93:before {
   background-color: #12ed00;
 }
-.asq-led-grade-94:before {
+.asq-led-score-94:before {
   background-color: #0ff000;
 }
-.asq-led-grade-95:before {
+.asq-led-score-95:before {
   background-color: #0df200;
 }
-.asq-led-grade-96:before {
+.asq-led-score-96:before {
   background-color: #0af500;
 }
-.asq-led-grade-97:before {
+.asq-led-score-97:before {
   background-color: #08f700;
 }
-.asq-led-grade-98:before {
+.asq-led-score-98:before {
   background-color: #05fa00;
 }
-.asq-led-grade-99:before {
+.asq-led-score-99:before {
   background-color: #03fc00;
 }
-.asq-led-grade-100:before {
+.asq-led-score-100:before {
   background-color: #00ff00;
 }

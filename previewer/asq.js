@@ -23,6 +23,7 @@ function start($el, userType, cb) {
   //parse
   var asqParser = new Parser();
   var parsedData = asqParser.parse($el[0].outerHTML)
+  parsedData =  fakeDatabaseIds(parsedData);
   //render
   var asqRenderer = new MarkupGenerator()
   asqRenderer.render(parsedData.html, parsedData.exercises, parsedData.rubrics,
@@ -31,7 +32,7 @@ function start($el, userType, cb) {
     $el[0].outerHTML = out;
 
     //setup components
-    microformatClient.setupMicroformatComponents(eventBus);
+    microformatClient.configureMicroformatComponents(userType, eventBus);
     generatesampleData(userType);
     impressUtils.makeAssessmentGridsTogglable();
     var exercises = handleRubrics(parsedData); // get exercises with rubrics (with fake data)
@@ -72,6 +73,7 @@ function fakeDatabaseIds(data) {
   , i, j, len1, len2, htmlId;
 
   for (i = 0, len1 = exercises.length; i < len1; i++) {
+    exercises[i].id= 'ex-'+i;
     for (j = 0, len2 = exercises[i].questions.length; j < len2; j++) {
       exercises[i].questions[j].id = 'q' + id;
       exercises[i].questions[j]._id = 'q' + id;
@@ -123,24 +125,27 @@ function generatesampleData(mode) {
       eventBus.emit('asq:folo-connected', {user: user});
     });
 
-    var gradeAll = function(i, j){
-      var event = {
-        assessor: users[i],
-        assessee: users[j],
-        grade: ~~(100 * Math.random())
-      };
+    var scoreAll = function(i, j){
+      $('.asq-exercise').each(function(){
+        var event = {
+          exerciseId: this.dataset.asqExerciseId,
+          assessor: users[i],
+          assessee: users[j],
+          score: ~~(100 * Math.random())
+        };
 
-      eventBus.emit('asq:assessment', event);
+        eventBus.emit('asq:assess', event);
+      })
       if(++j >= users.length){
         j=0;
-        if( ++ i >= users.length){
+        if( ++i >= users.length){
           return;
         }
       }
-      setTimeout(gradeAll, 350, i, j);
+      setTimeout(scoreAll, 350, i, j);
     }
 
-    gradeAll(0,0);
+    scoreAll(0,0);
 
     // Progress bar for presenter
     $('.asq-exercise').each(function() {
