@@ -14,9 +14,9 @@ module.exports = function (dust) {
 	 // progress-bar.dust
 	(function(){dust.register("progress-bar",body_0);function body_0(chk,ctx){return chk.write("<div class=\"asq-progress-info\"><div class=\"progress\"><div class=\"progress-bar asq-progress-answers\" style=\"width: 0%\"></div>").exists(ctx.get("self"),ctx,{"block":body_1},null).exists(ctx.get("peer"),ctx,{"block":body_2},null).write("</div><div class=\"asq-progress-details container-fluid\"><div class=\"row\"><div class=\"col-sm-4 col-xs-12 text-left asq-label-answers\"><span class=\"label label-primary\">Answers</span></div>").exists(ctx.get("self"),ctx,{"block":body_3},null).exists(ctx.get("peer"),ctx,{"block":body_4},null).write("</div></div></div>");}function body_1(chk,ctx){return chk.write("<div class=\"progress-bar progress-bar-warning asq-progress-self\" style=\"width: 0%\"></div>");}function body_2(chk,ctx){return chk.write("<div class=\"progress-bar progress-bar-success asq-progress-peer\" style=\"width: 0%\"></div>");}function body_3(chk,ctx){return chk.write("<div class=\"col-sm-4 col-xs-12 text-center asq-label-self\"><span class=\"label label-warning text-center\">Self</span></div>");}function body_4(chk,ctx){return chk.write("<div class=\"col-sm-4").notexists(ctx.get("self"),ctx,{"block":body_5},null).write(" col-xs-12 text-right asq-label-peer\"><span class=\"label label-success\">Peer</span></div>");}function body_5(chk,ctx){return chk.write(" col-sm-offset-4");}return body_0;})();
 	 // question-code-input-presenter.dust
-	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.getPath(false,["question","id"]),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.getPath(false,["question","id"]),ctx,"h").write("\" class=\"asq-code-editor\" ></div>");}return body_0;})();
+	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.get("id"),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\" >").reference(ctx.get("body"),ctx,"h").write("</div>");}return body_0;})();
 	 // question-code-input-viewer.dust
-	(function(){dust.register("question-code-input-viewer",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.get("id"),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\" ></div>");}return body_0;})();
+	(function(){dust.register("question-code-input-viewer",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.get("id"),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\">").exists(ctx.get("submission"),ctx,{"else":body_1,"block":body_2},null).write("</div>");}function body_1(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h");}function body_2(chk,ctx){return chk.reference(ctx.getPath(false,["submission","0"]),ctx,"h");}return body_0;})();
 	 // question-multi-choice-presenter.dust
 	(function(){dust.register("question-multi-choice-presenter",body_0);function body_0(chk,ctx){return chk.write("<ol>").section(ctx.get("questionOptions"),ctx,{"block":body_1},null).write("</ol>");}function body_1(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" >").reference(ctx.get("text"),ctx,"h",["s"]).write("</li>\n");}return body_0;})();
 	 // question-multi-choice-stats.dust
@@ -351,6 +351,37 @@ function initCodeEditors(){
   })
 }
 
+function initCodeEditorsForAssessment(){
+  $('.asq-assessment .asq-code-editor').not('.ace_editor').each(function(){
+    var aceEditor = ace.edit(this.id)
+    , aceEditSession = aceEditor.getSession()
+    , questionId = $(this).closest('.asq-question-preview').eq(0).data('asq-question')
+    , mode = $('.asq-question[data-question-id=' + questionId + ']').eq(0).data('asq-syntax')
+    , theme = $('.asq-question[data-question-id=' + questionId + ']').eq(0).data('asq-theme');
+
+    aceEditor.setFontSize(20);
+    aceEditor.setTheme("ace/theme/" + theme);
+    aceEditSession.setMode('ace/mode/'+ mode);
+    aceEditor.resize();
+    aceEditor.setReadOnly(true);
+
+    //disable keyevent for document (to block impress)
+    aceEditor.on("focus", function() {
+      document.body.addEventListener("keyup", muteKeysForDocument, false );
+      document.body.addEventListener("keydown", muteKeysForDocument, false );
+    });
+
+    aceEditor.on("blur", function() {
+       document.body.removeEventListener("keyup", muteKeysForDocument);
+       document.body.removeEventListener("keydown", muteKeysForDocument);
+    });
+
+    function muteKeysForDocument( event ) {
+      event.stopPropagation();
+    }
+  })
+}
+
 function initAssessmentGrids(eventBus){
   //create and index assessment grids by exercise
 
@@ -394,6 +425,7 @@ function initAssessmentGrids(eventBus){
 
 module.exports = {
   initCodeEditors: initCodeEditors,
+  initCodeEditorsForAssessment : initCodeEditorsForAssessment,
   initAssessmentGrids: initAssessmentGrids,
   configureMicroformatComponents : configureMicroformatComponents,
   AssessmentGridWidget : AssessmentGridWidget
@@ -535,6 +567,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
     }
 
     var opts = this.options;
+    this.statId = 0; // reset statId counter
 
     // generation starts from root node. we wrap everything
     // in a div so that we can use 'children" functions for
@@ -585,7 +618,6 @@ var MarkupGenerator = module.exports = function(dustInstance){
           this.options.templates['welcome-screen'][userType] + '"/}');
       }
 
-      var statId = 0;
       // render exercises
       return when.map(exercises, function handleExercise(exercise) {
         return this.renderExercise($root, exercise).then(function handleQuestion() {
@@ -725,7 +757,6 @@ var MarkupGenerator = module.exports = function(dustInstance){
   //render stats or answers
   this.renderStats = function($root, question){
     var self = this;
-    var statId = 0;
     var selector = '.asq-stats[data-target-asq-question="' + question.htmlId + '"]'
     return when.map($root.find(selector), function assessmentRender(stat){
       var  $stat = $root.find(selector);
@@ -738,7 +769,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
 
       return self.renderStat.call(self, $stat, {
         question    : question,
-        statId      : ++statId,
+        statId      : ++self.statId,
         activePanes : activePanes,
         width       : 879,
         height      : 500,
@@ -1191,6 +1222,7 @@ var Parser = module.exports = function(loggerInstance){
         htmlId: $el.attr('id'),
         slideHtmlId : parentSlideId,
         questionType: 'code-input',
+        body: $el.find('.asq-question-body').html()||'',
         correctAnswer : typeof answer === 'undefined' ? null : answer
       };
 

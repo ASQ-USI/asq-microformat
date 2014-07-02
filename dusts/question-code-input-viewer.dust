@@ -1,2 +1,2 @@
 <label class="control-label" for="editor-{id}">Your solution:</label>
-<div id="code-editor-{id}" class="asq-code-editor" ></div>
+<div id="code-editor-{id}" class="asq-code-editor">{?submission}{submission[0]}{:else}{body}{/submission}</div>
