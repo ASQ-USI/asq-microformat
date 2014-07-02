@@ -1,6 +1,6 @@
 {
   "name": "asq-microformat",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Microformat parser and markup generator for ASQ",
   "main": "index.js",
   "repository": {
