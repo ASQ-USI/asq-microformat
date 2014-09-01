@@ -13,16 +13,17 @@
   "author": "Vasileios Triglianos",
   "license": "MIT",
   "dependencies": {
+    "asq-highlight": "ASQ-USI/asq-highlight",
     "brace": "^0.2.1",
     "cheerio": "^0.15.0",
     "dustjs-helpers": "^1.2.0",
     "dustjs-linkedin": "~2.3.5",
+    "eventemitter2": "^0.4.14",
     "jquery": "~2.1.0",
     "lodash": "~2.4.1",
     "node-uuid": "^1.4.1",
     "sugar": "~1.4.1",
-    "when": "^3.1.0",
-    "eventemitter2": "^0.4.14"
+    "when": "^3.1.0"
   },
   "devDependencies": {
     "browserify": "^4.1.5",
@@ -30,6 +31,7 @@
     "chai-as-promised": "*",
     "ent": "^2.0.0",
     "grunt": "~0.4.1",
+    "grunt-browserify": "^2.1.0",
     "grunt-contrib-less": "^0.11.0",
     "grunt-contrib-uglify": "~0.2.2",
     "grunt-contrib-watch": "~0.5.3",
@@ -38,8 +40,7 @@
     "js-beautify": "^1.5.1",
     "load-grunt-tasks": "~0.4.0",
     "mocha": "~1.8.2",
-    "mocha-as-promised": "~1.4.0",
-    "grunt-browserify": "^2.1.0"
+    "mocha-as-promised": "~1.4.0"
   },
   "readmeFilename": "README.md"
 }
