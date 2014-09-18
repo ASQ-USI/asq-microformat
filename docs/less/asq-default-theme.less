@@ -469,3 +469,24 @@
   }
   .generate-score-colors(@n, (@i + 1));
 }
+
+//stat lists
+
+.list-group-item{
+  > .correct-btn{
+    float:right;
+    color: #dadada;
+
+    &:hover{
+      color: #91EC91;
+    }
+  }
+} 
+
+.correct-answer.list-group-item{
+  background: rgba(92, 184, 92, 0.1);
+
+  > .correct-btn{
+    color: #5cb85c;
+  }
+} 

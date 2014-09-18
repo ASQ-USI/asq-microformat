@@ -39,6 +39,25 @@ module.exports = {
 </article>',
 'code-input': '<article class="asq-question code-input" data-asq-syntax="javascript"  data-asq-theme="monokai" id="ci-1">\n\
   <h3 class="stem">Code an infinite loop</h3>\n\
+</article>',
+'css-select': '<article class="asq-question asq-css-select"  data-asq-code="<ul>\n\
+  <li class=\'daclass\'>\n\
+    <ul>\n\
+      <li></li>\n\
+      <li></li>\n\
+      <li></li>\n\
+    </ul>\n\
+  </li>\n\
+  <li></li>\n\
+  <li></li>\n\
+  <li>\n\
+    <div>\n\
+      <p></p>\n\
+      <p class=\'pclass\'></p>\n\
+    </div>\n\
+  </li>\n\
+</ul>" id="cs-1">\n \
+  <h3 class="stem">Select the innermost li elements</h3>\n\
 </article>'
 }
 

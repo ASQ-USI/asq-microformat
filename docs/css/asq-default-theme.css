@@ -727,3 +727,16 @@ lesshat-selector {
 .asq-led-score-100:before {
   background-color: #00ff00;
 }
+.list-group-item > .correct-btn {
+  float: right;
+  color: #dadada;
+}
+.list-group-item > .correct-btn:hover {
+  color: #91EC91;
+}
+.correct-answer.list-group-item {
+  background: rgba(92, 184, 92, 0.1);
+}
+.correct-answer.list-group-item > .correct-btn {
+  color: #5cb85c;
+}
