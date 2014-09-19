@@ -14,9 +14,9 @@ module.exports = function (dust) {
 	 // progress-bar.dust
 	(function(){dust.register("progress-bar",body_0);function body_0(chk,ctx){return chk.write("<div class=\"asq-progress-info\"><div class=\"progress\"><div class=\"progress-bar asq-progress-answers\" style=\"width: 0%\"></div>").exists(ctx.get("self"),ctx,{"block":body_1},null).exists(ctx.get("peer"),ctx,{"block":body_2},null).write("</div><div class=\"asq-progress-details container-fluid\"><div class=\"row\"><div class=\"col-sm-4 col-xs-12 text-left asq-label-answers\"><span class=\"label label-primary\">Answers</span></div>").exists(ctx.get("self"),ctx,{"block":body_3},null).exists(ctx.get("peer"),ctx,{"block":body_4},null).write("</div></div></div>");}function body_1(chk,ctx){return chk.write("<div class=\"progress-bar progress-bar-warning asq-progress-self\" style=\"width: 0%\"></div>");}function body_2(chk,ctx){return chk.write("<div class=\"progress-bar progress-bar-success asq-progress-peer\" style=\"width: 0%\"></div>");}function body_3(chk,ctx){return chk.write("<div class=\"col-sm-4 col-xs-12 text-center asq-label-self\"><span class=\"label label-warning text-center\">Self</span></div>");}function body_4(chk,ctx){return chk.write("<div class=\"col-sm-4").notexists(ctx.get("self"),ctx,{"block":body_5},null).write(" col-xs-12 text-right asq-label-peer\"><span class=\"label label-success\">Peer</span></div>");}function body_5(chk,ctx){return chk.write(" col-sm-offset-4");}return body_0;})();
 	 // question-asq-css-select-presenter.dust
-	(function(){dust.register("question-asq-css-select-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div class=\"asq-css-select-code\"><pre><code></code>").reference(ctx.get("code"),ctx,"h").write("</pre></div><label class=\"control-label\" for=\"inputText\">Selector</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
+	(function(){dust.register("question-asq-css-select-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div class=\"asq-css-select-code\"><pre><code>").reference(ctx.get("code"),ctx,"h").write("</code></pre></div><label class=\"control-label\" for=\"inputText\">Selector</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
 	 // question-asq-css-select-viewer.dust
-	(function(){dust.register("question-asq-css-select-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div class=\"asq-css-select-code\"><pre><code></code>").reference(ctx.get("code"),ctx,"h").write("</pre></div><label class=\"control-label\" for=\"inputText\">Selector</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
+	(function(){dust.register("question-asq-css-select-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div class=\"asq-css-select-code\"><pre><code>").reference(ctx.get("code"),ctx,"h").write("</code></pre></div><label class=\"control-label\" for=\"inputText\">Selector</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
 	 // question-code-input-presenter.dust
 	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.get("id"),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\" >").reference(ctx.get("body"),ctx,"h").write("</div>");}return body_0;})();
 	 // question-code-input-viewer.dust
@@ -305,11 +305,72 @@ function AssessmentGridWidget (container, opts){
 }).call(AssessmentGridWidget.prototype);
 
 module.exports = AssessmentGridWidget;
-},{"jquery":27,"lodash":28}],5:[function(require,module,exports){
+},{"jquery":32,"lodash":33}],5:[function(require,module,exports){
 /** @module lib/assessment.js
     @description javascript logic for assessment widgets
 */
 'use strict';
+
+// used for escaping
+var entityMap = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': '&quot;',
+  "'": '&#39;',
+  "/": '&#x2F;'
+};
+
+function escapeHtml(string) {
+  return String(string).replace(/[&<>"'\/]/g, function (s) {
+    return entityMap[s];
+  });
+}
+
+function getElOpeningTag(el){
+    var str ="<"
+    str += $(el).prop("tagName").toLowerCase()
+    
+    //get all attribures
+    $.each(el.attributes, function() {
+    // this.attributes is not a plain object, but an array
+    // of attribute nodes, which contain both the name and value
+        if(this.specified && this.name !=='data-asq-selected' ) {
+          str += ' ' + this.name
+          str += '="' + this.value + '"'
+        }
+    });
+    str+=">"
+    return str;
+}
+
+// recursive function that creates the escaped tree of the html
+// annotated with spans
+function createTree($el, treeStr, tabwidth){
+  var nextTabwidth = tabwidth || "";
+  $el.children().each(function(){
+   var $this = $(this)
+     , spanOpenTag = "<span>";
+    
+   if($this.attr('data-asq-selected') === "true"){
+       spanOpenTag = '<span style="background-color:#fd2343;">';
+   }
+   treeStr += tabwidth + spanOpenTag
+   treeStr += escapeHtml(getElOpeningTag(this))
+   treeStr += '</span>'+ '\n';
+    
+   //generate tree for children of current
+   nextTabwidth = tabwidth + "  "
+   treeStr = createTree($this, treeStr, nextTabwidth);
+    
+   //back to current 
+   treeStr += tabwidth + spanOpenTag
+   treeStr +=  escapeHtml("</" + $this.prop("tagName").toLowerCase());
+   treeStr += '</span>'+ '\n';
+  });
+      
+  return treeStr;
+}
 
 //if we're not in a browser the rest have no meaning
 if('undefined' !== typeof window){
@@ -317,9 +378,6 @@ if('undefined' !== typeof window){
   var $ = require('jquery')
   , AssessmentGridWidget = require('./assessment/AssessmentGridWidget')
   , roles = Object.create(null);
-
-  roles.presenter = configurePresenter;
-  roles.viewer = configurureViewer;
 
   var configureMicroformatComponents = function(role,  eventBus){
     if(roles[role]){
@@ -446,89 +504,33 @@ if('undefined' !== typeof window){
   var initCSSSelect = function(eventBus){
     $(function(){
 
-      $('.asq-css-code').each(function(){
+      $('.asq-css-select').each(function(){
         // instantiate code pane
         var $this = $(this);
         var $codePane = $this.find("code").eq(0);
-        var newHtml = $this.attr('data-asq-code');
+        var newHtml = $('<textarea/>').html($this.attr('data-asq-code')).val();
         var $vDOM = $('<div>' + newHtml + '</div>');
-        var codeTree = createTree($vDOM, "");
+        var codeTree = createTree($vDOM, "", "");
         $codePane.html(codeTree);
         
         // magic starts here
-        var $selInput = $this.$('input[type="text"]').eq(0);
+        var $selInput = $this.find('input[type="text"]').eq(0);
         $selInput.on('input', function(){
             var val = $selInput[0].value
             var $clone = $vDOM.clone();
             var selected = $clone.find(val).each(function(){
                 $(this).attr('data-asq-selected', "true");
             });
-            codeTree = createTree($clone, "");
+            codeTree = createTree($clone, "", "");
             $codePane.html(codeTree);
         })
       });
     })
   }
 
-var entityMap = {
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': '&quot;',
-  "'": '&#39;',
-  "/": '&#x2F;'
-};
 
-function escapeHtml(string) {
-  return String(string).replace(/[&<>"'\/]/g, function (s) {
-    return entityMap[s];
-  });
-}
-
-function getElOpeningTag(el){
-    var str ="<"
-    str += $(el).prop("tagName").toLowerCase()
-    
-    //get all attribures
-    $.each(el.attributes, function() {
-    // this.attributes is not a plain object, but an array
-    // of attribute nodes, which contain both the name and value
-        if(this.specified && this.name !=='data-asq-selected' ) {
-          str += ' ' + this.name
-          str += '="' + this.value + '"'
-        }
-    });
-    str+=">"
-    return str;
-}
-
-// recursive function that creates the escaped tree of the html
-// annotated with spans
-function createTree($el, treeStr, tabwidth){
-  tabwidth = tabwidth || "";
-  $el.children().each(function(){
-   var $this = $(this)
-     , spanOpenTag = "<span>";
-    
-   if($this.attr('data-asq-selected') === "true"){
-       spanOpenTag = '<span style="background-color:#fd2343;">';
-   }
-   treeStr += tabwidth + spanOpenTag
-   treeStr += escapeHtml(getElOpeningTag(this))
-   treeStr += '</span>'+ '\n';
-    
-   //generate tree for children of current
-   nextTabwidth = tabwidth + "  "
-   treeStr = createTree($this, treeStr, nextTabwidth);
-    
-   //back to current 
-   treeStr += tabwidth + spanOpenTag
-   treeStr +=  escapeHtml("</" + $this.prop("tagName").toLowerCase());
-   treeStr += '</span>'+ '\n';
-  });
-      
-  return treeStr;
-}
+ roles.presenter = configurePresenter;
+ roles.viewer = configurureViewer;
 
 
   module.exports = {
@@ -540,7 +542,7 @@ function createTree($el, treeStr, tabwidth){
   }
 
 }
-},{"./assessment/AssessmentGridWidget":4,"jquery":27}],6:[function(require,module,exports){
+},{"./assessment/AssessmentGridWidget":4,"jquery":32}],6:[function(require,module,exports){
 (function (process){
 /** @module lib/asqAssessmentMarkupGenerator
     @description Parse HTML files to extract assessment information
@@ -642,6 +644,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
   };
 
   this.dust = dustInstance || dust
+  require('../dusts/compiled/templates')(this.dust);
   this.options = {};
 };
 
@@ -671,7 +674,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
     var wrappedHtml = '<div>' + html + '</div>'
 
     //setup dom manipulation
-    var $ = isBrowser ? jQuery : cheerio.load(wrappedHtml)
+    var $ = isBrowser ? jQuery : cheerio.load(wrappedHtml, {decodeEntities: false})
       , $root = isBrowser ? $(wrappedHtml) : $('div').eq(0);
 
     // // NOTE: no need to wrap the html here, it is done during parsing.
@@ -937,7 +940,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
 }).call(MarkupGenerator.prototype);
 
 }).call(this,require("FWaASH"))
-},{"../dusts/compiled/templates":1,"./scriptBlacklist":8,"./utils":9,"FWaASH":20,"dustjs-linkedin":26,"jquery":27,"lodash":28,"when":46}],7:[function(require,module,exports){
+},{"../dusts/compiled/templates":1,"./scriptBlacklist":8,"./utils":9,"FWaASH":28,"dustjs-linkedin":31,"jquery":32,"lodash":33,"when":51}],7:[function(require,module,exports){
 /** @module lib/parser
     @description Parse HTML files to extract assessment information
 */
@@ -1567,7 +1570,7 @@ function returnData(errors, data, logger, start){
   return errors ? { errors: errors } : data;
 }
 
-},{"./utils":9,"jquery":27,"lodash":28,"node-uuid":29}],8:[function(require,module,exports){
+},{"./utils":9,"jquery":32,"lodash":33,"node-uuid":34}],8:[function(require,module,exports){
 /** @module lib/scriptBlacklist
     @description Regexes of scripts that we want removed
 */
@@ -1600,29 +1603,45 @@ module.exports = {
 
 var base64 = require('base64-js')
 var ieee754 = require('ieee754')
+var isArray = require('is-array')
 
 exports.Buffer = Buffer
 exports.SlowBuffer = Buffer
 exports.INSPECT_MAX_BYTES = 50
-Buffer.poolSize = 8192
+Buffer.poolSize = 8192 // not used by this implementation
+
+var kMaxLength = 0x3fffffff
 
 /**
- * If `Buffer._useTypedArrays`:
+ * If `Buffer.TYPED_ARRAY_SUPPORT`:
  *   === true    Use Uint8Array implementation (fastest)
- *   === false   Use Object implementation (compatible down to IE6)
+ *   === false   Use Object implementation (most compatible, even IE6)
+ *
+ * Browsers that support typed arrays are IE 10+, Firefox 4+, Chrome 7+, Safari 5.1+,
+ * Opera 11.6+, iOS 4.2+.
+ *
+ * Note:
+ *
+ * - Implementation must support adding new properties to `Uint8Array` instances.
+ *   Firefox 4-29 lacked support, fixed in Firefox 30+.
+ *   See: https://bugzilla.mozilla.org/show_bug.cgi?id=695438.
+ *
+ *  - Chrome 9-10 is missing the `TypedArray.prototype.subarray` function.
+ *
+ *  - IE10 has a broken `TypedArray.prototype.subarray` function which returns arrays of
+ *    incorrect length in some situations.
+ *
+ * We detect these buggy browsers and set `Buffer.TYPED_ARRAY_SUPPORT` to `false` so they will
+ * get the Object implementation, which is slower but will work correctly.
  */
-Buffer._useTypedArrays = (function () {
-  // Detect if browser supports Typed Arrays. Supported browsers are IE 10+, Firefox 4+,
-  // Chrome 7+, Safari 5.1+, Opera 11.6+, iOS 4.2+. If the browser does not support adding
-  // properties to `Uint8Array` instances, then that's the same as no `Uint8Array` support
-  // because we need to be able to add all the node Buffer API methods. This is an issue
-  // in Firefox 4-29. Now fixed: https://bugzilla.mozilla.org/show_bug.cgi?id=695438
+Buffer.TYPED_ARRAY_SUPPORT = (function () {
   try {
     var buf = new ArrayBuffer(0)
     var arr = new Uint8Array(buf)
     arr.foo = function () { return 42 }
-    return 42 === arr.foo() &&
-        typeof arr.subarray === 'function' // Chrome 9-10 lack `subarray`
+    return 42 === arr.foo() && // typed array instances can be augmented
+        typeof arr.subarray === 'function' && // chrome 9-10 lack `subarray`
+        new Uint8Array(1).subarray(1, 1).byteLength === 0 // ie10 has broken `subarray`
   } catch (e) {
     return false
   }
@@ -1646,28 +1665,27 @@ function Buffer (subject, encoding, noZero) {
 
   var type = typeof subject
 
-  // Workaround: node's base64 implementation allows for non-padded strings
-  // while base64-js does not.
-  if (encoding === 'base64' && type === 'string') {
-    subject = stringtrim(subject)
-    while (subject.length % 4 !== 0) {
-      subject = subject + '='
-    }
-  }
-
   // Find the length
   var length
   if (type === 'number')
-    length = coerce(subject)
-  else if (type === 'string')
+    length = subject > 0 ? subject >>> 0 : 0
+  else if (type === 'string') {
+    if (encoding === 'base64')
+      subject = base64clean(subject)
     length = Buffer.byteLength(subject, encoding)
-  else if (type === 'object')
-    length = coerce(subject.length) // assume that object is array-like
-  else
-    throw new Error('First argument needs to be a number, array or string.')
+  } else if (type === 'object' && subject !== null) { // assume object is array-like
+    if (subject.type === 'Buffer' && isArray(subject.data))
+      subject = subject.data
+    length = +subject.length > 0 ? Math.floor(+subject.length) : 0
+  } else
+    throw new TypeError('must start with number, buffer, array or string')
+
+  if (this.length > kMaxLength)
+    throw new RangeError('Attempt to allocate Buffer larger than maximum ' +
+      'size: 0x' + kMaxLength.toString(16) + ' bytes')
 
   var buf
-  if (Buffer._useTypedArrays) {
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
     // Preferred: Return an augmented `Uint8Array` instance for best performance
     buf = Buffer._augment(new Uint8Array(length))
   } else {
@@ -1678,20 +1696,21 @@ function Buffer (subject, encoding, noZero) {
   }
 
   var i
-  if (Buffer._useTypedArrays && typeof subject.byteLength === 'number') {
+  if (Buffer.TYPED_ARRAY_SUPPORT && typeof subject.byteLength === 'number') {
     // Speed optimization -- use set if we're copying from a typed array
     buf._set(subject)
   } else if (isArrayish(subject)) {
     // Treat array-ish objects as a byte array
-    for (i = 0; i < length; i++) {
-      if (Buffer.isBuffer(subject))
+    if (Buffer.isBuffer(subject)) {
+      for (i = 0; i < length; i++)
         buf[i] = subject.readUInt8(i)
-      else
-        buf[i] = subject[i]
+    } else {
+      for (i = 0; i < length; i++)
+        buf[i] = ((subject[i] % 256) + 256) % 256
     }
   } else if (type === 'string') {
     buf.write(subject, 0, encoding)
-  } else if (type === 'number' && !Buffer._useTypedArrays && !noZero) {
+  } else if (type === 'number' && !Buffer.TYPED_ARRAY_SUPPORT && !noZero) {
     for (i = 0; i < length; i++) {
       buf[i] = 0
     }
@@ -1700,8 +1719,25 @@ function Buffer (subject, encoding, noZero) {
   return buf
 }
 
-// STATIC METHODS
-// ==============
+Buffer.isBuffer = function (b) {
+  return !!(b != null && b._isBuffer)
+}
+
+Buffer.compare = function (a, b) {
+  if (!Buffer.isBuffer(a) || !Buffer.isBuffer(b))
+    throw new TypeError('Arguments must be Buffers')
+
+  var x = a.length
+  var y = b.length
+  for (var i = 0, len = Math.min(x, y); i < len && a[i] === b[i]; i++) {}
+  if (i !== len) {
+    x = a[i]
+    y = b[i]
+  }
+  if (x < y) return -1
+  if (y < x) return 1
+  return 0
+}
 
 Buffer.isEncoding = function (encoding) {
   switch (String(encoding).toLowerCase()) {
@@ -1722,43 +1758,8 @@ Buffer.isEncoding = function (encoding) {
   }
 }
 
-Buffer.isBuffer = function (b) {
-  return !!(b !== null && b !== undefined && b._isBuffer)
-}
-
-Buffer.byteLength = function (str, encoding) {
-  var ret
-  str = str.toString()
-  switch (encoding || 'utf8') {
-    case 'hex':
-      ret = str.length / 2
-      break
-    case 'utf8':
-    case 'utf-8':
-      ret = utf8ToBytes(str).length
-      break
-    case 'ascii':
-    case 'binary':
-    case 'raw':
-      ret = str.length
-      break
-    case 'base64':
-      ret = base64ToBytes(str).length
-      break
-    case 'ucs2':
-    case 'ucs-2':
-    case 'utf16le':
-    case 'utf-16le':
-      ret = str.length * 2
-      break
-    default:
-      throw new Error('Unknown encoding')
-  }
-  return ret
-}
-
 Buffer.concat = function (list, totalLength) {
-  assert(isArray(list), 'Usage: Buffer.concat(list[, length])')
+  if (!isArray(list)) throw new TypeError('Usage: Buffer.concat(list[, length])')
 
   if (list.length === 0) {
     return new Buffer(0)
@@ -1784,26 +1785,118 @@ Buffer.concat = function (list, totalLength) {
   return buf
 }
 
-Buffer.compare = function (a, b) {
-  assert(Buffer.isBuffer(a) && Buffer.isBuffer(b), 'Arguments must be Buffers')
-  var x = a.length
-  var y = b.length
-  for (var i = 0, len = Math.min(x, y); i < len && a[i] === b[i]; i++) {}
-  if (i !== len) {
-    x = a[i]
-    y = b[i]
+Buffer.byteLength = function (str, encoding) {
+  var ret
+  str = str + ''
+  switch (encoding || 'utf8') {
+    case 'ascii':
+    case 'binary':
+    case 'raw':
+      ret = str.length
+      break
+    case 'ucs2':
+    case 'ucs-2':
+    case 'utf16le':
+    case 'utf-16le':
+      ret = str.length * 2
+      break
+    case 'hex':
+      ret = str.length >>> 1
+      break
+    case 'utf8':
+    case 'utf-8':
+      ret = utf8ToBytes(str).length
+      break
+    case 'base64':
+      ret = base64ToBytes(str).length
+      break
+    default:
+      ret = str.length
   }
-  if (x < y) {
-    return -1
-  }
-  if (y < x) {
-    return 1
-  }
-  return 0
+  return ret
 }
 
-// BUFFER INSTANCE METHODS
-// =======================
+// pre-set for values that may exist in the future
+Buffer.prototype.length = undefined
+Buffer.prototype.parent = undefined
+
+// toString(encoding, start=0, end=buffer.length)
+Buffer.prototype.toString = function (encoding, start, end) {
+  var loweredCase = false
+
+  start = start >>> 0
+  end = end === undefined || end === Infinity ? this.length : end >>> 0
+
+  if (!encoding) encoding = 'utf8'
+  if (start < 0) start = 0
+  if (end > this.length) end = this.length
+  if (end <= start) return ''
+
+  while (true) {
+    switch (encoding) {
+      case 'hex':
+        return hexSlice(this, start, end)
+
+      case 'utf8':
+      case 'utf-8':
+        return utf8Slice(this, start, end)
+
+      case 'ascii':
+        return asciiSlice(this, start, end)
+
+      case 'binary':
+        return binarySlice(this, start, end)
+
+      case 'base64':
+        return base64Slice(this, start, end)
+
+      case 'ucs2':
+      case 'ucs-2':
+      case 'utf16le':
+      case 'utf-16le':
+        return utf16leSlice(this, start, end)
+
+      default:
+        if (loweredCase)
+          throw new TypeError('Unknown encoding: ' + encoding)
+        encoding = (encoding + '').toLowerCase()
+        loweredCase = true
+    }
+  }
+}
+
+Buffer.prototype.equals = function (b) {
+  if(!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+  return Buffer.compare(this, b) === 0
+}
+
+Buffer.prototype.inspect = function () {
+  var str = ''
+  var max = exports.INSPECT_MAX_BYTES
+  if (this.length > 0) {
+    str = this.toString('hex', 0, max).match(/.{2}/g).join(' ')
+    if (this.length > max)
+      str += ' ... '
+  }
+  return '<Buffer ' + str + '>'
+}
+
+Buffer.prototype.compare = function (b) {
+  if (!Buffer.isBuffer(b)) throw new TypeError('Argument must be a Buffer')
+  return Buffer.compare(this, b)
+}
+
+// `get` will be removed in Node 0.13+
+Buffer.prototype.get = function (offset) {
+  console.log('.get() is deprecated. Access using array indexes instead.')
+  return this.readUInt8(offset)
+}
+
+// `set` will be removed in Node 0.13+
+Buffer.prototype.set = function (v, offset) {
+  console.log('.set() is deprecated. Access using array indexes instead.')
+  return this.writeUInt8(v, offset)
+}
 
 function hexWrite (buf, string, offset, length) {
   offset = Number(offset) || 0
@@ -1819,14 +1912,14 @@ function hexWrite (buf, string, offset, length) {
 
   // must be an even number of digits
   var strLen = string.length
-  assert(strLen % 2 === 0, 'Invalid hex string')
+  if (strLen % 2 !== 0) throw new Error('Invalid hex string')
 
   if (length > strLen / 2) {
     length = strLen / 2
   }
   for (var i = 0; i < length; i++) {
     var byte = parseInt(string.substr(i * 2, 2), 16)
-    assert(!isNaN(byte), 'Invalid hex string')
+    if (isNaN(byte)) throw new Error('Invalid hex string')
     buf[offset + i] = byte
   }
   return i
@@ -1908,48 +2001,7 @@ Buffer.prototype.write = function (string, offset, length, encoding) {
       ret = utf16leWrite(this, string, offset, length)
       break
     default:
-      throw new Error('Unknown encoding')
-  }
-  return ret
-}
-
-Buffer.prototype.toString = function (encoding, start, end) {
-  var self = this
-
-  encoding = String(encoding || 'utf8').toLowerCase()
-  start = Number(start) || 0
-  end = (end === undefined) ? self.length : Number(end)
-
-  // Fastpath empty strings
-  if (end === start)
-    return ''
-
-  var ret
-  switch (encoding) {
-    case 'hex':
-      ret = hexSlice(self, start, end)
-      break
-    case 'utf8':
-    case 'utf-8':
-      ret = utf8Slice(self, start, end)
-      break
-    case 'ascii':
-      ret = asciiSlice(self, start, end)
-      break
-    case 'binary':
-      ret = binarySlice(self, start, end)
-      break
-    case 'base64':
-      ret = base64Slice(self, start, end)
-      break
-    case 'ucs2':
-    case 'ucs-2':
-    case 'utf16le':
-    case 'utf-16le':
-      ret = utf16leSlice(self, start, end)
-      break
-    default:
-      throw new Error('Unknown encoding')
+      throw new TypeError('Unknown encoding: ' + encoding)
   }
   return ret
 }
@@ -1958,52 +2010,6 @@ Buffer.prototype.toJSON = function () {
   return {
     type: 'Buffer',
     data: Array.prototype.slice.call(this._arr || this, 0)
-  }
-}
-
-Buffer.prototype.equals = function (b) {
-  assert(Buffer.isBuffer(b), 'Argument must be a Buffer')
-  return Buffer.compare(this, b) === 0
-}
-
-Buffer.prototype.compare = function (b) {
-  assert(Buffer.isBuffer(b), 'Argument must be a Buffer')
-  return Buffer.compare(this, b)
-}
-
-// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
-Buffer.prototype.copy = function (target, target_start, start, end) {
-  var source = this
-
-  if (!start) start = 0
-  if (!end && end !== 0) end = this.length
-  if (!target_start) target_start = 0
-
-  // Copy 0 bytes; we're done
-  if (end === start) return
-  if (target.length === 0 || source.length === 0) return
-
-  // Fatal error conditions
-  assert(end >= start, 'sourceEnd < sourceStart')
-  assert(target_start >= 0 && target_start < target.length,
-      'targetStart out of bounds')
-  assert(start >= 0 && start < source.length, 'sourceStart out of bounds')
-  assert(end >= 0 && end <= source.length, 'sourceEnd out of bounds')
-
-  // Are we oob?
-  if (end > this.length)
-    end = this.length
-  if (target.length - target_start < end - start)
-    end = target.length - target_start + start
-
-  var len = end - start
-
-  if (len < 100 || !Buffer._useTypedArrays) {
-    for (var i = 0; i < len; i++) {
-      target[i + target_start] = this[i + start]
-    }
-  } else {
-    target._set(this.subarray(start, start + len), target_start)
   }
 }
 
@@ -2070,10 +2076,29 @@ function utf16leSlice (buf, start, end) {
 
 Buffer.prototype.slice = function (start, end) {
   var len = this.length
-  start = clamp(start, len, 0)
-  end = clamp(end, len, len)
+  start = ~~start
+  end = end === undefined ? len : ~~end
 
-  if (Buffer._useTypedArrays) {
+  if (start < 0) {
+    start += len;
+    if (start < 0)
+      start = 0
+  } else if (start > len) {
+    start = len
+  }
+
+  if (end < 0) {
+    end += len
+    if (end < 0)
+      end = 0
+  } else if (end > len) {
+    end = len
+  }
+
+  if (end < start)
+    end = start
+
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
     return Buffer._augment(this.subarray(start, end))
   } else {
     var sliceLen = end - start
@@ -2085,365 +2110,275 @@ Buffer.prototype.slice = function (start, end) {
   }
 }
 
-// `get` will be removed in Node 0.13+
-Buffer.prototype.get = function (offset) {
-  console.log('.get() is deprecated. Access using array indexes instead.')
-  return this.readUInt8(offset)
-}
-
-// `set` will be removed in Node 0.13+
-Buffer.prototype.set = function (v, offset) {
-  console.log('.set() is deprecated. Access using array indexes instead.')
-  return this.writeUInt8(v, offset)
+/*
+ * Need to make sure that buffer isn't trying to write out of bounds.
+ */
+function checkOffset (offset, ext, length) {
+  if ((offset % 1) !== 0 || offset < 0)
+    throw new RangeError('offset is not uint')
+  if (offset + ext > length)
+    throw new RangeError('Trying to access beyond buffer length')
 }
 
 Buffer.prototype.readUInt8 = function (offset, noAssert) {
-  if (!noAssert) {
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset < this.length, 'Trying to read beyond buffer length')
-  }
-
-  if (offset >= this.length)
-    return
-
+  if (!noAssert)
+    checkOffset(offset, 1, this.length)
   return this[offset]
 }
 
-function readUInt16 (buf, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 1 < buf.length, 'Trying to read beyond buffer length')
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  var val
-  if (littleEndian) {
-    val = buf[offset]
-    if (offset + 1 < len)
-      val |= buf[offset + 1] << 8
-  } else {
-    val = buf[offset] << 8
-    if (offset + 1 < len)
-      val |= buf[offset + 1]
-  }
-  return val
-}
-
 Buffer.prototype.readUInt16LE = function (offset, noAssert) {
-  return readUInt16(this, offset, true, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 2, this.length)
+  return this[offset] | (this[offset + 1] << 8)
 }
 
 Buffer.prototype.readUInt16BE = function (offset, noAssert) {
-  return readUInt16(this, offset, false, noAssert)
-}
-
-function readUInt32 (buf, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  var val
-  if (littleEndian) {
-    if (offset + 2 < len)
-      val = buf[offset + 2] << 16
-    if (offset + 1 < len)
-      val |= buf[offset + 1] << 8
-    val |= buf[offset]
-    if (offset + 3 < len)
-      val = val + (buf[offset + 3] << 24 >>> 0)
-  } else {
-    if (offset + 1 < len)
-      val = buf[offset + 1] << 16
-    if (offset + 2 < len)
-      val |= buf[offset + 2] << 8
-    if (offset + 3 < len)
-      val |= buf[offset + 3]
-    val = val + (buf[offset] << 24 >>> 0)
-  }
-  return val
+  if (!noAssert)
+    checkOffset(offset, 2, this.length)
+  return (this[offset] << 8) | this[offset + 1]
 }
 
 Buffer.prototype.readUInt32LE = function (offset, noAssert) {
-  return readUInt32(this, offset, true, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 4, this.length)
+
+  return ((this[offset]) |
+      (this[offset + 1] << 8) |
+      (this[offset + 2] << 16)) +
+      (this[offset + 3] * 0x1000000)
 }
 
 Buffer.prototype.readUInt32BE = function (offset, noAssert) {
-  return readUInt32(this, offset, false, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 4, this.length)
+
+  return (this[offset] * 0x1000000) +
+      ((this[offset + 1] << 16) |
+      (this[offset + 2] << 8) |
+      this[offset + 3])
 }
 
 Buffer.prototype.readInt8 = function (offset, noAssert) {
-  if (!noAssert) {
-    assert(offset !== undefined && offset !== null,
-        'missing offset')
-    assert(offset < this.length, 'Trying to read beyond buffer length')
-  }
-
-  if (offset >= this.length)
-    return
-
-  var neg = this[offset] & 0x80
-  if (neg)
-    return (0xff - this[offset] + 1) * -1
-  else
-    return this[offset]
-}
-
-function readInt16 (buf, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 1 < buf.length, 'Trying to read beyond buffer length')
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  var val = readUInt16(buf, offset, littleEndian, true)
-  var neg = val & 0x8000
-  if (neg)
-    return (0xffff - val + 1) * -1
-  else
-    return val
+  if (!noAssert)
+    checkOffset(offset, 1, this.length)
+  if (!(this[offset] & 0x80))
+    return (this[offset])
+  return ((0xff - this[offset] + 1) * -1)
 }
 
 Buffer.prototype.readInt16LE = function (offset, noAssert) {
-  return readInt16(this, offset, true, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 2, this.length)
+  var val = this[offset] | (this[offset + 1] << 8)
+  return (val & 0x8000) ? val | 0xFFFF0000 : val
 }
 
 Buffer.prototype.readInt16BE = function (offset, noAssert) {
-  return readInt16(this, offset, false, noAssert)
-}
-
-function readInt32 (buf, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  var val = readUInt32(buf, offset, littleEndian, true)
-  var neg = val & 0x80000000
-  if (neg)
-    return (0xffffffff - val + 1) * -1
-  else
-    return val
+  if (!noAssert)
+    checkOffset(offset, 2, this.length)
+  var val = this[offset + 1] | (this[offset] << 8)
+  return (val & 0x8000) ? val | 0xFFFF0000 : val
 }
 
 Buffer.prototype.readInt32LE = function (offset, noAssert) {
-  return readInt32(this, offset, true, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 4, this.length)
+
+  return (this[offset]) |
+      (this[offset + 1] << 8) |
+      (this[offset + 2] << 16) |
+      (this[offset + 3] << 24)
 }
 
 Buffer.prototype.readInt32BE = function (offset, noAssert) {
-  return readInt32(this, offset, false, noAssert)
-}
+  if (!noAssert)
+    checkOffset(offset, 4, this.length)
 
-function readFloat (buf, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset + 3 < buf.length, 'Trying to read beyond buffer length')
-  }
-
-  return ieee754.read(buf, offset, littleEndian, 23, 4)
+  return (this[offset] << 24) |
+      (this[offset + 1] << 16) |
+      (this[offset + 2] << 8) |
+      (this[offset + 3])
 }
 
 Buffer.prototype.readFloatLE = function (offset, noAssert) {
-  return readFloat(this, offset, true, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 4, this.length)
+  return ieee754.read(this, offset, true, 23, 4)
 }
 
 Buffer.prototype.readFloatBE = function (offset, noAssert) {
-  return readFloat(this, offset, false, noAssert)
-}
-
-function readDouble (buf, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset + 7 < buf.length, 'Trying to read beyond buffer length')
-  }
-
-  return ieee754.read(buf, offset, littleEndian, 52, 8)
+  if (!noAssert)
+    checkOffset(offset, 4, this.length)
+  return ieee754.read(this, offset, false, 23, 4)
 }
 
 Buffer.prototype.readDoubleLE = function (offset, noAssert) {
-  return readDouble(this, offset, true, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 8, this.length)
+  return ieee754.read(this, offset, true, 52, 8)
 }
 
 Buffer.prototype.readDoubleBE = function (offset, noAssert) {
-  return readDouble(this, offset, false, noAssert)
+  if (!noAssert)
+    checkOffset(offset, 8, this.length)
+  return ieee754.read(this, offset, false, 52, 8)
+}
+
+function checkInt (buf, value, offset, ext, max, min) {
+  if (!Buffer.isBuffer(buf)) throw new TypeError('buffer must be a Buffer instance')
+  if (value > max || value < min) throw new TypeError('value is out of bounds')
+  if (offset + ext > buf.length) throw new TypeError('index out of range')
 }
 
 Buffer.prototype.writeUInt8 = function (value, offset, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset < this.length, 'trying to write beyond buffer length')
-    verifuint(value, 0xff)
-  }
-
-  if (offset >= this.length) return
-
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 1, 0xff, 0)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
   this[offset] = value
   return offset + 1
 }
 
-function writeUInt16 (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 1 < buf.length, 'trying to write beyond buffer length')
-    verifuint(value, 0xffff)
+function objectWriteUInt16 (buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffff + value + 1
+  for (var i = 0, j = Math.min(buf.length - offset, 2); i < j; i++) {
+    buf[offset + i] = (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
+      (littleEndian ? i : 1 - i) * 8
   }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  for (var i = 0, j = Math.min(len - offset, 2); i < j; i++) {
-    buf[offset + i] =
-        (value & (0xff << (8 * (littleEndian ? i : 1 - i)))) >>>
-            (littleEndian ? i : 1 - i) * 8
-  }
-  return offset + 2
 }
 
 Buffer.prototype.writeUInt16LE = function (value, offset, noAssert) {
-  return writeUInt16(this, value, offset, true, noAssert)
-}
-
-Buffer.prototype.writeUInt16BE = function (value, offset, noAssert) {
-  return writeUInt16(this, value, offset, false, noAssert)
-}
-
-function writeUInt32 (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 3 < buf.length, 'trying to write beyond buffer length')
-    verifuint(value, 0xffffffff)
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  for (var i = 0, j = Math.min(len - offset, 4); i < j; i++) {
-    buf[offset + i] =
-        (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
-  }
-  return offset + 4
-}
-
-Buffer.prototype.writeUInt32LE = function (value, offset, noAssert) {
-  return writeUInt32(this, value, offset, true, noAssert)
-}
-
-Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
-  return writeUInt32(this, value, offset, false, noAssert)
-}
-
-Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset < this.length, 'Trying to write beyond buffer length')
-    verifsint(value, 0x7f, -0x80)
-  }
-
-  if (offset >= this.length)
-    return
-
-  if (value >= 0)
-    this.writeUInt8(value, offset, noAssert)
-  else
-    this.writeUInt8(0xff + value + 1, offset, noAssert)
-  return offset + 1
-}
-
-function writeInt16 (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 1 < buf.length, 'Trying to write beyond buffer length')
-    verifsint(value, 0x7fff, -0x8000)
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  if (value >= 0)
-    writeUInt16(buf, value, offset, littleEndian, noAssert)
-  else
-    writeUInt16(buf, 0xffff + value + 1, offset, littleEndian, noAssert)
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 2, 0xffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value
+    this[offset + 1] = (value >>> 8)
+  } else objectWriteUInt16(this, value, offset, true)
   return offset + 2
 }
 
-Buffer.prototype.writeInt16LE = function (value, offset, noAssert) {
-  return writeInt16(this, value, offset, true, noAssert)
+Buffer.prototype.writeUInt16BE = function (value, offset, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 2, 0xffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 8)
+    this[offset + 1] = value
+  } else objectWriteUInt16(this, value, offset, false)
+  return offset + 2
 }
 
-Buffer.prototype.writeInt16BE = function (value, offset, noAssert) {
-  return writeInt16(this, value, offset, false, noAssert)
-}
-
-function writeInt32 (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 3 < buf.length, 'Trying to write beyond buffer length')
-    verifsint(value, 0x7fffffff, -0x80000000)
+function objectWriteUInt32 (buf, value, offset, littleEndian) {
+  if (value < 0) value = 0xffffffff + value + 1
+  for (var i = 0, j = Math.min(buf.length - offset, 4); i < j; i++) {
+    buf[offset + i] = (value >>> (littleEndian ? i : 3 - i) * 8) & 0xff
   }
+}
 
-  var len = buf.length
-  if (offset >= len)
-    return
-
-  if (value >= 0)
-    writeUInt32(buf, value, offset, littleEndian, noAssert)
-  else
-    writeUInt32(buf, 0xffffffff + value + 1, offset, littleEndian, noAssert)
+Buffer.prototype.writeUInt32LE = function (value, offset, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 4, 0xffffffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset + 3] = (value >>> 24)
+    this[offset + 2] = (value >>> 16)
+    this[offset + 1] = (value >>> 8)
+    this[offset] = value
+  } else objectWriteUInt32(this, value, offset, true)
   return offset + 4
 }
 
+Buffer.prototype.writeUInt32BE = function (value, offset, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 4, 0xffffffff, 0)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 24)
+    this[offset + 1] = (value >>> 16)
+    this[offset + 2] = (value >>> 8)
+    this[offset + 3] = value
+  } else objectWriteUInt32(this, value, offset, false)
+  return offset + 4
+}
+
+Buffer.prototype.writeInt8 = function (value, offset, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 1, 0x7f, -0x80)
+  if (!Buffer.TYPED_ARRAY_SUPPORT) value = Math.floor(value)
+  if (value < 0) value = 0xff + value + 1
+  this[offset] = value
+  return offset + 1
+}
+
+Buffer.prototype.writeInt16LE = function (value, offset, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value
+    this[offset + 1] = (value >>> 8)
+  } else objectWriteUInt16(this, value, offset, true)
+  return offset + 2
+}
+
+Buffer.prototype.writeInt16BE = function (value, offset, noAssert) {
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 2, 0x7fff, -0x8000)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 8)
+    this[offset + 1] = value
+  } else objectWriteUInt16(this, value, offset, false)
+  return offset + 2
+}
+
 Buffer.prototype.writeInt32LE = function (value, offset, noAssert) {
-  return writeInt32(this, value, offset, true, noAssert)
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = value
+    this[offset + 1] = (value >>> 8)
+    this[offset + 2] = (value >>> 16)
+    this[offset + 3] = (value >>> 24)
+  } else objectWriteUInt32(this, value, offset, true)
+  return offset + 4
 }
 
 Buffer.prototype.writeInt32BE = function (value, offset, noAssert) {
-  return writeInt32(this, value, offset, false, noAssert)
+  value = +value
+  offset = offset >>> 0
+  if (!noAssert)
+    checkInt(this, value, offset, 4, 0x7fffffff, -0x80000000)
+  if (value < 0) value = 0xffffffff + value + 1
+  if (Buffer.TYPED_ARRAY_SUPPORT) {
+    this[offset] = (value >>> 24)
+    this[offset + 1] = (value >>> 16)
+    this[offset + 2] = (value >>> 8)
+    this[offset + 3] = value
+  } else objectWriteUInt32(this, value, offset, false)
+  return offset + 4
+}
+
+function checkIEEE754 (buf, value, offset, ext, max, min) {
+  if (value > max || value < min) throw new TypeError('value is out of bounds')
+  if (offset + ext > buf.length) throw new TypeError('index out of range')
 }
 
 function writeFloat (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 3 < buf.length, 'Trying to write beyond buffer length')
-    verifIEEE754(value, 3.4028234663852886e+38, -3.4028234663852886e+38)
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
+  if (!noAssert)
+    checkIEEE754(buf, value, offset, 4, 3.4028234663852886e+38, -3.4028234663852886e+38)
   ieee754.write(buf, value, offset, littleEndian, 23, 4)
   return offset + 4
 }
@@ -2457,19 +2392,8 @@ Buffer.prototype.writeFloatBE = function (value, offset, noAssert) {
 }
 
 function writeDouble (buf, value, offset, littleEndian, noAssert) {
-  if (!noAssert) {
-    assert(value !== undefined && value !== null, 'missing value')
-    assert(typeof littleEndian === 'boolean', 'missing or invalid endian')
-    assert(offset !== undefined && offset !== null, 'missing offset')
-    assert(offset + 7 < buf.length,
-        'Trying to write beyond buffer length')
-    verifIEEE754(value, 1.7976931348623157E+308, -1.7976931348623157E+308)
-  }
-
-  var len = buf.length
-  if (offset >= len)
-    return
-
+  if (!noAssert)
+    checkIEEE754(buf, value, offset, 8, 1.7976931348623157E+308, -1.7976931348623157E+308)
   ieee754.write(buf, value, offset, littleEndian, 52, 8)
   return offset + 8
 }
@@ -2482,20 +2406,56 @@ Buffer.prototype.writeDoubleBE = function (value, offset, noAssert) {
   return writeDouble(this, value, offset, false, noAssert)
 }
 
+// copy(targetBuffer, targetStart=0, sourceStart=0, sourceEnd=buffer.length)
+Buffer.prototype.copy = function (target, target_start, start, end) {
+  var source = this
+
+  if (!start) start = 0
+  if (!end && end !== 0) end = this.length
+  if (!target_start) target_start = 0
+
+  // Copy 0 bytes; we're done
+  if (end === start) return
+  if (target.length === 0 || source.length === 0) return
+
+  // Fatal error conditions
+  if (end < start) throw new TypeError('sourceEnd < sourceStart')
+  if (target_start < 0 || target_start >= target.length)
+    throw new TypeError('targetStart out of bounds')
+  if (start < 0 || start >= source.length) throw new TypeError('sourceStart out of bounds')
+  if (end < 0 || end > source.length) throw new TypeError('sourceEnd out of bounds')
+
+  // Are we oob?
+  if (end > this.length)
+    end = this.length
+  if (target.length - target_start < end - start)
+    end = target.length - target_start + start
+
+  var len = end - start
+
+  if (len < 100 || !Buffer.TYPED_ARRAY_SUPPORT) {
+    for (var i = 0; i < len; i++) {
+      target[i + target_start] = this[i + start]
+    }
+  } else {
+    target._set(this.subarray(start, start + len), target_start)
+  }
+}
+
 // fill(value, start=0, end=buffer.length)
 Buffer.prototype.fill = function (value, start, end) {
   if (!value) value = 0
   if (!start) start = 0
   if (!end) end = this.length
 
-  assert(end >= start, 'end < start')
+  if (end < start) throw new TypeError('end < start')
 
   // Fill 0 bytes; we're done
   if (end === start) return
   if (this.length === 0) return
 
-  assert(start >= 0 && start < this.length, 'start out of bounds')
-  assert(end >= 0 && end <= this.length, 'end out of bounds')
+  if (start < 0 || start >= this.length) throw new TypeError('start out of bounds')
+  if (end < 0 || end > this.length) throw new TypeError('end out of bounds')
 
   var i
   if (typeof value === 'number') {
@@ -2513,26 +2473,13 @@ Buffer.prototype.fill = function (value, start, end) {
   return this
 }
 
-Buffer.prototype.inspect = function () {
-  var out = []
-  var len = this.length
-  for (var i = 0; i < len; i++) {
-    out[i] = toHex(this[i])
-    if (i === exports.INSPECT_MAX_BYTES) {
-      out[i + 1] = '...'
-      break
-    }
-  }
-  return '<Buffer ' + out.join(' ') + '>'
-}
-
 /**
  * Creates a new `ArrayBuffer` with the *copied* memory of the buffer instance.
  * Added in Node 0.12. Only available in browsers that support ArrayBuffer.
  */
 Buffer.prototype.toArrayBuffer = function () {
   if (typeof Uint8Array !== 'undefined') {
-    if (Buffer._useTypedArrays) {
+    if (Buffer.TYPED_ARRAY_SUPPORT) {
       return (new Buffer(this)).buffer
     } else {
       var buf = new Uint8Array(this.length)
@@ -2542,7 +2489,7 @@ Buffer.prototype.toArrayBuffer = function () {
       return buf.buffer
     }
   } else {
-    throw new Error('Buffer.toArrayBuffer not supported in this browser')
+    throw new TypeError('Buffer.toArrayBuffer not supported in this browser')
   }
 }
 
@@ -2608,34 +2555,21 @@ Buffer._augment = function (arr) {
   return arr
 }
 
+var INVALID_BASE64_RE = /[^+\/0-9A-z]/g
+
+function base64clean (str) {
+  // Node strips out invalid characters like \n and \t from the string, base64-js does not
+  str = stringtrim(str).replace(INVALID_BASE64_RE, '')
+  // Node allows for non-padded base64 strings (missing trailing ===), base64-js does not
+  while (str.length % 4 !== 0) {
+    str = str + '='
+  }
+  return str
+}
+
 function stringtrim (str) {
   if (str.trim) return str.trim()
   return str.replace(/^\s+|\s+$/g, '')
-}
-
-// slice(start, end)
-function clamp (index, len, defaultValue) {
-  if (typeof index !== 'number') return defaultValue
-  index = ~~index;  // Coerce to integer.
-  if (index >= len) return len
-  if (index >= 0) return index
-  index += len
-  if (index >= 0) return index
-  return 0
-}
-
-function coerce (length) {
-  // Coerce length to a number (possibly NaN), round up
-  // in case it's fractional (e.g. 123.456) then do a
-  // double negate to coerce a NaN to 0. Easy, right?
-  length = ~~Math.ceil(+length)
-  return length < 0 ? 0 : length
-}
-
-function isArray (subject) {
-  return (Array.isArray || function (subject) {
-    return Object.prototype.toString.call(subject) === '[object Array]'
-  })(subject)
 }
 
 function isArrayish (subject) {
@@ -2711,36 +2645,7 @@ function decodeUtf8Char (str) {
   }
 }
 
-/*
- * We have to make sure that the value is a valid integer. This means that it
- * is non-negative. It has no fractional component and that it does not
- * exceed the maximum allowed value.
- */
-function verifuint (value, max) {
-  assert(typeof value === 'number', 'cannot write a non-number as a number')
-  assert(value >= 0, 'specified a negative value for writing an unsigned value')
-  assert(value <= max, 'value is larger than maximum value for type')
-  assert(Math.floor(value) === value, 'value has a fractional component')
-}
-
-function verifsint (value, max, min) {
-  assert(typeof value === 'number', 'cannot write a non-number as a number')
-  assert(value <= max, 'value larger than maximum allowed value')
-  assert(value >= min, 'value smaller than minimum allowed value')
-  assert(Math.floor(value) === value, 'value has a fractional component')
-}
-
-function verifIEEE754 (value, max, min) {
-  assert(typeof value === 'number', 'cannot write a non-number as a number')
-  assert(value <= max, 'value larger than maximum allowed value')
-  assert(value >= min, 'value smaller than minimum allowed value')
-}
-
-function assert (test, message) {
-  if (!test) throw new Error(message || 'Failed assertion')
-}
-
-},{"base64-js":11,"ieee754":12}],11:[function(require,module,exports){
+},{"base64-js":11,"ieee754":12,"is-array":13}],11:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -2750,7 +2655,6 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
     ? Uint8Array
     : Array
 
-	var ZERO   = '0'.charCodeAt(0)
 	var PLUS   = '+'.charCodeAt(0)
 	var SLASH  = '/'.charCodeAt(0)
 	var NUMBER = '0'.charCodeAt(0)
@@ -2859,9 +2763,9 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 		return output
 	}
 
-	module.exports.toByteArray = b64ToByteArray
-	module.exports.fromByteArray = uint8ToBase64
-}())
+	exports.toByteArray = b64ToByteArray
+	exports.fromByteArray = uint8ToBase64
+}(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
 },{}],12:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
@@ -2950,7 +2854,121 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
 };
 
 },{}],13:[function(require,module,exports){
-var Buffer = require('buffer').Buffer;
+
+/**
+ * isArray
+ */
+
+var isArray = Array.isArray;
+
+/**
+ * toString
+ */
+
+var str = Object.prototype.toString;
+
+/**
+ * Whether or not the given `val`
+ * is an array.
+ *
+ * example:
+ *
+ *        isArray([]);
+ *        // > true
+ *        isArray(arguments);
+ *        // > false
+ *        isArray('');
+ *        // > false
+ *
+ * @param {mixed} val
+ * @return {bool}
+ */
+
+module.exports = isArray || function (val) {
+  return !! val && '[object Array]' == str.call(val);
+};
+
+},{}],14:[function(require,module,exports){
+(function (Buffer){
+var createHash = require('sha.js')
+
+var md5 = toConstructor(require('./md5'))
+var rmd160 = toConstructor(require('ripemd160'))
+
+function toConstructor (fn) {
+  return function () {
+    var buffers = []
+    var m= {
+      update: function (data, enc) {
+        if(!Buffer.isBuffer(data)) data = new Buffer(data, enc)
+        buffers.push(data)
+        return this
+      },
+      digest: function (enc) {
+        var buf = Buffer.concat(buffers)
+        var r = fn(buf)
+        buffers = null
+        return enc ? r.toString(enc) : r
+      }
+    }
+    return m
+  }
+}
+
+module.exports = function (alg) {
+  if('md5' === alg) return new md5()
+  if('rmd160' === alg) return new rmd160()
+  return createHash(alg)
+}
+
+}).call(this,require("buffer").Buffer)
+},{"./md5":18,"buffer":10,"ripemd160":19,"sha.js":21}],15:[function(require,module,exports){
+(function (Buffer){
+var createHash = require('./create-hash')
+
+var blocksize = 64
+var zeroBuffer = new Buffer(blocksize); zeroBuffer.fill(0)
+
+module.exports = Hmac
+
+function Hmac (alg, key) {
+  if(!(this instanceof Hmac)) return new Hmac(alg, key)
+  this._opad = opad
+  this._alg = alg
+
+  key = this._key = !Buffer.isBuffer(key) ? new Buffer(key) : key
+
+  if(key.length > blocksize) {
+    key = createHash(alg).update(key).digest()
+  } else if(key.length < blocksize) {
+    key = Buffer.concat([key, zeroBuffer], blocksize)
+  }
+
+  var ipad = this._ipad = new Buffer(blocksize)
+  var opad = this._opad = new Buffer(blocksize)
+
+  for(var i = 0; i < blocksize; i++) {
+    ipad[i] = key[i] ^ 0x36
+    opad[i] = key[i] ^ 0x5C
+  }
+
+  this._hash = createHash(alg).update(ipad)
+}
+
+Hmac.prototype.update = function (data, enc) {
+  this._hash.update(data, enc)
+  return this
+}
+
+Hmac.prototype.digest = function (enc) {
+  var h = this._hash.digest()
+  return createHash(this._alg).update(this._opad).update(h).digest(enc)
+}
+
+
+}).call(this,require("buffer").Buffer)
+},{"./create-hash":14,"buffer":10}],16:[function(require,module,exports){
+(function (Buffer){
 var intSize = 4;
 var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
 var chrsz = 8;
@@ -2986,63 +3004,10 @@ function hash(buf, fn, hashSize, bigEndian) {
 
 module.exports = { hash: hash };
 
-},{"buffer":10}],14:[function(require,module,exports){
-var Buffer = require('buffer').Buffer
-var sha = require('./sha')
-var sha256 = require('./sha256')
+}).call(this,require("buffer").Buffer)
+},{"buffer":10}],17:[function(require,module,exports){
+(function (Buffer){
 var rng = require('./rng')
-var md5 = require('./md5')
-
-var algorithms = {
-  sha1: sha,
-  sha256: sha256,
-  md5: md5
-}
-
-var blocksize = 64
-var zeroBuffer = new Buffer(blocksize); zeroBuffer.fill(0)
-function hmac(fn, key, data) {
-  if(!Buffer.isBuffer(key)) key = new Buffer(key)
-  if(!Buffer.isBuffer(data)) data = new Buffer(data)
-
-  if(key.length > blocksize) {
-    key = fn(key)
-  } else if(key.length < blocksize) {
-    key = Buffer.concat([key, zeroBuffer], blocksize)
-  }
-
-  var ipad = new Buffer(blocksize), opad = new Buffer(blocksize)
-  for(var i = 0; i < blocksize; i++) {
-    ipad[i] = key[i] ^ 0x36
-    opad[i] = key[i] ^ 0x5C
-  }
-
-  var hash = fn(Buffer.concat([ipad, data]))
-  return fn(Buffer.concat([opad, hash]))
-}
-
-function hash(alg, key) {
-  alg = alg || 'sha1'
-  var fn = algorithms[alg]
-  var bufs = []
-  var length = 0
-  if(!fn) error('algorithm:', alg, 'is not yet supported')
-  return {
-    update: function (data) {
-      if(!Buffer.isBuffer(data)) data = new Buffer(data)
-        
-      bufs.push(data)
-      length += data.length
-      return this
-    },
-    digest: function (enc) {
-      var buf = Buffer.concat(bufs)
-      var r = key ? hmac(fn, key, buf) : fn(buf)
-      bufs = null
-      return enc ? r.toString(enc) : r
-    }
-  }
-}
 
 function error () {
   var m = [].slice.call(arguments).join(' ')
@@ -3053,8 +3018,10 @@ function error () {
     ].join('\n'))
 }
 
-exports.createHash = function (alg) { return hash(alg) }
-exports.createHmac = function (alg, key) { return hash(alg, key) }
+exports.createHash = require('./create-hash')
+
+exports.createHmac = require('./create-hmac')
+
 exports.randomBytes = function(size, callback) {
   if (callback && callback.call) {
     try {
@@ -3070,6 +3037,16 @@ function each(a, f) {
     f(a[i], i)
 }
 
+exports.getHashes = function () {
+  return ['sha1', 'sha256', 'md5', 'rmd160']
+
+}
+
+var p = require('./pbkdf2')(exports.createHmac)
+exports.pbkdf2 = p.pbkdf2
+exports.pbkdf2Sync = p.pbkdf2Sync
+
+
 // the least I can do is make error messages for the rest of the node.js/crypto api.
 each(['createCredentials'
 , 'createCipher'
@@ -3079,13 +3056,14 @@ each(['createCredentials'
 , 'createSign'
 , 'createVerify'
 , 'createDiffieHellman'
-, 'pbkdf2'], function (name) {
+], function (name) {
   exports[name] = function () {
     error('sorry,', name, 'is not implemented yet')
   }
 })
 
-},{"./md5":15,"./rng":16,"./sha":17,"./sha256":18,"buffer":10}],15:[function(require,module,exports){
+}).call(this,require("buffer").Buffer)
+},{"./create-hash":14,"./create-hmac":15,"./pbkdf2":25,"./rng":26,"buffer":10}],18:[function(require,module,exports){
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -3096,14 +3074,6 @@ each(['createCredentials'
  */
 
 var helpers = require('./helpers');
-
-/*
- * Perform a simple self-test to see if the VM is working
- */
-function md5_vm_test()
-{
-  return hex_md5("abc") == "900150983cd24fb0d6963f7d28e17f72";
-}
 
 /*
  * Calculate the MD5 of an array of little-endian words, and a bit length
@@ -3250,9 +3220,785 @@ module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
 
-},{"./helpers":13}],16:[function(require,module,exports){
+},{"./helpers":16}],19:[function(require,module,exports){
+(function (Buffer){
+
+module.exports = ripemd160
+
+
+
+/*
+CryptoJS v3.1.2
+code.google.com/p/crypto-js
+(c) 2009-2013 by Jeff Mott. All rights reserved.
+code.google.com/p/crypto-js/wiki/License
+*/
+/** @preserve
+(c) 2012 by Cédric Mesnil. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+    - Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+    - Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+// Constants table
+var zl = [
+    0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+    7,  4, 13,  1, 10,  6, 15,  3, 12,  0,  9,  5,  2, 14, 11,  8,
+    3, 10, 14,  4,  9, 15,  8,  1,  2,  7,  0,  6, 13, 11,  5, 12,
+    1,  9, 11, 10,  0,  8, 12,  4, 13,  3,  7, 15, 14,  5,  6,  2,
+    4,  0,  5,  9,  7, 12,  2, 10, 14,  1,  3,  8, 11,  6, 15, 13];
+var zr = [
+    5, 14,  7,  0,  9,  2, 11,  4, 13,  6, 15,  8,  1, 10,  3, 12,
+    6, 11,  3,  7,  0, 13,  5, 10, 14, 15,  8, 12,  4,  9,  1,  2,
+    15,  5,  1,  3,  7, 14,  6,  9, 11,  8, 12,  2, 10,  0,  4, 13,
+    8,  6,  4,  1,  3, 11, 15,  0,  5, 12,  2, 13,  9,  7, 10, 14,
+    12, 15, 10,  4,  1,  5,  8,  7,  6,  2, 13, 14,  0,  3,  9, 11];
+var sl = [
+     11, 14, 15, 12,  5,  8,  7,  9, 11, 13, 14, 15,  6,  7,  9,  8,
+    7, 6,   8, 13, 11,  9,  7, 15,  7, 12, 15,  9, 11,  7, 13, 12,
+    11, 13,  6,  7, 14,  9, 13, 15, 14,  8, 13,  6,  5, 12,  7,  5,
+      11, 12, 14, 15, 14, 15,  9,  8,  9, 14,  5,  6,  8,  6,  5, 12,
+    9, 15,  5, 11,  6,  8, 13, 12,  5, 12, 13, 14, 11,  8,  5,  6 ];
+var sr = [
+    8,  9,  9, 11, 13, 15, 15,  5,  7,  7,  8, 11, 14, 14, 12,  6,
+    9, 13, 15,  7, 12,  8,  9, 11,  7,  7, 12,  7,  6, 15, 13, 11,
+    9,  7, 15, 11,  8,  6,  6, 14, 12, 13,  5, 14, 13, 13,  7,  5,
+    15,  5,  8, 11, 14, 14,  6, 14,  6,  9, 12,  9, 12,  5, 15,  8,
+    8,  5, 12,  9, 12,  5, 14,  6,  8, 13,  6,  5, 15, 13, 11, 11 ];
+
+var hl =  [ 0x00000000, 0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xA953FD4E];
+var hr =  [ 0x50A28BE6, 0x5C4DD124, 0x6D703EF3, 0x7A6D76E9, 0x00000000];
+
+var bytesToWords = function (bytes) {
+  var words = [];
+  for (var i = 0, b = 0; i < bytes.length; i++, b += 8) {
+    words[b >>> 5] |= bytes[i] << (24 - b % 32);
+  }
+  return words;
+};
+
+var wordsToBytes = function (words) {
+  var bytes = [];
+  for (var b = 0; b < words.length * 32; b += 8) {
+    bytes.push((words[b >>> 5] >>> (24 - b % 32)) & 0xFF);
+  }
+  return bytes;
+};
+
+var processBlock = function (H, M, offset) {
+
+  // Swap endian
+  for (var i = 0; i < 16; i++) {
+    var offset_i = offset + i;
+    var M_offset_i = M[offset_i];
+
+    // Swap
+    M[offset_i] = (
+        (((M_offset_i << 8)  | (M_offset_i >>> 24)) & 0x00ff00ff) |
+        (((M_offset_i << 24) | (M_offset_i >>> 8))  & 0xff00ff00)
+    );
+  }
+
+  // Working variables
+  var al, bl, cl, dl, el;
+  var ar, br, cr, dr, er;
+
+  ar = al = H[0];
+  br = bl = H[1];
+  cr = cl = H[2];
+  dr = dl = H[3];
+  er = el = H[4];
+  // Computation
+  var t;
+  for (var i = 0; i < 80; i += 1) {
+    t = (al +  M[offset+zl[i]])|0;
+    if (i<16){
+        t +=  f1(bl,cl,dl) + hl[0];
+    } else if (i<32) {
+        t +=  f2(bl,cl,dl) + hl[1];
+    } else if (i<48) {
+        t +=  f3(bl,cl,dl) + hl[2];
+    } else if (i<64) {
+        t +=  f4(bl,cl,dl) + hl[3];
+    } else {// if (i<80) {
+        t +=  f5(bl,cl,dl) + hl[4];
+    }
+    t = t|0;
+    t =  rotl(t,sl[i]);
+    t = (t+el)|0;
+    al = el;
+    el = dl;
+    dl = rotl(cl, 10);
+    cl = bl;
+    bl = t;
+
+    t = (ar + M[offset+zr[i]])|0;
+    if (i<16){
+        t +=  f5(br,cr,dr) + hr[0];
+    } else if (i<32) {
+        t +=  f4(br,cr,dr) + hr[1];
+    } else if (i<48) {
+        t +=  f3(br,cr,dr) + hr[2];
+    } else if (i<64) {
+        t +=  f2(br,cr,dr) + hr[3];
+    } else {// if (i<80) {
+        t +=  f1(br,cr,dr) + hr[4];
+    }
+    t = t|0;
+    t =  rotl(t,sr[i]) ;
+    t = (t+er)|0;
+    ar = er;
+    er = dr;
+    dr = rotl(cr, 10);
+    cr = br;
+    br = t;
+  }
+  // Intermediate hash value
+  t    = (H[1] + cl + dr)|0;
+  H[1] = (H[2] + dl + er)|0;
+  H[2] = (H[3] + el + ar)|0;
+  H[3] = (H[4] + al + br)|0;
+  H[4] = (H[0] + bl + cr)|0;
+  H[0] =  t;
+};
+
+function f1(x, y, z) {
+  return ((x) ^ (y) ^ (z));
+}
+
+function f2(x, y, z) {
+  return (((x)&(y)) | ((~x)&(z)));
+}
+
+function f3(x, y, z) {
+  return (((x) | (~(y))) ^ (z));
+}
+
+function f4(x, y, z) {
+  return (((x) & (z)) | ((y)&(~(z))));
+}
+
+function f5(x, y, z) {
+  return ((x) ^ ((y) |(~(z))));
+}
+
+function rotl(x,n) {
+  return (x<<n) | (x>>>(32-n));
+}
+
+function ripemd160(message) {
+  var H = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0];
+
+  if (typeof message == 'string')
+    message = new Buffer(message, 'utf8');
+
+  var m = bytesToWords(message);
+
+  var nBitsLeft = message.length * 8;
+  var nBitsTotal = message.length * 8;
+
+  // Add padding
+  m[nBitsLeft >>> 5] |= 0x80 << (24 - nBitsLeft % 32);
+  m[(((nBitsLeft + 64) >>> 9) << 4) + 14] = (
+      (((nBitsTotal << 8)  | (nBitsTotal >>> 24)) & 0x00ff00ff) |
+      (((nBitsTotal << 24) | (nBitsTotal >>> 8))  & 0xff00ff00)
+  );
+
+  for (var i=0 ; i<m.length; i += 16) {
+    processBlock(H, m, i);
+  }
+
+  // Swap endian
+  for (var i = 0; i < 5; i++) {
+      // Shortcut
+    var H_i = H[i];
+
+    // Swap
+    H[i] = (((H_i << 8)  | (H_i >>> 24)) & 0x00ff00ff) |
+          (((H_i << 24) | (H_i >>> 8))  & 0xff00ff00);
+  }
+
+  var digestbytes = wordsToBytes(H);
+  return new Buffer(digestbytes);
+}
+
+
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":10}],20:[function(require,module,exports){
+var u = require('./util')
+var write = u.write
+var fill = u.zeroFill
+
+module.exports = function (Buffer) {
+
+  //prototype class for hash functions
+  function Hash (blockSize, finalSize) {
+    this._block = new Buffer(blockSize) //new Uint32Array(blockSize/4)
+    this._finalSize = finalSize
+    this._blockSize = blockSize
+    this._len = 0
+    this._s = 0
+  }
+
+  Hash.prototype.init = function () {
+    this._s = 0
+    this._len = 0
+  }
+
+  function lengthOf(data, enc) {
+    if(enc == null)     return data.byteLength || data.length
+    if(enc == 'ascii' || enc == 'binary')  return data.length
+    if(enc == 'hex')    return data.length/2
+    if(enc == 'base64') return data.length/3
+  }
+
+  Hash.prototype.update = function (data, enc) {
+    var bl = this._blockSize
+
+    //I'd rather do this with a streaming encoder, like the opposite of
+    //http://nodejs.org/api/string_decoder.html
+    var length
+      if(!enc && 'string' === typeof data)
+        enc = 'utf8'
+
+    if(enc) {
+      if(enc === 'utf-8')
+        enc = 'utf8'
+
+      if(enc === 'base64' || enc === 'utf8')
+        data = new Buffer(data, enc), enc = null
+
+      length = lengthOf(data, enc)
+    } else
+      length = data.byteLength || data.length
+
+    var l = this._len += length
+    var s = this._s = (this._s || 0)
+    var f = 0
+    var buffer = this._block
+    while(s < l) {
+      var t = Math.min(length, f + bl)
+      write(buffer, data, enc, s%bl, f, t)
+      var ch = (t - f);
+      s += ch; f += ch
+
+      if(!(s%bl))
+        this._update(buffer)
+    }
+    this._s = s
+
+    return this
+
+  }
+
+  Hash.prototype.digest = function (enc) {
+    var bl = this._blockSize
+    var fl = this._finalSize
+    var len = this._len*8
+
+    var x = this._block
+
+    var bits = len % (bl*8)
+
+    //add end marker, so that appending 0's creats a different hash.
+    x[this._len % bl] = 0x80
+    fill(this._block, this._len % bl + 1)
+
+    if(bits >= fl*8) {
+      this._update(this._block)
+      u.zeroFill(this._block, 0)
+    }
+
+    //TODO: handle case where the bit length is > Math.pow(2, 29)
+    x.writeInt32BE(len, fl + 4) //big endian
+
+    var hash = this._update(this._block) || this._hash()
+    if(enc == null) return hash
+    return hash.toString(enc)
+  }
+
+  Hash.prototype._update = function () {
+    throw new Error('_update must be implemented by subclass')
+  }
+
+  return Hash
+}
+
+},{"./util":24}],21:[function(require,module,exports){
+var exports = module.exports = function (alg) {
+  var Alg = exports[alg]
+  if(!Alg) throw new Error(alg + ' is not supported (we accept pull requests)')
+  return new Alg()
+}
+
+var Buffer = require('buffer').Buffer
+var Hash   = require('./hash')(Buffer)
+
+exports.sha =
+exports.sha1 = require('./sha1')(Buffer, Hash)
+exports.sha256 = require('./sha256')(Buffer, Hash)
+
+},{"./hash":20,"./sha1":22,"./sha256":23,"buffer":10}],22:[function(require,module,exports){
+/*
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
+ * in FIPS PUB 180-1
+ * Version 2.1a Copyright Paul Johnston 2000 - 2002.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ * Distributed under the BSD License
+ * See http://pajhome.org.uk/crypt/md5 for details.
+ */
+module.exports = function (Buffer, Hash) {
+
+  var inherits = require('util').inherits
+
+  inherits(Sha1, Hash)
+
+  var A = 0|0
+  var B = 4|0
+  var C = 8|0
+  var D = 12|0
+  var E = 16|0
+
+  var BE = false
+  var LE = true
+
+  var W = new Int32Array(80)
+
+  var POOL = []
+
+  function Sha1 () {
+    if(POOL.length)
+      return POOL.pop().init()
+
+    if(!(this instanceof Sha1)) return new Sha1()
+    this._w = W
+    Hash.call(this, 16*4, 14*4)
+  
+    this._h = null
+    this.init()
+  }
+
+  Sha1.prototype.init = function () {
+    this._a = 0x67452301
+    this._b = 0xefcdab89
+    this._c = 0x98badcfe
+    this._d = 0x10325476
+    this._e = 0xc3d2e1f0
+
+    Hash.prototype.init.call(this)
+    return this
+  }
+
+  Sha1.prototype._POOL = POOL
+
+  // assume that array is a Uint32Array with length=16,
+  // and that if it is the last block, it already has the length and the 1 bit appended.
+
+
+  var isDV = new Buffer(1) instanceof DataView
+  function readInt32BE (X, i) {
+    return isDV
+      ? X.getInt32(i, false)
+      : X.readInt32BE(i)
+  }
+
+  Sha1.prototype._update = function (array) {
+
+    var X = this._block
+    var h = this._h
+    var a, b, c, d, e, _a, _b, _c, _d, _e
+
+    a = _a = this._a
+    b = _b = this._b
+    c = _c = this._c
+    d = _d = this._d
+    e = _e = this._e
+
+    var w = this._w
+
+    for(var j = 0; j < 80; j++) {
+      var W = w[j]
+        = j < 16
+        //? X.getInt32(j*4, false)
+        //? readInt32BE(X, j*4) //*/ X.readInt32BE(j*4) //*/
+        ? X.readInt32BE(j*4)
+        : rol(w[j - 3] ^ w[j -  8] ^ w[j - 14] ^ w[j - 16], 1)
+
+      var t =
+        add(
+          add(rol(a, 5), sha1_ft(j, b, c, d)),
+          add(add(e, W), sha1_kt(j))
+        );
+
+      e = d
+      d = c
+      c = rol(b, 30)
+      b = a
+      a = t
+    }
+
+    this._a = add(a, _a)
+    this._b = add(b, _b)
+    this._c = add(c, _c)
+    this._d = add(d, _d)
+    this._e = add(e, _e)
+  }
+
+  Sha1.prototype._hash = function () {
+    if(POOL.length < 100) POOL.push(this)
+    var H = new Buffer(20)
+    //console.log(this._a|0, this._b|0, this._c|0, this._d|0, this._e|0)
+    H.writeInt32BE(this._a|0, A)
+    H.writeInt32BE(this._b|0, B)
+    H.writeInt32BE(this._c|0, C)
+    H.writeInt32BE(this._d|0, D)
+    H.writeInt32BE(this._e|0, E)
+    return H
+  }
+
+  /*
+   * Perform the appropriate triplet combination function for the current
+   * iteration
+   */
+  function sha1_ft(t, b, c, d) {
+    if(t < 20) return (b & c) | ((~b) & d);
+    if(t < 40) return b ^ c ^ d;
+    if(t < 60) return (b & c) | (b & d) | (c & d);
+    return b ^ c ^ d;
+  }
+
+  /*
+   * Determine the appropriate additive constant for the current iteration
+   */
+  function sha1_kt(t) {
+    return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
+           (t < 60) ? -1894007588 : -899497514;
+  }
+
+  /*
+   * Add integers, wrapping at 2^32. This uses 16-bit operations internally
+   * to work around bugs in some JS interpreters.
+   * //dominictarr: this is 10 years old, so maybe this can be dropped?)
+   *
+   */
+  function add(x, y) {
+    return (x + y ) | 0
+  //lets see how this goes on testling.
+  //  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+  //  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+  //  return (msw << 16) | (lsw & 0xFFFF);
+  }
+
+  /*
+   * Bitwise rotate a 32-bit number to the left.
+   */
+  function rol(num, cnt) {
+    return (num << cnt) | (num >>> (32 - cnt));
+  }
+
+  return Sha1
+}
+
+},{"util":30}],23:[function(require,module,exports){
+
+/**
+ * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
+ * in FIPS 180-2
+ * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
+ * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
+ *
+ */
+
+var inherits = require('util').inherits
+var BE       = false
+var LE       = true
+var u        = require('./util')
+
+module.exports = function (Buffer, Hash) {
+
+  var K = [
+      0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
+      0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
+      0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3,
+      0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
+      0xE49B69C1, 0xEFBE4786, 0x0FC19DC6, 0x240CA1CC,
+      0x2DE92C6F, 0x4A7484AA, 0x5CB0A9DC, 0x76F988DA,
+      0x983E5152, 0xA831C66D, 0xB00327C8, 0xBF597FC7,
+      0xC6E00BF3, 0xD5A79147, 0x06CA6351, 0x14292967,
+      0x27B70A85, 0x2E1B2138, 0x4D2C6DFC, 0x53380D13,
+      0x650A7354, 0x766A0ABB, 0x81C2C92E, 0x92722C85,
+      0xA2BFE8A1, 0xA81A664B, 0xC24B8B70, 0xC76C51A3,
+      0xD192E819, 0xD6990624, 0xF40E3585, 0x106AA070,
+      0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5,
+      0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
+      0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
+      0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
+    ]
+
+  inherits(Sha256, Hash)
+  var W = new Array(64)
+  var POOL = []
+  function Sha256() {
+    if(POOL.length) {
+      //return POOL.shift().init()
+    }
+    //this._data = new Buffer(32)
+
+    this.init()
+
+    this._w = W //new Array(64)
+
+    Hash.call(this, 16*4, 14*4)
+  };
+
+  Sha256.prototype.init = function () {
+
+    this._a = 0x6a09e667|0
+    this._b = 0xbb67ae85|0
+    this._c = 0x3c6ef372|0
+    this._d = 0xa54ff53a|0
+    this._e = 0x510e527f|0
+    this._f = 0x9b05688c|0
+    this._g = 0x1f83d9ab|0
+    this._h = 0x5be0cd19|0
+
+    this._len = this._s = 0
+
+    return this
+  }
+
+  var safe_add = function(x, y) {
+    var lsw = (x & 0xFFFF) + (y & 0xFFFF);
+    var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
+    return (msw << 16) | (lsw & 0xFFFF);
+  }
+
+  function S (X, n) {
+    return (X >>> n) | (X << (32 - n));
+  }
+
+  function R (X, n) {
+    return (X >>> n);
+  }
+
+  function Ch (x, y, z) {
+    return ((x & y) ^ ((~x) & z));
+  }
+
+  function Maj (x, y, z) {
+    return ((x & y) ^ (x & z) ^ (y & z));
+  }
+
+  function Sigma0256 (x) {
+    return (S(x, 2) ^ S(x, 13) ^ S(x, 22));
+  }
+
+  function Sigma1256 (x) {
+    return (S(x, 6) ^ S(x, 11) ^ S(x, 25));
+  }
+
+  function Gamma0256 (x) {
+    return (S(x, 7) ^ S(x, 18) ^ R(x, 3));
+  }
+
+  function Gamma1256 (x) {
+    return (S(x, 17) ^ S(x, 19) ^ R(x, 10));
+  }
+
+  Sha256.prototype._update = function(m) {
+    var M = this._block
+    var W = this._w
+    var a, b, c, d, e, f, g, h
+    var T1, T2
+
+    a = this._a | 0
+    b = this._b | 0
+    c = this._c | 0
+    d = this._d | 0
+    e = this._e | 0
+    f = this._f | 0
+    g = this._g | 0
+    h = this._h | 0
+
+    for (var j = 0; j < 64; j++) {
+      var w = W[j] = j < 16
+        ? M.readInt32BE(j * 4)
+        : Gamma1256(W[j - 2]) + W[j - 7] + Gamma0256(W[j - 15]) + W[j - 16]
+
+      T1 = h + Sigma1256(e) + Ch(e, f, g) + K[j] + w
+
+      T2 = Sigma0256(a) + Maj(a, b, c);
+      h = g; g = f; f = e; e = d + T1; d = c; c = b; b = a; a = T1 + T2;
+    }
+
+    this._a = (a + this._a) | 0
+    this._b = (b + this._b) | 0
+    this._c = (c + this._c) | 0
+    this._d = (d + this._d) | 0
+    this._e = (e + this._e) | 0
+    this._f = (f + this._f) | 0
+    this._g = (g + this._g) | 0
+    this._h = (h + this._h) | 0
+
+  };
+
+  Sha256.prototype._hash = function () {
+    if(POOL.length < 10)
+      POOL.push(this)
+
+    var H = new Buffer(32)
+
+    H.writeInt32BE(this._a,  0)
+    H.writeInt32BE(this._b,  4)
+    H.writeInt32BE(this._c,  8)
+    H.writeInt32BE(this._d, 12)
+    H.writeInt32BE(this._e, 16)
+    H.writeInt32BE(this._f, 20)
+    H.writeInt32BE(this._g, 24)
+    H.writeInt32BE(this._h, 28)
+
+    return H
+  }
+
+  return Sha256
+
+}
+
+},{"./util":24,"util":30}],24:[function(require,module,exports){
+exports.write = write
+exports.zeroFill = zeroFill
+
+exports.toString = toString
+
+function write (buffer, string, enc, start, from, to, LE) {
+  var l = (to - from)
+  if(enc === 'ascii' || enc === 'binary') {
+    for( var i = 0; i < l; i++) {
+      buffer[start + i] = string.charCodeAt(i + from)
+    }
+  }
+  else if(enc == null) {
+    for( var i = 0; i < l; i++) {
+      buffer[start + i] = string[i + from]
+    }
+  }
+  else if(enc === 'hex') {
+    for(var i = 0; i < l; i++) {
+      var j = from + i
+      buffer[start + i] = parseInt(string[j*2] + string[(j*2)+1], 16)
+    }
+  }
+  else if(enc === 'base64') {
+    throw new Error('base64 encoding not yet supported')
+  }
+  else
+    throw new Error(enc +' encoding not yet supported')
+}
+
+//always fill to the end!
+function zeroFill(buf, from) {
+  for(var i = from; i < buf.length; i++)
+    buf[i] = 0
+}
+
+
+},{}],25:[function(require,module,exports){
+(function (Buffer){
+// JavaScript PBKDF2 Implementation
+// Based on http://git.io/qsv2zw
+// Licensed under LGPL v3
+// Copyright (c) 2013 jduncanator
+
+var blocksize = 64
+var zeroBuffer = new Buffer(blocksize); zeroBuffer.fill(0)
+
+module.exports = function (createHmac, exports) {
+  exports = exports || {}
+
+  exports.pbkdf2 = function(password, salt, iterations, keylen, cb) {
+    if('function' !== typeof cb)
+      throw new Error('No callback provided to pbkdf2');
+    setTimeout(function () {
+      cb(null, exports.pbkdf2Sync(password, salt, iterations, keylen))
+    })
+  }
+
+  exports.pbkdf2Sync = function(key, salt, iterations, keylen) {
+    if('number' !== typeof iterations)
+      throw new TypeError('Iterations not a number')
+    if(iterations < 0)
+      throw new TypeError('Bad iterations')
+    if('number' !== typeof keylen)
+      throw new TypeError('Key length not a number')
+    if(keylen < 0)
+      throw new TypeError('Bad key length')
+
+    //stretch key to the correct length that hmac wants it,
+    //otherwise this will happen every time hmac is called
+    //twice per iteration.
+    var key = !Buffer.isBuffer(key) ? new Buffer(key) : key
+
+    if(key.length > blocksize) {
+      key = createHash(alg).update(key).digest()
+    } else if(key.length < blocksize) {
+      key = Buffer.concat([key, zeroBuffer], blocksize)
+    }
+
+    var HMAC;
+    var cplen, p = 0, i = 1, itmp = new Buffer(4), digtmp;
+    var out = new Buffer(keylen);
+    out.fill(0);
+    while(keylen) {
+      if(keylen > 20)
+        cplen = 20;
+      else
+        cplen = keylen;
+
+      /* We are unlikely to ever use more than 256 blocks (5120 bits!)
+         * but just in case...
+         */
+        itmp[0] = (i >> 24) & 0xff;
+        itmp[1] = (i >> 16) & 0xff;
+          itmp[2] = (i >> 8) & 0xff;
+          itmp[3] = i & 0xff;
+
+          HMAC = createHmac('sha1', key);
+          HMAC.update(salt)
+          HMAC.update(itmp);
+        digtmp = HMAC.digest();
+        digtmp.copy(out, p, 0, cplen);
+
+        for(var j = 1; j < iterations; j++) {
+          HMAC = createHmac('sha1', key);
+          HMAC.update(digtmp);
+          digtmp = HMAC.digest();
+          for(var k = 0; k < cplen; k++) {
+            out[k] ^= digtmp[k];
+          }
+        }
+      keylen -= cplen;
+      i++;
+      p += cplen;
+    }
+
+    return out;
+  }
+
+  return exports
+}
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":10}],26:[function(require,module,exports){
+(function (Buffer){
 // Original code adapted from Robert Kieffer.
 // details at https://github.com/broofa/node-uuid
+
+
 (function() {
   var _global = this;
 
@@ -3260,7 +4006,7 @@ module.exports = function md5(buf) {
 
   // NOTE: Math.random() does not guarantee "cryptographic quality"
   mathRNG = function(size) {
-    var bytes = new Array(size);
+    var bytes = new Buffer(size);
     var r;
 
     for (var i = 0, r; i < size; i++) {
@@ -3273,7 +4019,7 @@ module.exports = function md5(buf) {
 
   if (_global.crypto && crypto.getRandomValues) {
     whatwgRNG = function(size) {
-      var bytes = new Uint8Array(size);
+      var bytes = new Buffer(size); //in browserify, this is an extended Uint8Array
       crypto.getRandomValues(bytes);
       return bytes;
     }
@@ -3283,419 +4029,33 @@ module.exports = function md5(buf) {
 
 }())
 
-},{}],17:[function(require,module,exports){
-/*
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
- * in FIPS PUB 180-1
- * Version 2.1a Copyright Paul Johnston 2000 - 2002.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- * Distributed under the BSD License
- * See http://pajhome.org.uk/crypt/md5 for details.
- */
-
-var helpers = require('./helpers');
-
-/*
- * Calculate the SHA-1 of an array of big-endian words, and a bit length
- */
-function core_sha1(x, len)
-{
-  /* append padding */
-  x[len >> 5] |= 0x80 << (24 - len % 32);
-  x[((len + 64 >> 9) << 4) + 15] = len;
-
-  var w = Array(80);
-  var a =  1732584193;
-  var b = -271733879;
-  var c = -1732584194;
-  var d =  271733878;
-  var e = -1009589776;
-
-  for(var i = 0; i < x.length; i += 16)
-  {
-    var olda = a;
-    var oldb = b;
-    var oldc = c;
-    var oldd = d;
-    var olde = e;
-
-    for(var j = 0; j < 80; j++)
-    {
-      if(j < 16) w[j] = x[i + j];
-      else w[j] = rol(w[j-3] ^ w[j-8] ^ w[j-14] ^ w[j-16], 1);
-      var t = safe_add(safe_add(rol(a, 5), sha1_ft(j, b, c, d)),
-                       safe_add(safe_add(e, w[j]), sha1_kt(j)));
-      e = d;
-      d = c;
-      c = rol(b, 30);
-      b = a;
-      a = t;
-    }
-
-    a = safe_add(a, olda);
-    b = safe_add(b, oldb);
-    c = safe_add(c, oldc);
-    d = safe_add(d, oldd);
-    e = safe_add(e, olde);
-  }
-  return Array(a, b, c, d, e);
-
-}
-
-/*
- * Perform the appropriate triplet combination function for the current
- * iteration
- */
-function sha1_ft(t, b, c, d)
-{
-  if(t < 20) return (b & c) | ((~b) & d);
-  if(t < 40) return b ^ c ^ d;
-  if(t < 60) return (b & c) | (b & d) | (c & d);
-  return b ^ c ^ d;
-}
-
-/*
- * Determine the appropriate additive constant for the current iteration
- */
-function sha1_kt(t)
-{
-  return (t < 20) ?  1518500249 : (t < 40) ?  1859775393 :
-         (t < 60) ? -1894007588 : -899497514;
-}
-
-/*
- * Add integers, wrapping at 2^32. This uses 16-bit operations internally
- * to work around bugs in some JS interpreters.
- */
-function safe_add(x, y)
-{
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
-}
-
-/*
- * Bitwise rotate a 32-bit number to the left.
- */
-function rol(num, cnt)
-{
-  return (num << cnt) | (num >>> (32 - cnt));
-}
-
-module.exports = function sha1(buf) {
-  return helpers.hash(buf, core_sha1, 20, true);
-};
-
-},{"./helpers":13}],18:[function(require,module,exports){
-
-/**
- * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
- * in FIPS 180-2
- * Version 2.2-beta Copyright Angel Marin, Paul Johnston 2000 - 2009.
- * Other contributors: Greg Holt, Andrew Kepert, Ydnar, Lostinet
- *
- */
-
-var helpers = require('./helpers');
-
-var safe_add = function(x, y) {
-  var lsw = (x & 0xFFFF) + (y & 0xFFFF);
-  var msw = (x >> 16) + (y >> 16) + (lsw >> 16);
-  return (msw << 16) | (lsw & 0xFFFF);
-};
-
-var S = function(X, n) {
-  return (X >>> n) | (X << (32 - n));
-};
-
-var R = function(X, n) {
-  return (X >>> n);
-};
-
-var Ch = function(x, y, z) {
-  return ((x & y) ^ ((~x) & z));
-};
-
-var Maj = function(x, y, z) {
-  return ((x & y) ^ (x & z) ^ (y & z));
-};
-
-var Sigma0256 = function(x) {
-  return (S(x, 2) ^ S(x, 13) ^ S(x, 22));
-};
-
-var Sigma1256 = function(x) {
-  return (S(x, 6) ^ S(x, 11) ^ S(x, 25));
-};
-
-var Gamma0256 = function(x) {
-  return (S(x, 7) ^ S(x, 18) ^ R(x, 3));
-};
-
-var Gamma1256 = function(x) {
-  return (S(x, 17) ^ S(x, 19) ^ R(x, 10));
-};
-
-var core_sha256 = function(m, l) {
-  var K = new Array(0x428A2F98,0x71374491,0xB5C0FBCF,0xE9B5DBA5,0x3956C25B,0x59F111F1,0x923F82A4,0xAB1C5ED5,0xD807AA98,0x12835B01,0x243185BE,0x550C7DC3,0x72BE5D74,0x80DEB1FE,0x9BDC06A7,0xC19BF174,0xE49B69C1,0xEFBE4786,0xFC19DC6,0x240CA1CC,0x2DE92C6F,0x4A7484AA,0x5CB0A9DC,0x76F988DA,0x983E5152,0xA831C66D,0xB00327C8,0xBF597FC7,0xC6E00BF3,0xD5A79147,0x6CA6351,0x14292967,0x27B70A85,0x2E1B2138,0x4D2C6DFC,0x53380D13,0x650A7354,0x766A0ABB,0x81C2C92E,0x92722C85,0xA2BFE8A1,0xA81A664B,0xC24B8B70,0xC76C51A3,0xD192E819,0xD6990624,0xF40E3585,0x106AA070,0x19A4C116,0x1E376C08,0x2748774C,0x34B0BCB5,0x391C0CB3,0x4ED8AA4A,0x5B9CCA4F,0x682E6FF3,0x748F82EE,0x78A5636F,0x84C87814,0x8CC70208,0x90BEFFFA,0xA4506CEB,0xBEF9A3F7,0xC67178F2);
-  var HASH = new Array(0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A, 0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19);
-    var W = new Array(64);
-    var a, b, c, d, e, f, g, h, i, j;
-    var T1, T2;
-  /* append padding */
-  m[l >> 5] |= 0x80 << (24 - l % 32);
-  m[((l + 64 >> 9) << 4) + 15] = l;
-  for (var i = 0; i < m.length; i += 16) {
-    a = HASH[0]; b = HASH[1]; c = HASH[2]; d = HASH[3]; e = HASH[4]; f = HASH[5]; g = HASH[6]; h = HASH[7];
-    for (var j = 0; j < 64; j++) {
-      if (j < 16) {
-        W[j] = m[j + i];
-      } else {
-        W[j] = safe_add(safe_add(safe_add(Gamma1256(W[j - 2]), W[j - 7]), Gamma0256(W[j - 15])), W[j - 16]);
+}).call(this,require("buffer").Buffer)
+},{"buffer":10}],27:[function(require,module,exports){
+if (typeof Object.create === 'function') {
+  // implementation from standard node.js 'util' module
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    ctor.prototype = Object.create(superCtor.prototype, {
+      constructor: {
+        value: ctor,
+        enumerable: false,
+        writable: true,
+        configurable: true
       }
-      T1 = safe_add(safe_add(safe_add(safe_add(h, Sigma1256(e)), Ch(e, f, g)), K[j]), W[j]);
-      T2 = safe_add(Sigma0256(a), Maj(a, b, c));
-      h = g; g = f; f = e; e = safe_add(d, T1); d = c; c = b; b = a; a = safe_add(T1, T2);
-    }
-    HASH[0] = safe_add(a, HASH[0]); HASH[1] = safe_add(b, HASH[1]); HASH[2] = safe_add(c, HASH[2]); HASH[3] = safe_add(d, HASH[3]);
-    HASH[4] = safe_add(e, HASH[4]); HASH[5] = safe_add(f, HASH[5]); HASH[6] = safe_add(g, HASH[6]); HASH[7] = safe_add(h, HASH[7]);
+    });
+  };
+} else {
+  // old school shim for old browsers
+  module.exports = function inherits(ctor, superCtor) {
+    ctor.super_ = superCtor
+    var TempCtor = function () {}
+    TempCtor.prototype = superCtor.prototype
+    ctor.prototype = new TempCtor()
+    ctor.prototype.constructor = ctor
   }
-  return HASH;
-};
-
-module.exports = function sha256(buf) {
-  return helpers.hash(buf, core_sha256, 32, true);
-};
-
-},{"./helpers":13}],19:[function(require,module,exports){
-(function (process){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-// resolves . and .. elements in a path array with directory names there
-// must be no slashes, empty elements, or device names (c:\) in the array
-// (so also no leading and trailing slashes - it does not distinguish
-// relative and absolute paths)
-function normalizeArray(parts, allowAboveRoot) {
-  // if the path tries to go above the root, `up` ends up > 0
-  var up = 0;
-  for (var i = parts.length - 1; i >= 0; i--) {
-    var last = parts[i];
-    if (last === '.') {
-      parts.splice(i, 1);
-    } else if (last === '..') {
-      parts.splice(i, 1);
-      up++;
-    } else if (up) {
-      parts.splice(i, 1);
-      up--;
-    }
-  }
-
-  // if the path is allowed to go above the root, restore leading ..s
-  if (allowAboveRoot) {
-    for (; up--; up) {
-      parts.unshift('..');
-    }
-  }
-
-  return parts;
 }
 
-// Split a filename into [root, dir, basename, ext], unix version
-// 'root' is just a slash, or nothing.
-var splitPathRe =
-    /^(\/?|)([\s\S]*?)((?:\.{1,2}|[^\/]+?|)(\.[^.\/]*|))(?:[\/]*)$/;
-var splitPath = function(filename) {
-  return splitPathRe.exec(filename).slice(1);
-};
-
-// path.resolve([from ...], to)
-// posix version
-exports.resolve = function() {
-  var resolvedPath = '',
-      resolvedAbsolute = false;
-
-  for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
-    var path = (i >= 0) ? arguments[i] : process.cwd();
-
-    // Skip empty and invalid entries
-    if (typeof path !== 'string') {
-      throw new TypeError('Arguments to path.resolve must be strings');
-    } else if (!path) {
-      continue;
-    }
-
-    resolvedPath = path + '/' + resolvedPath;
-    resolvedAbsolute = path.charAt(0) === '/';
-  }
-
-  // At this point the path should be resolved to a full absolute path, but
-  // handle relative paths to be safe (might happen when process.cwd() fails)
-
-  // Normalize the path
-  resolvedPath = normalizeArray(filter(resolvedPath.split('/'), function(p) {
-    return !!p;
-  }), !resolvedAbsolute).join('/');
-
-  return ((resolvedAbsolute ? '/' : '') + resolvedPath) || '.';
-};
-
-// path.normalize(path)
-// posix version
-exports.normalize = function(path) {
-  var isAbsolute = exports.isAbsolute(path),
-      trailingSlash = substr(path, -1) === '/';
-
-  // Normalize the path
-  path = normalizeArray(filter(path.split('/'), function(p) {
-    return !!p;
-  }), !isAbsolute).join('/');
-
-  if (!path && !isAbsolute) {
-    path = '.';
-  }
-  if (path && trailingSlash) {
-    path += '/';
-  }
-
-  return (isAbsolute ? '/' : '') + path;
-};
-
-// posix version
-exports.isAbsolute = function(path) {
-  return path.charAt(0) === '/';
-};
-
-// posix version
-exports.join = function() {
-  var paths = Array.prototype.slice.call(arguments, 0);
-  return exports.normalize(filter(paths, function(p, index) {
-    if (typeof p !== 'string') {
-      throw new TypeError('Arguments to path.join must be strings');
-    }
-    return p;
-  }).join('/'));
-};
-
-
-// path.relative(from, to)
-// posix version
-exports.relative = function(from, to) {
-  from = exports.resolve(from).substr(1);
-  to = exports.resolve(to).substr(1);
-
-  function trim(arr) {
-    var start = 0;
-    for (; start < arr.length; start++) {
-      if (arr[start] !== '') break;
-    }
-
-    var end = arr.length - 1;
-    for (; end >= 0; end--) {
-      if (arr[end] !== '') break;
-    }
-
-    if (start > end) return [];
-    return arr.slice(start, end - start + 1);
-  }
-
-  var fromParts = trim(from.split('/'));
-  var toParts = trim(to.split('/'));
-
-  var length = Math.min(fromParts.length, toParts.length);
-  var samePartsLength = length;
-  for (var i = 0; i < length; i++) {
-    if (fromParts[i] !== toParts[i]) {
-      samePartsLength = i;
-      break;
-    }
-  }
-
-  var outputParts = [];
-  for (var i = samePartsLength; i < fromParts.length; i++) {
-    outputParts.push('..');
-  }
-
-  outputParts = outputParts.concat(toParts.slice(samePartsLength));
-
-  return outputParts.join('/');
-};
-
-exports.sep = '/';
-exports.delimiter = ':';
-
-exports.dirname = function(path) {
-  var result = splitPath(path),
-      root = result[0],
-      dir = result[1];
-
-  if (!root && !dir) {
-    // No dirname whatsoever
-    return '.';
-  }
-
-  if (dir) {
-    // It has a dirname, strip trailing slash
-    dir = dir.substr(0, dir.length - 1);
-  }
-
-  return root + dir;
-};
-
-
-exports.basename = function(path, ext) {
-  var f = splitPath(path)[2];
-  // TODO: make this comparison case-insensitive on windows?
-  if (ext && f.substr(-1 * ext.length) === ext) {
-    f = f.substr(0, f.length - ext.length);
-  }
-  return f;
-};
-
-
-exports.extname = function(path) {
-  return splitPath(path)[3];
-};
-
-function filter (xs, f) {
-    if (xs.filter) return xs.filter(f);
-    var res = [];
-    for (var i = 0; i < xs.length; i++) {
-        if (f(xs[i], i, xs)) res.push(xs[i]);
-    }
-    return res;
-}
-
-// String.prototype.substr - negative index don't work in IE8
-var substr = 'ab'.substr(-1) === 'b'
-    ? function (str, start, len) { return str.substr(start, len) }
-    : function (str, start, len) {
-        if (start < 0) start = str.length + start;
-        return str.substr(start, len);
-    }
-;
-
-}).call(this,require("FWaASH"))
-},{"FWaASH":20}],20:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -3760,578 +4120,604 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],21:[function(require,module,exports){
-var indexOf = require('indexof');
+},{}],29:[function(require,module,exports){
+module.exports = function isBuffer(arg) {
+  return arg && typeof arg === 'object'
+    && typeof arg.copy === 'function'
+    && typeof arg.fill === 'function'
+    && typeof arg.readUInt8 === 'function';
+}
+},{}],30:[function(require,module,exports){
+(function (process,global){
+// Copyright Joyent, Inc. and other Node contributors.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to permit
+// persons to whom the Software is furnished to do so, subject to the
+// following conditions:
+//
+// The above copyright notice and this permission notice shall be included
+// in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
+// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
+// USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-var Object_keys = function (obj) {
-    if (Object.keys) return Object.keys(obj)
-    else {
-        var res = [];
-        for (var key in obj) res.push(key)
-        return res;
+var formatRegExp = /%[sdj%]/g;
+exports.format = function(f) {
+  if (!isString(f)) {
+    var objects = [];
+    for (var i = 0; i < arguments.length; i++) {
+      objects.push(inspect(arguments[i]));
     }
-};
+    return objects.join(' ');
+  }
 
-var forEach = function (xs, fn) {
-    if (xs.forEach) return xs.forEach(fn)
-    else for (var i = 0; i < xs.length; i++) {
-        fn(xs[i], i, xs);
-    }
-};
-
-var defineProp = (function() {
-    try {
-        Object.defineProperty({}, '_', {});
-        return function(obj, name, value) {
-            Object.defineProperty(obj, name, {
-                writable: true,
-                enumerable: false,
-                configurable: true,
-                value: value
-            })
-        };
-    } catch(e) {
-        return function(obj, name, value) {
-            obj[name] = value;
-        };
-    }
-}());
-
-var globals = ['Array', 'Boolean', 'Date', 'Error', 'EvalError', 'Function',
-'Infinity', 'JSON', 'Math', 'NaN', 'Number', 'Object', 'RangeError',
-'ReferenceError', 'RegExp', 'String', 'SyntaxError', 'TypeError', 'URIError',
-'decodeURI', 'decodeURIComponent', 'encodeURI', 'encodeURIComponent', 'escape',
-'eval', 'isFinite', 'isNaN', 'parseFloat', 'parseInt', 'undefined', 'unescape'];
-
-function Context() {}
-Context.prototype = {};
-
-var Script = exports.Script = function NodeScript (code) {
-    if (!(this instanceof Script)) return new Script(code);
-    this.code = code;
-};
-
-Script.prototype.runInContext = function (context) {
-    if (!(context instanceof Context)) {
-        throw new TypeError("needs a 'context' argument.");
-    }
-    
-    var iframe = document.createElement('iframe');
-    if (!iframe.style) iframe.style = {};
-    iframe.style.display = 'none';
-    
-    document.body.appendChild(iframe);
-    
-    var win = iframe.contentWindow;
-    var wEval = win.eval, wExecScript = win.execScript;
-
-    if (!wEval && wExecScript) {
-        // win.eval() magically appears when this is called in IE:
-        wExecScript.call(win, 'null');
-        wEval = win.eval;
-    }
-    
-    forEach(Object_keys(context), function (key) {
-        win[key] = context[key];
-    });
-    forEach(globals, function (key) {
-        if (context[key]) {
-            win[key] = context[key];
+  var i = 1;
+  var args = arguments;
+  var len = args.length;
+  var str = String(f).replace(formatRegExp, function(x) {
+    if (x === '%%') return '%';
+    if (i >= len) return x;
+    switch (x) {
+      case '%s': return String(args[i++]);
+      case '%d': return Number(args[i++]);
+      case '%j':
+        try {
+          return JSON.stringify(args[i++]);
+        } catch (_) {
+          return '[Circular]';
         }
-    });
-    
-    var winKeys = Object_keys(win);
-
-    var res = wEval.call(win, this.code);
-    
-    forEach(Object_keys(win), function (key) {
-        // Avoid copying circular objects like `top` and `window` by only
-        // updating existing context properties or new properties in the `win`
-        // that was only introduced after the eval.
-        if (key in context || indexOf(winKeys, key) === -1) {
-            context[key] = win[key];
-        }
-    });
-
-    forEach(globals, function (key) {
-        if (!(key in context)) {
-            defineProp(context, key, win[key]);
-        }
-    });
-    
-    document.body.removeChild(iframe);
-    
-    return res;
+      default:
+        return x;
+    }
+  });
+  for (var x = args[i]; i < len; x = args[++i]) {
+    if (isNull(x) || !isObject(x)) {
+      str += ' ' + x;
+    } else {
+      str += ' ' + inspect(x);
+    }
+  }
+  return str;
 };
 
-Script.prototype.runInThisContext = function () {
-    return eval(this.code); // maybe...
-};
 
-Script.prototype.runInNewContext = function (context) {
-    var ctx = Script.createContext(context);
-    var res = this.runInContext(ctx);
-
-    forEach(Object_keys(ctx), function (key) {
-        context[key] = ctx[key];
-    });
-
-    return res;
-};
-
-forEach(Object_keys(Script.prototype), function (name) {
-    exports[name] = Script[name] = function (code) {
-        var s = Script(code);
-        return s[name].apply(s, [].slice.call(arguments, 1));
+// Mark that a method should not be used.
+// Returns a modified function which warns once by default.
+// If --no-deprecation is set, then it is a no-op.
+exports.deprecate = function(fn, msg) {
+  // Allow for deprecating things in the process of starting up.
+  if (isUndefined(global.process)) {
+    return function() {
+      return exports.deprecate(fn, msg).apply(this, arguments);
     };
-});
-
-exports.createScript = function (code) {
-    return exports.Script(code);
-};
-
-exports.createContext = Script.createContext = function (context) {
-    var copy = new Context();
-    if(typeof context === 'object') {
-        forEach(Object_keys(context), function (key) {
-            copy[key] = context[key];
-        });
-    }
-    return copy;
-};
-
-},{"indexof":22}],22:[function(require,module,exports){
-
-var indexOf = [].indexOf;
-
-module.exports = function(arr, obj){
-  if (indexOf) return arr.indexOf(obj);
-  for (var i = 0; i < arr.length; ++i) {
-    if (arr[i] === obj) return i;
-  }
-  return -1;
-};
-},{}],23:[function(require,module,exports){
-/*jshint latedef:false */
-(function(root, factory) {
-  if (typeof exports === 'object') {
-    // in Node, require this file if we want to use the compiler as a standalone module
-    module.exports = factory(require('./parser').parse, require('./dust'));
-  } else {
-    // in the browser, store the factory output if we want to use the compiler directly
-    factory(root.dust.parse, root.dust);
-  }
-}(this, function(parse, dust) {
-  var compiler = {},
-      isArray = dust.isArray;
-
-  
-  compiler.compile = function(source, name) {
-    // the name parameter is optional.
-    // this can happen for templates that are rendered immediately (renderSource which calls compileFn) or
-    // for templates that are compiled as a callable (compileFn)
-    //
-    // for the common case (using compile and render) a name is required so that templates will be cached by name and rendered later, by name.
-    if (!name && name !== null) {
-      dust.log(new Error("Template name parameter cannot be undefined when calling dust.compile"), 'ERROR');
-    }
- 
-    try {
-      var ast = filterAST(parse(source));
-      return compile(ast, name);
-    }
-    catch (err)
-    {
-      if (!err.line || !err.column) {
-        throw err;
-      }
-      throw new SyntaxError(err.message + ' At line : ' + err.line + ', column : ' + err.column);
-    }
-  };
-
-  function filterAST(ast) {
-    var context = {};
-    return compiler.filterNode(context, ast);
   }
 
-  compiler.filterNode = function(context, node) {
-    return compiler.optimizers[node[0]](context, node);
-  };
-
-  compiler.optimizers = {
-    body:      compactBuffers,
-    buffer:    noop,
-    special:   convertSpecial,
-    format:    nullify,        // TODO: convert format
-    reference: visit,
-    '#':       visit,
-    '?':       visit,
-    '^':       visit,
-    '<':       visit,
-    '+':       visit,
-    '@':       visit,
-    '%':       visit,
-    partial:   visit,
-    context:   visit,
-    params:    visit,
-    bodies:    visit,
-    param:     visit,
-    filters:   noop,
-    key:       noop,
-    path:      noop,
-    literal:   noop,
-    raw:       noop,
-    comment:   nullify,
-    line:      nullify,
-    col:       nullify
-  };
-
-  compiler.pragmas = {
-    esc: function(compiler, context, bodies, params) {
-      var old = compiler.auto,
-          out;
-      if (!context) {
-        context = 'h';
-      }
-      compiler.auto = (context === 's') ? '' : context;
-      out = compileParts(compiler, bodies.block);
-      compiler.auto = old;
-      return out;
-    }
-  };
-
-  function visit(context, node) {
-    var out = [node[0]],
-        i, len, res;
-    for (i=1, len=node.length; i<len; i++) {
-      res = compiler.filterNode(context, node[i]);
-      if (res) {
-        out.push(res);
-      }
-    }
-    return out;
+  if (process.noDeprecation === true) {
+    return fn;
   }
 
-  // Compacts consecutive buffer nodes into a single node
-  function compactBuffers(context, node) {
-    var out = [node[0]],
-        memo, i, len, res;
-    for (i=1, len=node.length; i<len; i++) {
-      res = compiler.filterNode(context, node[i]);
-      if (res) {
-        if (res[0] === 'buffer') {
-          if (memo) {
-            memo[1] += res[1];
-          } else {
-            memo = res;
-            out.push(res);
-          }
-        } else {
-          memo = null;
-          out.push(res);
-        }
-      }
-    }
-    return out;
-  }
-
-  var specialChars = {
-    's': ' ',
-    'n': '\n',
-    'r': '\r',
-    'lb': '{',
-    'rb': '}'
-  };
-
-  function convertSpecial(context, node) {
-    return ['buffer', specialChars[node[1]]];
-  }
-
-  function noop(context, node) {
-    return node;
-  }
-
-  function nullify(){}
-
-  function compile(ast, name) {
-    var context = {
-      name: name,
-      bodies: [],
-      blocks: {},
-      index: 0,
-      auto: 'h'
-    };
-
-    return '(function(){dust.register(' +
-        (name ? '"' + name + '"' : 'null') + ',' +
-        compiler.compileNode(context, ast) +
-        ');' +
-        compileBlocks(context) +
-        compileBodies(context) +
-        'return body_0;' +
-        '})();';
-  }
-
-  function compileBlocks(context) {
-    var out = [],
-        blocks = context.blocks,
-        name;
-
-    for (name in blocks) {
-      out.push('"' + name + '":' + blocks[name]);
-    }
-    if (out.length) {
-      context.blocks = 'ctx=ctx.shiftBlocks(blocks);';
-      return 'var blocks={' + out.join(',') + '};';
-    }
-    return context.blocks = '';
-  }
-
-  function compileBodies(context) {
-    var out = [],
-        bodies = context.bodies,
-        blx = context.blocks,
-        i, len;
-
-    for (i=0, len=bodies.length; i<len; i++) {
-      out[i] = 'function body_' + i + '(chk,ctx){' +
-          blx + 'return chk' + bodies[i] + ';}';
-    }
-    return out.join('');
-  }
-
-  function compileParts(context, body) {
-    var parts = '',
-        i, len;
-    for (i=1, len=body.length; i<len; i++) {
-      parts += compiler.compileNode(context, body[i]);
-    }
-    return parts;
-  }
-
-  compiler.compileNode = function(context, node) {
-    return compiler.nodes[node[0]](context, node);
-  };
-
-  compiler.nodes = {
-    body: function(context, node) {
-      var id = context.index++,
-          name = 'body_' + id;
-      context.bodies[id] = compileParts(context, node);
-      return name;
-    },
-
-    buffer: function(context, node) {
-      return '.write(' + escape(node[1]) + ')';
-    },
-
-    format: function(context, node) {
-      return '.write(' + escape(node[1] + node[2]) + ')';
-    },
-
-    reference: function(context, node) {
-      return '.reference(' + compiler.compileNode(context, node[1]) +
-        ',ctx,' + compiler.compileNode(context, node[2]) + ')';
-    },
-
-    '#': function(context, node) {
-      return compileSection(context, node, 'section');
-    },
-
-    '?': function(context, node) {
-      return compileSection(context, node, 'exists');
-    },
-
-    '^': function(context, node) {
-      return compileSection(context, node, 'notexists');
-    },
-
-    '<': function(context, node) {
-      var bodies = node[4];
-      for (var i=1, len=bodies.length; i<len; i++) {
-        var param = bodies[i],
-            type = param[1][1];
-        if (type === 'block') {
-          context.blocks[node[1].text] = compiler.compileNode(context, param[2]);
-          return '';
-        }
-      }
-      return '';
-    },
-
-    '+': function(context, node) {
-      if (typeof(node[1].text) === 'undefined'  && typeof(node[4]) === 'undefined'){
-        return '.block(ctx.getBlock(' +
-              compiler.compileNode(context, node[1]) +
-              ',chk, ctx),' + compiler.compileNode(context, node[2]) + ', {},' +
-              compiler.compileNode(context, node[3]) +
-              ')';
+  var warned = false;
+  function deprecated() {
+    if (!warned) {
+      if (process.throwDeprecation) {
+        throw new Error(msg);
+      } else if (process.traceDeprecation) {
+        console.trace(msg);
       } else {
-        return '.block(ctx.getBlock(' +
-            escape(node[1].text) +
-            '),' + compiler.compileNode(context, node[2]) + ',' +
-            compiler.compileNode(context, node[4]) + ',' +
-            compiler.compileNode(context, node[3]) +
-            ')';
+        console.error(msg);
       }
-    },
+      warned = true;
+    }
+    return fn.apply(this, arguments);
+  }
 
-    '@': function(context, node) {
-      return '.helper(' +
-        escape(node[1].text) +
-        ',' + compiler.compileNode(context, node[2]) + ',' +
-        compiler.compileNode(context, node[4]) + ',' +
-        compiler.compileNode(context, node[3]) +
-        ')';
-    },
+  return deprecated;
+};
 
-    '%': function(context, node) {
-      // TODO: Move these hacks into pragma precompiler
-      var name = node[1][1],
-          rawBodies,
-          bodies,
-          rawParams,
-          params,
-          ctx, b, p, i, len;
-      if (!compiler.pragmas[name]) {
-        return '';
+
+var debugs = {};
+var debugEnviron;
+exports.debuglog = function(set) {
+  if (isUndefined(debugEnviron))
+    debugEnviron = process.env.NODE_DEBUG || '';
+  set = set.toUpperCase();
+  if (!debugs[set]) {
+    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
+      var pid = process.pid;
+      debugs[set] = function() {
+        var msg = exports.format.apply(exports, arguments);
+        console.error('%s %d: %s', set, pid, msg);
+      };
+    } else {
+      debugs[set] = function() {};
+    }
+  }
+  return debugs[set];
+};
+
+
+/**
+ * Echos the value of a value. Trys to print the value out
+ * in the best way possible given the different types.
+ *
+ * @param {Object} obj The object to print out.
+ * @param {Object} opts Optional options object that alters the output.
+ */
+/* legacy: obj, showHidden, depth, colors*/
+function inspect(obj, opts) {
+  // default options
+  var ctx = {
+    seen: [],
+    stylize: stylizeNoColor
+  };
+  // legacy...
+  if (arguments.length >= 3) ctx.depth = arguments[2];
+  if (arguments.length >= 4) ctx.colors = arguments[3];
+  if (isBoolean(opts)) {
+    // legacy...
+    ctx.showHidden = opts;
+  } else if (opts) {
+    // got an "options" object
+    exports._extend(ctx, opts);
+  }
+  // set default options
+  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
+  if (isUndefined(ctx.depth)) ctx.depth = 2;
+  if (isUndefined(ctx.colors)) ctx.colors = false;
+  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
+  if (ctx.colors) ctx.stylize = stylizeWithColor;
+  return formatValue(ctx, obj, ctx.depth);
+}
+exports.inspect = inspect;
+
+
+// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
+inspect.colors = {
+  'bold' : [1, 22],
+  'italic' : [3, 23],
+  'underline' : [4, 24],
+  'inverse' : [7, 27],
+  'white' : [37, 39],
+  'grey' : [90, 39],
+  'black' : [30, 39],
+  'blue' : [34, 39],
+  'cyan' : [36, 39],
+  'green' : [32, 39],
+  'magenta' : [35, 39],
+  'red' : [31, 39],
+  'yellow' : [33, 39]
+};
+
+// Don't use 'blue' not visible on cmd.exe
+inspect.styles = {
+  'special': 'cyan',
+  'number': 'yellow',
+  'boolean': 'yellow',
+  'undefined': 'grey',
+  'null': 'bold',
+  'string': 'green',
+  'date': 'magenta',
+  // "name": intentionally not styling
+  'regexp': 'red'
+};
+
+
+function stylizeWithColor(str, styleType) {
+  var style = inspect.styles[styleType];
+
+  if (style) {
+    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
+           '\u001b[' + inspect.colors[style][1] + 'm';
+  } else {
+    return str;
+  }
+}
+
+
+function stylizeNoColor(str, styleType) {
+  return str;
+}
+
+
+function arrayToHash(array) {
+  var hash = {};
+
+  array.forEach(function(val, idx) {
+    hash[val] = true;
+  });
+
+  return hash;
+}
+
+
+function formatValue(ctx, value, recurseTimes) {
+  // Provide a hook for user-specified inspect functions.
+  // Check that value is an object with an inspect function on it
+  if (ctx.customInspect &&
+      value &&
+      isFunction(value.inspect) &&
+      // Filter out the util module, it's inspect function is special
+      value.inspect !== exports.inspect &&
+      // Also filter out any prototype objects using the circular check.
+      !(value.constructor && value.constructor.prototype === value)) {
+    var ret = value.inspect(recurseTimes, ctx);
+    if (!isString(ret)) {
+      ret = formatValue(ctx, ret, recurseTimes);
+    }
+    return ret;
+  }
+
+  // Primitive types cannot have properties
+  var primitive = formatPrimitive(ctx, value);
+  if (primitive) {
+    return primitive;
+  }
+
+  // Look up the keys of the object.
+  var keys = Object.keys(value);
+  var visibleKeys = arrayToHash(keys);
+
+  if (ctx.showHidden) {
+    keys = Object.getOwnPropertyNames(value);
+  }
+
+  // IE doesn't make error fields non-enumerable
+  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
+  if (isError(value)
+      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
+    return formatError(value);
+  }
+
+  // Some type of object without properties can be shortcutted.
+  if (keys.length === 0) {
+    if (isFunction(value)) {
+      var name = value.name ? ': ' + value.name : '';
+      return ctx.stylize('[Function' + name + ']', 'special');
+    }
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    }
+    if (isDate(value)) {
+      return ctx.stylize(Date.prototype.toString.call(value), 'date');
+    }
+    if (isError(value)) {
+      return formatError(value);
+    }
+  }
+
+  var base = '', array = false, braces = ['{', '}'];
+
+  // Make Array say that they are Array
+  if (isArray(value)) {
+    array = true;
+    braces = ['[', ']'];
+  }
+
+  // Make functions say that they are functions
+  if (isFunction(value)) {
+    var n = value.name ? ': ' + value.name : '';
+    base = ' [Function' + n + ']';
+  }
+
+  // Make RegExps say that they are RegExps
+  if (isRegExp(value)) {
+    base = ' ' + RegExp.prototype.toString.call(value);
+  }
+
+  // Make dates with properties first say the date
+  if (isDate(value)) {
+    base = ' ' + Date.prototype.toUTCString.call(value);
+  }
+
+  // Make error with message first say the error
+  if (isError(value)) {
+    base = ' ' + formatError(value);
+  }
+
+  if (keys.length === 0 && (!array || value.length == 0)) {
+    return braces[0] + base + braces[1];
+  }
+
+  if (recurseTimes < 0) {
+    if (isRegExp(value)) {
+      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
+    } else {
+      return ctx.stylize('[Object]', 'special');
+    }
+  }
+
+  ctx.seen.push(value);
+
+  var output;
+  if (array) {
+    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
+  } else {
+    output = keys.map(function(key) {
+      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
+    });
+  }
+
+  ctx.seen.pop();
+
+  return reduceToSingleString(output, base, braces);
+}
+
+
+function formatPrimitive(ctx, value) {
+  if (isUndefined(value))
+    return ctx.stylize('undefined', 'undefined');
+  if (isString(value)) {
+    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
+                                             .replace(/'/g, "\\'")
+                                             .replace(/\\"/g, '"') + '\'';
+    return ctx.stylize(simple, 'string');
+  }
+  if (isNumber(value))
+    return ctx.stylize('' + value, 'number');
+  if (isBoolean(value))
+    return ctx.stylize('' + value, 'boolean');
+  // For some reason typeof null is "object", so special case here.
+  if (isNull(value))
+    return ctx.stylize('null', 'null');
+}
+
+
+function formatError(value) {
+  return '[' + Error.prototype.toString.call(value) + ']';
+}
+
+
+function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
+  var output = [];
+  for (var i = 0, l = value.length; i < l; ++i) {
+    if (hasOwnProperty(value, String(i))) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          String(i), true));
+    } else {
+      output.push('');
+    }
+  }
+  keys.forEach(function(key) {
+    if (!key.match(/^\d+$/)) {
+      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
+          key, true));
+    }
+  });
+  return output;
+}
+
+
+function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
+  var name, str, desc;
+  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
+  if (desc.get) {
+    if (desc.set) {
+      str = ctx.stylize('[Getter/Setter]', 'special');
+    } else {
+      str = ctx.stylize('[Getter]', 'special');
+    }
+  } else {
+    if (desc.set) {
+      str = ctx.stylize('[Setter]', 'special');
+    }
+  }
+  if (!hasOwnProperty(visibleKeys, key)) {
+    name = '[' + key + ']';
+  }
+  if (!str) {
+    if (ctx.seen.indexOf(desc.value) < 0) {
+      if (isNull(recurseTimes)) {
+        str = formatValue(ctx, desc.value, null);
+      } else {
+        str = formatValue(ctx, desc.value, recurseTimes - 1);
       }
-
-      rawBodies = node[4];
-      bodies = {};
-      for (i=1, len=rawBodies.length; i<len; i++) {
-        b = rawBodies[i];
-        bodies[b[1][1]] = b[2];
-      }
-
-      rawParams = node[3];
-      params = {};
-      for (i=1, len=rawParams.length; i<len; i++) {
-        p = rawParams[i];
-        params[p[1][1]] = p[2][1];
-      }
-
-      ctx = node[2][1] ? node[2][1].text : null;
-
-      return compiler.pragmas[name](context, ctx, bodies, params);
-    },
-
-    partial: function(context, node) {
-      return '.partial(' +
-          compiler.compileNode(context, node[1]) +
-          ',' + compiler.compileNode(context, node[2]) +
-          ',' + compiler.compileNode(context, node[3]) + ')';
-    },
-
-    context: function(context, node) {
-      if (node[1]) {
-        return 'ctx.rebase(' + compiler.compileNode(context, node[1]) + ')';
-      }
-      return 'ctx';
-    },
-
-    params: function(context, node) {
-      var out = [];
-      for (var i=1, len=node.length; i<len; i++) {
-        out.push(compiler.compileNode(context, node[i]));
-      }
-      if (out.length) {
-        return '{' + out.join(',') + '}';
-      }
-      return 'null';
-    },
-
-    bodies: function(context, node) {
-      var out = [];
-      for (var i=1, len=node.length; i<len; i++) {
-        out.push(compiler.compileNode(context, node[i]));
-      }
-      return '{' + out.join(',') + '}';
-    },
-
-    param: function(context, node) {
-      return compiler.compileNode(context, node[1]) + ':' + compiler.compileNode(context, node[2]);
-    },
-
-    filters: function(context, node) {
-      var list = [];
-      for (var i=1, len=node.length; i<len; i++) {
-        var filter = node[i];
-        list.push('"' + filter + '"');
-      }
-      return '"' + context.auto + '"' +
-        (list.length ? ',[' + list.join(',') + ']' : '');
-    },
-
-    key: function(context, node) {
-      return 'ctx.get(["' + node[1] + '"], false)';
-    },
-
-    path: function(context, node) {
-      var current = node[1],
-          keys = node[2],
-          list = [];
-
-      for (var i=0,len=keys.length; i<len; i++) {
-        if (isArray(keys[i])) {
-          list.push(compiler.compileNode(context, keys[i]));
+      if (str.indexOf('\n') > -1) {
+        if (array) {
+          str = str.split('\n').map(function(line) {
+            return '  ' + line;
+          }).join('\n').substr(2);
         } else {
-          list.push('"' + keys[i] + '"');
+          str = '\n' + str.split('\n').map(function(line) {
+            return '   ' + line;
+          }).join('\n');
         }
       }
-      return 'ctx.getPath(' + current + ', [' + list.join(',') + '])';
-    },
-
-    literal: function(context, node) {
-      return escape(node[1]);
-    },
-    raw: function(context, node) {
-      return ".write(" + escape(node[1]) + ")";
+    } else {
+      str = ctx.stylize('[Circular]', 'special');
     }
-  };
-
-  function compileSection(context, node, cmd) {
-    return '.' + cmd + '(' +
-      compiler.compileNode(context, node[1]) +
-      ',' + compiler.compileNode(context, node[2]) + ',' +
-      compiler.compileNode(context, node[4]) + ',' +
-      compiler.compileNode(context, node[3]) +
-      ')';
+  }
+  if (isUndefined(name)) {
+    if (array && key.match(/^\d+$/)) {
+      return str;
+    }
+    name = JSON.stringify('' + key);
+    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
+      name = name.substr(1, name.length - 2);
+      name = ctx.stylize(name, 'name');
+    } else {
+      name = name.replace(/'/g, "\\'")
+                 .replace(/\\"/g, '"')
+                 .replace(/(^"|"$)/g, "'");
+      name = ctx.stylize(name, 'string');
+    }
   }
 
-  var BS = /\\/g,
-      DQ = /"/g,
-      LF = /\f/g,
-      NL = /\n/g,
-      CR = /\r/g,
-      TB = /\t/g;
-  function escapeToJsSafeString(str) {
-    return str.replace(BS, '\\\\')
-              .replace(DQ, '\\"')
-              .replace(LF, '\\f')
-              .replace(NL, '\\n')
-              .replace(CR, '\\r')
-              .replace(TB, '\\t');
+  return name + ': ' + str;
+}
+
+
+function reduceToSingleString(output, base, braces) {
+  var numLinesEst = 0;
+  var length = output.reduce(function(prev, cur) {
+    numLinesEst++;
+    if (cur.indexOf('\n') >= 0) numLinesEst++;
+    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
+  }, 0);
+
+  if (length > 60) {
+    return braces[0] +
+           (base === '' ? '' : base + '\n ') +
+           ' ' +
+           output.join(',\n  ') +
+           ' ' +
+           braces[1];
   }
 
-  var escape = (typeof JSON === 'undefined') ?
-                  function(str) { return '"' + escapeToJsSafeString(str) + '"';} :
-                  JSON.stringify;
-
-  // expose compiler methods
-  dust.compile = compiler.compile;
-  dust.filterNode = compiler.filterNode;
-  dust.optimizers = compiler.optimizers;
-  dust.pragmas = compiler.pragmas;
-  dust.compileNode = compiler.compileNode;
-  dust.nodes = compiler.nodes;
-  
-  return compiler;
-
-}));
+  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
+}
 
 
-},{"./dust":24,"./parser":25}],24:[function(require,module,exports){
+// NOTE: These type checking functions intentionally don't use `instanceof`
+// because it is fragile and can be easily faked with `Object.create()`.
+function isArray(ar) {
+  return Array.isArray(ar);
+}
+exports.isArray = isArray;
+
+function isBoolean(arg) {
+  return typeof arg === 'boolean';
+}
+exports.isBoolean = isBoolean;
+
+function isNull(arg) {
+  return arg === null;
+}
+exports.isNull = isNull;
+
+function isNullOrUndefined(arg) {
+  return arg == null;
+}
+exports.isNullOrUndefined = isNullOrUndefined;
+
+function isNumber(arg) {
+  return typeof arg === 'number';
+}
+exports.isNumber = isNumber;
+
+function isString(arg) {
+  return typeof arg === 'string';
+}
+exports.isString = isString;
+
+function isSymbol(arg) {
+  return typeof arg === 'symbol';
+}
+exports.isSymbol = isSymbol;
+
+function isUndefined(arg) {
+  return arg === void 0;
+}
+exports.isUndefined = isUndefined;
+
+function isRegExp(re) {
+  return isObject(re) && objectToString(re) === '[object RegExp]';
+}
+exports.isRegExp = isRegExp;
+
+function isObject(arg) {
+  return typeof arg === 'object' && arg !== null;
+}
+exports.isObject = isObject;
+
+function isDate(d) {
+  return isObject(d) && objectToString(d) === '[object Date]';
+}
+exports.isDate = isDate;
+
+function isError(e) {
+  return isObject(e) &&
+      (objectToString(e) === '[object Error]' || e instanceof Error);
+}
+exports.isError = isError;
+
+function isFunction(arg) {
+  return typeof arg === 'function';
+}
+exports.isFunction = isFunction;
+
+function isPrimitive(arg) {
+  return arg === null ||
+         typeof arg === 'boolean' ||
+         typeof arg === 'number' ||
+         typeof arg === 'string' ||
+         typeof arg === 'symbol' ||  // ES6 symbol
+         typeof arg === 'undefined';
+}
+exports.isPrimitive = isPrimitive;
+
+exports.isBuffer = require('./support/isBuffer');
+
+function objectToString(o) {
+  return Object.prototype.toString.call(o);
+}
+
+
+function pad(n) {
+  return n < 10 ? '0' + n.toString(10) : n.toString(10);
+}
+
+
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+              'Oct', 'Nov', 'Dec'];
+
+// 26 Feb 16:19:34
+function timestamp() {
+  var d = new Date();
+  var time = [pad(d.getHours()),
+              pad(d.getMinutes()),
+              pad(d.getSeconds())].join(':');
+  return [d.getDate(), months[d.getMonth()], time].join(' ');
+}
+
+
+// log is just a thin wrapper to console.log that prepends a timestamp
+exports.log = function() {
+  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
+};
+
+
+/**
+ * Inherit the prototype methods from one constructor into another.
+ *
+ * The Function.prototype.inherits from lang.js rewritten as a standalone
+ * function (not on Function.prototype). NOTE: If this file is to be loaded
+ * during bootstrapping this function needs to be rewritten using some native
+ * functions as prototype setup using normal JavaScript does not work as
+ * expected during bootstrapping (see mirror.js in r114903).
+ *
+ * @param {function} ctor Constructor function which needs to inherit the
+ *     prototype.
+ * @param {function} superCtor Constructor function to inherit prototype from.
+ */
+exports.inherits = require('inherits');
+
+exports._extend = function(origin, add) {
+  // Don't do anything if add isn't an object
+  if (!add || !isObject(add)) return origin;
+
+  var keys = Object.keys(add);
+  var i = keys.length;
+  while (i--) {
+    origin[keys[i]] = add[keys[i]];
+  }
+  return origin;
+};
+
+function hasOwnProperty(obj, prop) {
+  return Object.prototype.hasOwnProperty.call(obj, prop);
+}
+
+}).call(this,require("FWaASH"),typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./support/isBuffer":29,"FWaASH":28,"inherits":27}],31:[function(require,module,exports){
 /*jshint evil:true*/
 (function(root) {
   var dust = {},
@@ -4347,7 +4733,6 @@ module.exports = function(arr, obj){
       loggerContext;
 
   dust.debugLevel = NONE;
-  dust.silenceErrors = false;
 
   // Try to find the console in global scope
   if (root && root.console && root.console.log) {
@@ -4373,7 +4758,8 @@ module.exports = function(arr, obj){
   } : function() { /* no op */ };
 
   /**
-   * If dust.isDebug is true, Log dust debug statements, info statements, warning statements, and errors.
+   * Log dust debug statements, info statements, warning statements, and errors.
+   * Filters out the messages based on the dust.debuglevel.
    * This default implementation will print to the console if it exists.
    * @param {String|Error} message the message to print/throw
    * @param {String} type the severity of the message(ERROR, WARN, INFO, or DEBUG)
@@ -4387,31 +4773,6 @@ module.exports = function(arr, obj){
       }
       dust.logQueue.push({message: message, type: type});
       logger.log('[DUST ' + type + ']: ' + message);
-    }
-
-    if (!dust.silenceErrors && type === ERROR) {
-      if (typeof message === 'string') {
-        throw new Error(message);
-      } else {
-        throw message;
-      }
-    }
-  };
-
-  /**
-   * If debugging is turned on(dust.isDebug=true) log the error message and throw it.
-   * Otherwise try to keep rendering.  This is useful to fail hard in dev mode, but keep rendering in production.
-   * @param {Error} error the error message to throw
-   * @param {Object} chunk the chunk the error was thrown from
-   * @public
-   */
-  dust.onError = function(error, chunk) {
-    logger.log('[!!!DEPRECATION WARNING!!!]: dust.onError will no longer return a chunk object.');
-    dust.log(error.message || error, ERROR);
-    if(!dust.silenceErrors) {
-      throw error;
-    } else {
-      return chunk;
     }
   };
 
@@ -4431,17 +4792,18 @@ module.exports = function(arr, obj){
     try {
       dust.load(name, chunk, Context.wrap(context, name)).end();
     } catch (err) {
-      dust.log(err, ERROR);
+      chunk.setError(err);
     }
   };
 
   dust.stream = function(name, context) {
-    var stream = new Stream();
+    var stream = new Stream(),
+        chunk = stream.head;
     dust.nextTick(function() {
       try {
         dust.load(name, stream.head, Context.wrap(context, name)).end();
       } catch (err) {
-        dust.log(err, ERROR);
+        chunk.setError(err);
       }
     });
     return stream;
@@ -4698,15 +5060,14 @@ module.exports = function(arr, obj){
 
     // Return the ctx or a function wrapping the application of the context.
     if (typeof ctx === 'function') {
-      var fn = function() {
+      return function() {
         try {
           return ctx.apply(ctxThis, arguments);
         } catch (err) {
-          return dust.log(err, ERROR);
+          dust.log(err, ERROR);
+          throw err;
         }
       };
-      fn.isFunction = true;
-      return fn;
     } else {
       if (ctx === undefined) {
         dust.log('Cannot find the value for reference [{' + down.join('.') + '}] in template [' + this.getTemplateName() + ']');
@@ -4922,7 +5283,12 @@ module.exports = function(arr, obj){
 
     this.next = branch;
     this.flushable = true;
-    callback(branch);
+    try {
+      callback(branch);
+    } catch(e) {
+      dust.log(e, ERROR);
+      branch.setError(e);
+    }
     return cursor;
   };
 
@@ -4948,7 +5314,6 @@ module.exports = function(arr, obj){
 
   Chunk.prototype.reference = function(elem, context, auto, filters) {
     if (typeof elem === 'function') {
-      elem.isFunction = true;
       // Changed the function calling to use apply with the current context to make sure
       // that "this" is wat we expect it to be inside the function
       elem = elem.apply(context.current(), [this, context, null, {auto: auto, filters: filters}]);
@@ -4966,7 +5331,12 @@ module.exports = function(arr, obj){
   Chunk.prototype.section = function(elem, context, bodies, params) {
     // anonymous functions
     if (typeof elem === 'function') {
-      elem = elem.apply(context.current(), [this, context, bodies, params]);
+      try {
+        elem = elem.apply(context.current(), [this, context, bodies, params]);
+      } catch(e) {
+        dust.log(e, ERROR);
+        return this.setError(e);
+      }
       // functions that return chunks are assumed to have handled the body and/or have modified the chunk
       // use that return value as the current chunk and go to the next method in the chain
       if (elem instanceof Chunk) {
@@ -5113,15 +5483,15 @@ module.exports = function(arr, obj){
   Chunk.prototype.helper = function(name, context, bodies, params) {
     var chunk = this;
     // handle invalid helpers, similar to invalid filters
-    try {
-      if(dust.helpers[name]) {
+    if(dust.helpers[name]) {
+      try {
         return dust.helpers[name](chunk, context, bodies, params);
-      } else {
-        dust.log('Invalid helper [' + name + ']', WARN);
-        return chunk;
+      } catch(e) {
+        dust.log('Error in ' + name + ' helper: ' + e, ERROR);
+        return chunk.setError(e);
       }
-    } catch (err) {
-      dust.log(err, ERROR);
+    } else {
+      dust.log('Invalid helper [' + name + ']', WARN);
       return chunk;
     }
   };
@@ -5218,2855 +5588,7 @@ module.exports = function(arr, obj){
 
 })((function(){return this;})());
 
-},{}],25:[function(require,module,exports){
-/* Do not edit the parser directly. This is a generated file created using a build script and the PEG grammar. */
-(function(root, factory) {
-  if (typeof exports === 'object') {
-    // in Node, require this file if we want to use the parser as a standalone module
-    module.exports = factory(require('./dust'));
-    // @see server file for parser methods exposed in node
-  } else {
-    // in the browser, store the factory output if we want to use the parser directly
-    factory(root.dust);
-  }
-}(this, function(dust) {
-  var parser = (function(){
-  /*
-   * Generated by PEG.js 0.7.0.
-   *
-   * http://pegjs.majda.cz/
-   */
-  
-  function quote(s) {
-    /*
-     * ECMA-262, 5th ed., 7.8.4: All characters may appear literally in a
-     * string literal except for the closing quote character, backslash,
-     * carriage return, line separator, paragraph separator, and line feed.
-     * Any character may appear in the form of an escape sequence.
-     *
-     * For portability, we also escape escape all control and non-ASCII
-     * characters. Note that "\0" and "\v" escape sequences are not used
-     * because JSHint does not like the first and IE the second.
-     */
-     return '"' + s
-      .replace(/\\/g, '\\\\')  // backslash
-      .replace(/"/g, '\\"')    // closing quote character
-      .replace(/\x08/g, '\\b') // backspace
-      .replace(/\t/g, '\\t')   // horizontal tab
-      .replace(/\n/g, '\\n')   // line feed
-      .replace(/\f/g, '\\f')   // form feed
-      .replace(/\r/g, '\\r')   // carriage return
-      .replace(/[\x00-\x07\x0B\x0E-\x1F\x80-\uFFFF]/g, escape)
-      + '"';
-  }
-  
-  var result = {
-    /*
-     * Parses the input with a generated parser. If the parsing is successfull,
-     * returns a value explicitly or implicitly specified by the grammar from
-     * which the parser was generated (see |PEG.buildParser|). If the parsing is
-     * unsuccessful, throws |PEG.parser.SyntaxError| describing the error.
-     */
-    parse: function(input, startRule) {
-      var parseFunctions = {
-        "body": parse_body,
-        "part": parse_part,
-        "section": parse_section,
-        "sec_tag_start": parse_sec_tag_start,
-        "end_tag": parse_end_tag,
-        "context": parse_context,
-        "params": parse_params,
-        "bodies": parse_bodies,
-        "reference": parse_reference,
-        "partial": parse_partial,
-        "filters": parse_filters,
-        "special": parse_special,
-        "identifier": parse_identifier,
-        "number": parse_number,
-        "float": parse_float,
-        "integer": parse_integer,
-        "path": parse_path,
-        "key": parse_key,
-        "array": parse_array,
-        "array_part": parse_array_part,
-        "inline": parse_inline,
-        "inline_part": parse_inline_part,
-        "buffer": parse_buffer,
-        "literal": parse_literal,
-        "esc": parse_esc,
-        "raw": parse_raw,
-        "comment": parse_comment,
-        "tag": parse_tag,
-        "ld": parse_ld,
-        "rd": parse_rd,
-        "lb": parse_lb,
-        "rb": parse_rb,
-        "eol": parse_eol,
-        "ws": parse_ws
-      };
-      
-      if (startRule !== undefined) {
-        if (parseFunctions[startRule] === undefined) {
-          throw new Error("Invalid rule name: " + quote(startRule) + ".");
-        }
-      } else {
-        startRule = "body";
-      }
-      
-      var pos = { offset: 0, line: 1, column: 1, seenCR: false };
-      var reportFailures = 0;
-      var rightmostFailuresPos = { offset: 0, line: 1, column: 1, seenCR: false };
-      var rightmostFailuresExpected = [];
-      
-      function padLeft(input, padding, length) {
-        var result = input;
-        
-        var padLength = length - input.length;
-        for (var i = 0; i < padLength; i++) {
-          result = padding + result;
-        }
-        
-        return result;
-      }
-      
-      function escape(ch) {
-        var charCode = ch.charCodeAt(0);
-        var escapeChar;
-        var length;
-        
-        if (charCode <= 0xFF) {
-          escapeChar = 'x';
-          length = 2;
-        } else {
-          escapeChar = 'u';
-          length = 4;
-        }
-        
-        return '\\' + escapeChar + padLeft(charCode.toString(16).toUpperCase(), '0', length);
-      }
-      
-      function clone(object) {
-        var result = {};
-        for (var key in object) {
-          result[key] = object[key];
-        }
-        return result;
-      }
-      
-      function advance(pos, n) {
-        var endOffset = pos.offset + n;
-        
-        for (var offset = pos.offset; offset < endOffset; offset++) {
-          var ch = input.charAt(offset);
-          if (ch === "\n") {
-            if (!pos.seenCR) { pos.line++; }
-            pos.column = 1;
-            pos.seenCR = false;
-          } else if (ch === "\r" || ch === "\u2028" || ch === "\u2029") {
-            pos.line++;
-            pos.column = 1;
-            pos.seenCR = true;
-          } else {
-            pos.column++;
-            pos.seenCR = false;
-          }
-        }
-        
-        pos.offset += n;
-      }
-      
-      function matchFailed(failure) {
-        if (pos.offset < rightmostFailuresPos.offset) {
-          return;
-        }
-        
-        if (pos.offset > rightmostFailuresPos.offset) {
-          rightmostFailuresPos = clone(pos);
-          rightmostFailuresExpected = [];
-        }
-        
-        rightmostFailuresExpected.push(failure);
-      }
-      
-      function parse_body() {
-        var result0, result1;
-        var pos0;
-        
-        pos0 = clone(pos);
-        result0 = [];
-        result1 = parse_part();
-        while (result1 !== null) {
-          result0.push(result1);
-          result1 = parse_part();
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, p) { return ["body"].concat(p).concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        return result0;
-      }
-      
-      function parse_part() {
-        var result0;
-        
-        result0 = parse_raw();
-        if (result0 === null) {
-          result0 = parse_comment();
-          if (result0 === null) {
-            result0 = parse_section();
-            if (result0 === null) {
-              result0 = parse_partial();
-              if (result0 === null) {
-                result0 = parse_special();
-                if (result0 === null) {
-                  result0 = parse_reference();
-                  if (result0 === null) {
-                    result0 = parse_buffer();
-                  }
-                }
-              }
-            }
-          }
-        }
-        return result0;
-      }
-      
-      function parse_section() {
-        var result0, result1, result2, result3, result4, result5, result6;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_sec_tag_start();
-        if (result0 !== null) {
-          result1 = [];
-          result2 = parse_ws();
-          while (result2 !== null) {
-            result1.push(result2);
-            result2 = parse_ws();
-          }
-          if (result1 !== null) {
-            result2 = parse_rd();
-            if (result2 !== null) {
-              result3 = parse_body();
-              if (result3 !== null) {
-                result4 = parse_bodies();
-                if (result4 !== null) {
-                  result5 = parse_end_tag();
-                  result5 = result5 !== null ? result5 : "";
-                  if (result5 !== null) {
-                    result6 = (function(offset, line, column, t, b, e, n) {if( (!n) || (t[1].text !== n.text) ) { throw new Error("Expected end tag for "+t[1].text+" but it was not found. At line : "+line+", column : " + column)} return true;})(pos.offset, pos.line, pos.column, result0, result3, result4, result5) ? "" : null;
-                    if (result6 !== null) {
-                      result0 = [result0, result1, result2, result3, result4, result5, result6];
-                    } else {
-                      result0 = null;
-                      pos = clone(pos1);
-                    }
-                  } else {
-                    result0 = null;
-                    pos = clone(pos1);
-                  }
-                } else {
-                  result0 = null;
-                  pos = clone(pos1);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, t, b, e, n) { e.push(["param", ["literal", "block"], b]); t.push(e); return t.concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[0], result0[3], result0[4], result0[5]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        if (result0 === null) {
-          pos0 = clone(pos);
-          pos1 = clone(pos);
-          result0 = parse_sec_tag_start();
-          if (result0 !== null) {
-            result1 = [];
-            result2 = parse_ws();
-            while (result2 !== null) {
-              result1.push(result2);
-              result2 = parse_ws();
-            }
-            if (result1 !== null) {
-              if (input.charCodeAt(pos.offset) === 47) {
-                result2 = "/";
-                advance(pos, 1);
-              } else {
-                result2 = null;
-                if (reportFailures === 0) {
-                  matchFailed("\"/\"");
-                }
-              }
-              if (result2 !== null) {
-                result3 = parse_rd();
-                if (result3 !== null) {
-                  result0 = [result0, result1, result2, result3];
-                } else {
-                  result0 = null;
-                  pos = clone(pos1);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-          if (result0 !== null) {
-            result0 = (function(offset, line, column, t) { t.push(["bodies"]); return t.concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[0]);
-          }
-          if (result0 === null) {
-            pos = clone(pos0);
-          }
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("section");
-        }
-        return result0;
-      }
-      
-      function parse_sec_tag_start() {
-        var result0, result1, result2, result3, result4, result5;
-        var pos0, pos1;
-        
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_ld();
-        if (result0 !== null) {
-          if (/^[#?^<+@%]/.test(input.charAt(pos.offset))) {
-            result1 = input.charAt(pos.offset);
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("[#?^<+@%]");
-            }
-          }
-          if (result1 !== null) {
-            result2 = [];
-            result3 = parse_ws();
-            while (result3 !== null) {
-              result2.push(result3);
-              result3 = parse_ws();
-            }
-            if (result2 !== null) {
-              result3 = parse_identifier();
-              if (result3 !== null) {
-                result4 = parse_context();
-                if (result4 !== null) {
-                  result5 = parse_params();
-                  if (result5 !== null) {
-                    result0 = [result0, result1, result2, result3, result4, result5];
-                  } else {
-                    result0 = null;
-                    pos = clone(pos1);
-                  }
-                } else {
-                  result0 = null;
-                  pos = clone(pos1);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, t, n, c, p) { return [t, n, c, p] })(pos0.offset, pos0.line, pos0.column, result0[1], result0[3], result0[4], result0[5]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        return result0;
-      }
-      
-      function parse_end_tag() {
-        var result0, result1, result2, result3, result4, result5;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_ld();
-        if (result0 !== null) {
-          if (input.charCodeAt(pos.offset) === 47) {
-            result1 = "/";
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"/\"");
-            }
-          }
-          if (result1 !== null) {
-            result2 = [];
-            result3 = parse_ws();
-            while (result3 !== null) {
-              result2.push(result3);
-              result3 = parse_ws();
-            }
-            if (result2 !== null) {
-              result3 = parse_identifier();
-              if (result3 !== null) {
-                result4 = [];
-                result5 = parse_ws();
-                while (result5 !== null) {
-                  result4.push(result5);
-                  result5 = parse_ws();
-                }
-                if (result4 !== null) {
-                  result5 = parse_rd();
-                  if (result5 !== null) {
-                    result0 = [result0, result1, result2, result3, result4, result5];
-                  } else {
-                    result0 = null;
-                    pos = clone(pos1);
-                  }
-                } else {
-                  result0 = null;
-                  pos = clone(pos1);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, n) { return n })(pos0.offset, pos0.line, pos0.column, result0[3]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("end tag");
-        }
-        return result0;
-      }
-      
-      function parse_context() {
-        var result0, result1;
-        var pos0, pos1, pos2;
-        
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        if (input.charCodeAt(pos.offset) === 58) {
-          result0 = ":";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\":\"");
-          }
-        }
-        if (result0 !== null) {
-          result1 = parse_identifier();
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos2);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos2);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, n) {return n})(pos1.offset, pos1.line, pos1.column, result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos1);
-        }
-        result0 = result0 !== null ? result0 : "";
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, n) { return n ? ["context", n] : ["context"] })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        return result0;
-      }
-      
-      function parse_params() {
-        var result0, result1, result2, result3, result4;
-        var pos0, pos1, pos2;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        result0 = [];
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        result2 = parse_ws();
-        if (result2 !== null) {
-          result1 = [];
-          while (result2 !== null) {
-            result1.push(result2);
-            result2 = parse_ws();
-          }
-        } else {
-          result1 = null;
-        }
-        if (result1 !== null) {
-          result2 = parse_key();
-          if (result2 !== null) {
-            if (input.charCodeAt(pos.offset) === 61) {
-              result3 = "=";
-              advance(pos, 1);
-            } else {
-              result3 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"=\"");
-              }
-            }
-            if (result3 !== null) {
-              result4 = parse_number();
-              if (result4 === null) {
-                result4 = parse_identifier();
-                if (result4 === null) {
-                  result4 = parse_inline();
-                }
-              }
-              if (result4 !== null) {
-                result1 = [result1, result2, result3, result4];
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-        } else {
-          result1 = null;
-          pos = clone(pos2);
-        }
-        if (result1 !== null) {
-          result1 = (function(offset, line, column, k, v) {return ["param", ["literal", k], v]})(pos1.offset, pos1.line, pos1.column, result1[1], result1[3]);
-        }
-        if (result1 === null) {
-          pos = clone(pos1);
-        }
-        while (result1 !== null) {
-          result0.push(result1);
-          pos1 = clone(pos);
-          pos2 = clone(pos);
-          result2 = parse_ws();
-          if (result2 !== null) {
-            result1 = [];
-            while (result2 !== null) {
-              result1.push(result2);
-              result2 = parse_ws();
-            }
-          } else {
-            result1 = null;
-          }
-          if (result1 !== null) {
-            result2 = parse_key();
-            if (result2 !== null) {
-              if (input.charCodeAt(pos.offset) === 61) {
-                result3 = "=";
-                advance(pos, 1);
-              } else {
-                result3 = null;
-                if (reportFailures === 0) {
-                  matchFailed("\"=\"");
-                }
-              }
-              if (result3 !== null) {
-                result4 = parse_number();
-                if (result4 === null) {
-                  result4 = parse_identifier();
-                  if (result4 === null) {
-                    result4 = parse_inline();
-                  }
-                }
-                if (result4 !== null) {
-                  result1 = [result1, result2, result3, result4];
-                } else {
-                  result1 = null;
-                  pos = clone(pos2);
-                }
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-          if (result1 !== null) {
-            result1 = (function(offset, line, column, k, v) {return ["param", ["literal", k], v]})(pos1.offset, pos1.line, pos1.column, result1[1], result1[3]);
-          }
-          if (result1 === null) {
-            pos = clone(pos1);
-          }
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, p) { return ["params"].concat(p) })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("params");
-        }
-        return result0;
-      }
-      
-      function parse_bodies() {
-        var result0, result1, result2, result3, result4, result5;
-        var pos0, pos1, pos2;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        result0 = [];
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        result1 = parse_ld();
-        if (result1 !== null) {
-          if (input.charCodeAt(pos.offset) === 58) {
-            result2 = ":";
-            advance(pos, 1);
-          } else {
-            result2 = null;
-            if (reportFailures === 0) {
-              matchFailed("\":\"");
-            }
-          }
-          if (result2 !== null) {
-            result3 = parse_key();
-            if (result3 !== null) {
-              result4 = parse_rd();
-              if (result4 !== null) {
-                result5 = parse_body();
-                if (result5 !== null) {
-                  result1 = [result1, result2, result3, result4, result5];
-                } else {
-                  result1 = null;
-                  pos = clone(pos2);
-                }
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-        } else {
-          result1 = null;
-          pos = clone(pos2);
-        }
-        if (result1 !== null) {
-          result1 = (function(offset, line, column, k, v) {return ["param", ["literal", k], v]})(pos1.offset, pos1.line, pos1.column, result1[2], result1[4]);
-        }
-        if (result1 === null) {
-          pos = clone(pos1);
-        }
-        while (result1 !== null) {
-          result0.push(result1);
-          pos1 = clone(pos);
-          pos2 = clone(pos);
-          result1 = parse_ld();
-          if (result1 !== null) {
-            if (input.charCodeAt(pos.offset) === 58) {
-              result2 = ":";
-              advance(pos, 1);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("\":\"");
-              }
-            }
-            if (result2 !== null) {
-              result3 = parse_key();
-              if (result3 !== null) {
-                result4 = parse_rd();
-                if (result4 !== null) {
-                  result5 = parse_body();
-                  if (result5 !== null) {
-                    result1 = [result1, result2, result3, result4, result5];
-                  } else {
-                    result1 = null;
-                    pos = clone(pos2);
-                  }
-                } else {
-                  result1 = null;
-                  pos = clone(pos2);
-                }
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-          if (result1 !== null) {
-            result1 = (function(offset, line, column, k, v) {return ["param", ["literal", k], v]})(pos1.offset, pos1.line, pos1.column, result1[2], result1[4]);
-          }
-          if (result1 === null) {
-            pos = clone(pos1);
-          }
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, p) { return ["bodies"].concat(p) })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("bodies");
-        }
-        return result0;
-      }
-      
-      function parse_reference() {
-        var result0, result1, result2, result3;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_ld();
-        if (result0 !== null) {
-          result1 = parse_identifier();
-          if (result1 !== null) {
-            result2 = parse_filters();
-            if (result2 !== null) {
-              result3 = parse_rd();
-              if (result3 !== null) {
-                result0 = [result0, result1, result2, result3];
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, n, f) { return ["reference", n, f].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[1], result0[2]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("reference");
-        }
-        return result0;
-      }
-      
-      function parse_partial() {
-        var result0, result1, result2, result3, result4, result5, result6, result7, result8;
-        var pos0, pos1, pos2;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_ld();
-        if (result0 !== null) {
-          if (input.charCodeAt(pos.offset) === 62) {
-            result1 = ">";
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\">\"");
-            }
-          }
-          if (result1 === null) {
-            if (input.charCodeAt(pos.offset) === 43) {
-              result1 = "+";
-              advance(pos, 1);
-            } else {
-              result1 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"+\"");
-              }
-            }
-          }
-          if (result1 !== null) {
-            result2 = [];
-            result3 = parse_ws();
-            while (result3 !== null) {
-              result2.push(result3);
-              result3 = parse_ws();
-            }
-            if (result2 !== null) {
-              pos2 = clone(pos);
-              result3 = parse_key();
-              if (result3 !== null) {
-                result3 = (function(offset, line, column, k) {return ["literal", k]})(pos2.offset, pos2.line, pos2.column, result3);
-              }
-              if (result3 === null) {
-                pos = clone(pos2);
-              }
-              if (result3 === null) {
-                result3 = parse_inline();
-              }
-              if (result3 !== null) {
-                result4 = parse_context();
-                if (result4 !== null) {
-                  result5 = parse_params();
-                  if (result5 !== null) {
-                    result6 = [];
-                    result7 = parse_ws();
-                    while (result7 !== null) {
-                      result6.push(result7);
-                      result7 = parse_ws();
-                    }
-                    if (result6 !== null) {
-                      if (input.charCodeAt(pos.offset) === 47) {
-                        result7 = "/";
-                        advance(pos, 1);
-                      } else {
-                        result7 = null;
-                        if (reportFailures === 0) {
-                          matchFailed("\"/\"");
-                        }
-                      }
-                      if (result7 !== null) {
-                        result8 = parse_rd();
-                        if (result8 !== null) {
-                          result0 = [result0, result1, result2, result3, result4, result5, result6, result7, result8];
-                        } else {
-                          result0 = null;
-                          pos = clone(pos1);
-                        }
-                      } else {
-                        result0 = null;
-                        pos = clone(pos1);
-                      }
-                    } else {
-                      result0 = null;
-                      pos = clone(pos1);
-                    }
-                  } else {
-                    result0 = null;
-                    pos = clone(pos1);
-                  }
-                } else {
-                  result0 = null;
-                  pos = clone(pos1);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, s, n, c, p) { var key = (s ===">")? "partial" : s; return [key, n, c, p].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[1], result0[3], result0[4], result0[5]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("partial");
-        }
-        return result0;
-      }
-      
-      function parse_filters() {
-        var result0, result1, result2;
-        var pos0, pos1, pos2;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        result0 = [];
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        if (input.charCodeAt(pos.offset) === 124) {
-          result1 = "|";
-          advance(pos, 1);
-        } else {
-          result1 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"|\"");
-          }
-        }
-        if (result1 !== null) {
-          result2 = parse_key();
-          if (result2 !== null) {
-            result1 = [result1, result2];
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-        } else {
-          result1 = null;
-          pos = clone(pos2);
-        }
-        if (result1 !== null) {
-          result1 = (function(offset, line, column, n) {return n})(pos1.offset, pos1.line, pos1.column, result1[1]);
-        }
-        if (result1 === null) {
-          pos = clone(pos1);
-        }
-        while (result1 !== null) {
-          result0.push(result1);
-          pos1 = clone(pos);
-          pos2 = clone(pos);
-          if (input.charCodeAt(pos.offset) === 124) {
-            result1 = "|";
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"|\"");
-            }
-          }
-          if (result1 !== null) {
-            result2 = parse_key();
-            if (result2 !== null) {
-              result1 = [result1, result2];
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-          if (result1 !== null) {
-            result1 = (function(offset, line, column, n) {return n})(pos1.offset, pos1.line, pos1.column, result1[1]);
-          }
-          if (result1 === null) {
-            pos = clone(pos1);
-          }
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, f) { return ["filters"].concat(f) })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("filters");
-        }
-        return result0;
-      }
-      
-      function parse_special() {
-        var result0, result1, result2, result3;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_ld();
-        if (result0 !== null) {
-          if (input.charCodeAt(pos.offset) === 126) {
-            result1 = "~";
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"~\"");
-            }
-          }
-          if (result1 !== null) {
-            result2 = parse_key();
-            if (result2 !== null) {
-              result3 = parse_rd();
-              if (result3 !== null) {
-                result0 = [result0, result1, result2, result3];
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, k) { return ["special", k].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[2]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("special");
-        }
-        return result0;
-      }
-      
-      function parse_identifier() {
-        var result0;
-        var pos0;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        result0 = parse_path();
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, p) { var arr = ["path"].concat(p); arr.text = p[1].join('.'); return arr; })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        if (result0 === null) {
-          pos0 = clone(pos);
-          result0 = parse_key();
-          if (result0 !== null) {
-            result0 = (function(offset, line, column, k) { var arr = ["key", k]; arr.text = k; return arr; })(pos0.offset, pos0.line, pos0.column, result0);
-          }
-          if (result0 === null) {
-            pos = clone(pos0);
-          }
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("identifier");
-        }
-        return result0;
-      }
-      
-      function parse_number() {
-        var result0;
-        var pos0;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        result0 = parse_float();
-        if (result0 === null) {
-          result0 = parse_integer();
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, n) { return ['literal', n]; })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("number");
-        }
-        return result0;
-      }
-      
-      function parse_float() {
-        var result0, result1, result2, result3;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_integer();
-        if (result0 !== null) {
-          if (input.charCodeAt(pos.offset) === 46) {
-            result1 = ".";
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\".\"");
-            }
-          }
-          if (result1 !== null) {
-            result3 = parse_integer();
-            if (result3 !== null) {
-              result2 = [];
-              while (result3 !== null) {
-                result2.push(result3);
-                result3 = parse_integer();
-              }
-            } else {
-              result2 = null;
-            }
-            if (result2 !== null) {
-              result0 = [result0, result1, result2];
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, l, r) { return parseFloat(l + "." + r.join('')); })(pos0.offset, pos0.line, pos0.column, result0[0], result0[2]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("float");
-        }
-        return result0;
-      }
-      
-      function parse_integer() {
-        var result0, result1;
-        var pos0;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        if (/^[0-9]/.test(input.charAt(pos.offset))) {
-          result1 = input.charAt(pos.offset);
-          advance(pos, 1);
-        } else {
-          result1 = null;
-          if (reportFailures === 0) {
-            matchFailed("[0-9]");
-          }
-        }
-        if (result1 !== null) {
-          result0 = [];
-          while (result1 !== null) {
-            result0.push(result1);
-            if (/^[0-9]/.test(input.charAt(pos.offset))) {
-              result1 = input.charAt(pos.offset);
-              advance(pos, 1);
-            } else {
-              result1 = null;
-              if (reportFailures === 0) {
-                matchFailed("[0-9]");
-              }
-            }
-          }
-        } else {
-          result0 = null;
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, digits) { return parseInt(digits.join(""), 10); })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("integer");
-        }
-        return result0;
-      }
-      
-      function parse_path() {
-        var result0, result1, result2;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_key();
-        result0 = result0 !== null ? result0 : "";
-        if (result0 !== null) {
-          result2 = parse_array_part();
-          if (result2 === null) {
-            result2 = parse_array();
-          }
-          if (result2 !== null) {
-            result1 = [];
-            while (result2 !== null) {
-              result1.push(result2);
-              result2 = parse_array_part();
-              if (result2 === null) {
-                result2 = parse_array();
-              }
-            }
-          } else {
-            result1 = null;
-          }
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, k, d) {
-            d = d[0];
-            if (k && d) {
-              d.unshift(k);
-              return [false, d].concat([['line', line], ['col', column]]);
-            }
-            return [true, d].concat([['line', line], ['col', column]]);
-          })(pos0.offset, pos0.line, pos0.column, result0[0], result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        if (result0 === null) {
-          pos0 = clone(pos);
-          pos1 = clone(pos);
-          if (input.charCodeAt(pos.offset) === 46) {
-            result0 = ".";
-            advance(pos, 1);
-          } else {
-            result0 = null;
-            if (reportFailures === 0) {
-              matchFailed("\".\"");
-            }
-          }
-          if (result0 !== null) {
-            result1 = [];
-            result2 = parse_array_part();
-            if (result2 === null) {
-              result2 = parse_array();
-            }
-            while (result2 !== null) {
-              result1.push(result2);
-              result2 = parse_array_part();
-              if (result2 === null) {
-                result2 = parse_array();
-              }
-            }
-            if (result1 !== null) {
-              result0 = [result0, result1];
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-          if (result0 !== null) {
-            result0 = (function(offset, line, column, d) {
-              if (d.length > 0) {
-                return [true, d[0]].concat([['line', line], ['col', column]]);
-              }
-              return [true, []].concat([['line', line], ['col', column]]);
-            })(pos0.offset, pos0.line, pos0.column, result0[1]);
-          }
-          if (result0 === null) {
-            pos = clone(pos0);
-          }
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("path");
-        }
-        return result0;
-      }
-      
-      function parse_key() {
-        var result0, result1, result2;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        if (/^[a-zA-Z_$]/.test(input.charAt(pos.offset))) {
-          result0 = input.charAt(pos.offset);
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("[a-zA-Z_$]");
-          }
-        }
-        if (result0 !== null) {
-          result1 = [];
-          if (/^[0-9a-zA-Z_$\-]/.test(input.charAt(pos.offset))) {
-            result2 = input.charAt(pos.offset);
-            advance(pos, 1);
-          } else {
-            result2 = null;
-            if (reportFailures === 0) {
-              matchFailed("[0-9a-zA-Z_$\\-]");
-            }
-          }
-          while (result2 !== null) {
-            result1.push(result2);
-            if (/^[0-9a-zA-Z_$\-]/.test(input.charAt(pos.offset))) {
-              result2 = input.charAt(pos.offset);
-              advance(pos, 1);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("[0-9a-zA-Z_$\\-]");
-              }
-            }
-          }
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, h, t) { return h + t.join('') })(pos0.offset, pos0.line, pos0.column, result0[0], result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("key");
-        }
-        return result0;
-      }
-      
-      function parse_array() {
-        var result0, result1, result2;
-        var pos0, pos1, pos2, pos3, pos4;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        pos3 = clone(pos);
-        result0 = parse_lb();
-        if (result0 !== null) {
-          pos4 = clone(pos);
-          if (/^[0-9]/.test(input.charAt(pos.offset))) {
-            result2 = input.charAt(pos.offset);
-            advance(pos, 1);
-          } else {
-            result2 = null;
-            if (reportFailures === 0) {
-              matchFailed("[0-9]");
-            }
-          }
-          if (result2 !== null) {
-            result1 = [];
-            while (result2 !== null) {
-              result1.push(result2);
-              if (/^[0-9]/.test(input.charAt(pos.offset))) {
-                result2 = input.charAt(pos.offset);
-                advance(pos, 1);
-              } else {
-                result2 = null;
-                if (reportFailures === 0) {
-                  matchFailed("[0-9]");
-                }
-              }
-            }
-          } else {
-            result1 = null;
-          }
-          if (result1 !== null) {
-            result1 = (function(offset, line, column, n) {return n.join('')})(pos4.offset, pos4.line, pos4.column, result1);
-          }
-          if (result1 === null) {
-            pos = clone(pos4);
-          }
-          if (result1 === null) {
-            result1 = parse_identifier();
-          }
-          if (result1 !== null) {
-            result2 = parse_rb();
-            if (result2 !== null) {
-              result0 = [result0, result1, result2];
-            } else {
-              result0 = null;
-              pos = clone(pos3);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos3);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos3);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, a) {return a; })(pos2.offset, pos2.line, pos2.column, result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos2);
-        }
-        if (result0 !== null) {
-          result1 = parse_array_part();
-          result1 = result1 !== null ? result1 : "";
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, i, nk) { if(nk) { nk.unshift(i); } else {nk = [i] } return nk; })(pos0.offset, pos0.line, pos0.column, result0[0], result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("array");
-        }
-        return result0;
-      }
-      
-      function parse_array_part() {
-        var result0, result1, result2;
-        var pos0, pos1, pos2, pos3;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        pos3 = clone(pos);
-        if (input.charCodeAt(pos.offset) === 46) {
-          result1 = ".";
-          advance(pos, 1);
-        } else {
-          result1 = null;
-          if (reportFailures === 0) {
-            matchFailed("\".\"");
-          }
-        }
-        if (result1 !== null) {
-          result2 = parse_key();
-          if (result2 !== null) {
-            result1 = [result1, result2];
-          } else {
-            result1 = null;
-            pos = clone(pos3);
-          }
-        } else {
-          result1 = null;
-          pos = clone(pos3);
-        }
-        if (result1 !== null) {
-          result1 = (function(offset, line, column, k) {return k})(pos2.offset, pos2.line, pos2.column, result1[1]);
-        }
-        if (result1 === null) {
-          pos = clone(pos2);
-        }
-        if (result1 !== null) {
-          result0 = [];
-          while (result1 !== null) {
-            result0.push(result1);
-            pos2 = clone(pos);
-            pos3 = clone(pos);
-            if (input.charCodeAt(pos.offset) === 46) {
-              result1 = ".";
-              advance(pos, 1);
-            } else {
-              result1 = null;
-              if (reportFailures === 0) {
-                matchFailed("\".\"");
-              }
-            }
-            if (result1 !== null) {
-              result2 = parse_key();
-              if (result2 !== null) {
-                result1 = [result1, result2];
-              } else {
-                result1 = null;
-                pos = clone(pos3);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos3);
-            }
-            if (result1 !== null) {
-              result1 = (function(offset, line, column, k) {return k})(pos2.offset, pos2.line, pos2.column, result1[1]);
-            }
-            if (result1 === null) {
-              pos = clone(pos2);
-            }
-          }
-        } else {
-          result0 = null;
-        }
-        if (result0 !== null) {
-          result1 = parse_array();
-          result1 = result1 !== null ? result1 : "";
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, d, a) { if (a) { return d.concat(a); } else { return d; } })(pos0.offset, pos0.line, pos0.column, result0[0], result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("array_part");
-        }
-        return result0;
-      }
-      
-      function parse_inline() {
-        var result0, result1, result2;
-        var pos0, pos1;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        if (input.charCodeAt(pos.offset) === 34) {
-          result0 = "\"";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"\\\"\"");
-          }
-        }
-        if (result0 !== null) {
-          if (input.charCodeAt(pos.offset) === 34) {
-            result1 = "\"";
-            advance(pos, 1);
-          } else {
-            result1 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"\\\"\"");
-            }
-          }
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column) { return ["literal", ""].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        if (result0 === null) {
-          pos0 = clone(pos);
-          pos1 = clone(pos);
-          if (input.charCodeAt(pos.offset) === 34) {
-            result0 = "\"";
-            advance(pos, 1);
-          } else {
-            result0 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"\\\"\"");
-            }
-          }
-          if (result0 !== null) {
-            result1 = parse_literal();
-            if (result1 !== null) {
-              if (input.charCodeAt(pos.offset) === 34) {
-                result2 = "\"";
-                advance(pos, 1);
-              } else {
-                result2 = null;
-                if (reportFailures === 0) {
-                  matchFailed("\"\\\"\"");
-                }
-              }
-              if (result2 !== null) {
-                result0 = [result0, result1, result2];
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-          if (result0 !== null) {
-            result0 = (function(offset, line, column, l) { return ["literal", l].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[1]);
-          }
-          if (result0 === null) {
-            pos = clone(pos0);
-          }
-          if (result0 === null) {
-            pos0 = clone(pos);
-            pos1 = clone(pos);
-            if (input.charCodeAt(pos.offset) === 34) {
-              result0 = "\"";
-              advance(pos, 1);
-            } else {
-              result0 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"\\\"\"");
-              }
-            }
-            if (result0 !== null) {
-              result2 = parse_inline_part();
-              if (result2 !== null) {
-                result1 = [];
-                while (result2 !== null) {
-                  result1.push(result2);
-                  result2 = parse_inline_part();
-                }
-              } else {
-                result1 = null;
-              }
-              if (result1 !== null) {
-                if (input.charCodeAt(pos.offset) === 34) {
-                  result2 = "\"";
-                  advance(pos, 1);
-                } else {
-                  result2 = null;
-                  if (reportFailures === 0) {
-                    matchFailed("\"\\\"\"");
-                  }
-                }
-                if (result2 !== null) {
-                  result0 = [result0, result1, result2];
-                } else {
-                  result0 = null;
-                  pos = clone(pos1);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos1);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-            if (result0 !== null) {
-              result0 = (function(offset, line, column, p) { return ["body"].concat(p).concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[1]);
-            }
-            if (result0 === null) {
-              pos = clone(pos0);
-            }
-          }
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("inline");
-        }
-        return result0;
-      }
-      
-      function parse_inline_part() {
-        var result0;
-        var pos0;
-        
-        result0 = parse_special();
-        if (result0 === null) {
-          result0 = parse_reference();
-          if (result0 === null) {
-            pos0 = clone(pos);
-            result0 = parse_literal();
-            if (result0 !== null) {
-              result0 = (function(offset, line, column, l) { return ["buffer", l] })(pos0.offset, pos0.line, pos0.column, result0);
-            }
-            if (result0 === null) {
-              pos = clone(pos0);
-            }
-          }
-        }
-        return result0;
-      }
-      
-      function parse_buffer() {
-        var result0, result1, result2, result3, result4, result5;
-        var pos0, pos1, pos2, pos3;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        result0 = parse_eol();
-        if (result0 !== null) {
-          result1 = [];
-          result2 = parse_ws();
-          while (result2 !== null) {
-            result1.push(result2);
-            result2 = parse_ws();
-          }
-          if (result1 !== null) {
-            result0 = [result0, result1];
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, e, w) { return ["format", e, w.join('')].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[0], result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        if (result0 === null) {
-          pos0 = clone(pos);
-          pos1 = clone(pos);
-          pos2 = clone(pos);
-          pos3 = clone(pos);
-          reportFailures++;
-          result1 = parse_tag();
-          reportFailures--;
-          if (result1 === null) {
-            result1 = "";
-          } else {
-            result1 = null;
-            pos = clone(pos3);
-          }
-          if (result1 !== null) {
-            pos3 = clone(pos);
-            reportFailures++;
-            result2 = parse_raw();
-            reportFailures--;
-            if (result2 === null) {
-              result2 = "";
-            } else {
-              result2 = null;
-              pos = clone(pos3);
-            }
-            if (result2 !== null) {
-              pos3 = clone(pos);
-              reportFailures++;
-              result3 = parse_comment();
-              reportFailures--;
-              if (result3 === null) {
-                result3 = "";
-              } else {
-                result3 = null;
-                pos = clone(pos3);
-              }
-              if (result3 !== null) {
-                pos3 = clone(pos);
-                reportFailures++;
-                result4 = parse_eol();
-                reportFailures--;
-                if (result4 === null) {
-                  result4 = "";
-                } else {
-                  result4 = null;
-                  pos = clone(pos3);
-                }
-                if (result4 !== null) {
-                  if (input.length > pos.offset) {
-                    result5 = input.charAt(pos.offset);
-                    advance(pos, 1);
-                  } else {
-                    result5 = null;
-                    if (reportFailures === 0) {
-                      matchFailed("any character");
-                    }
-                  }
-                  if (result5 !== null) {
-                    result1 = [result1, result2, result3, result4, result5];
-                  } else {
-                    result1 = null;
-                    pos = clone(pos2);
-                  }
-                } else {
-                  result1 = null;
-                  pos = clone(pos2);
-                }
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-          if (result1 !== null) {
-            result1 = (function(offset, line, column, c) {return c})(pos1.offset, pos1.line, pos1.column, result1[4]);
-          }
-          if (result1 === null) {
-            pos = clone(pos1);
-          }
-          if (result1 !== null) {
-            result0 = [];
-            while (result1 !== null) {
-              result0.push(result1);
-              pos1 = clone(pos);
-              pos2 = clone(pos);
-              pos3 = clone(pos);
-              reportFailures++;
-              result1 = parse_tag();
-              reportFailures--;
-              if (result1 === null) {
-                result1 = "";
-              } else {
-                result1 = null;
-                pos = clone(pos3);
-              }
-              if (result1 !== null) {
-                pos3 = clone(pos);
-                reportFailures++;
-                result2 = parse_raw();
-                reportFailures--;
-                if (result2 === null) {
-                  result2 = "";
-                } else {
-                  result2 = null;
-                  pos = clone(pos3);
-                }
-                if (result2 !== null) {
-                  pos3 = clone(pos);
-                  reportFailures++;
-                  result3 = parse_comment();
-                  reportFailures--;
-                  if (result3 === null) {
-                    result3 = "";
-                  } else {
-                    result3 = null;
-                    pos = clone(pos3);
-                  }
-                  if (result3 !== null) {
-                    pos3 = clone(pos);
-                    reportFailures++;
-                    result4 = parse_eol();
-                    reportFailures--;
-                    if (result4 === null) {
-                      result4 = "";
-                    } else {
-                      result4 = null;
-                      pos = clone(pos3);
-                    }
-                    if (result4 !== null) {
-                      if (input.length > pos.offset) {
-                        result5 = input.charAt(pos.offset);
-                        advance(pos, 1);
-                      } else {
-                        result5 = null;
-                        if (reportFailures === 0) {
-                          matchFailed("any character");
-                        }
-                      }
-                      if (result5 !== null) {
-                        result1 = [result1, result2, result3, result4, result5];
-                      } else {
-                        result1 = null;
-                        pos = clone(pos2);
-                      }
-                    } else {
-                      result1 = null;
-                      pos = clone(pos2);
-                    }
-                  } else {
-                    result1 = null;
-                    pos = clone(pos2);
-                  }
-                } else {
-                  result1 = null;
-                  pos = clone(pos2);
-                }
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-              if (result1 !== null) {
-                result1 = (function(offset, line, column, c) {return c})(pos1.offset, pos1.line, pos1.column, result1[4]);
-              }
-              if (result1 === null) {
-                pos = clone(pos1);
-              }
-            }
-          } else {
-            result0 = null;
-          }
-          if (result0 !== null) {
-            result0 = (function(offset, line, column, b) { return ["buffer", b.join('')].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0);
-          }
-          if (result0 === null) {
-            pos = clone(pos0);
-          }
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("buffer");
-        }
-        return result0;
-      }
-      
-      function parse_literal() {
-        var result0, result1, result2;
-        var pos0, pos1, pos2, pos3;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        pos2 = clone(pos);
-        pos3 = clone(pos);
-        reportFailures++;
-        result1 = parse_tag();
-        reportFailures--;
-        if (result1 === null) {
-          result1 = "";
-        } else {
-          result1 = null;
-          pos = clone(pos3);
-        }
-        if (result1 !== null) {
-          result2 = parse_esc();
-          if (result2 === null) {
-            if (/^[^"]/.test(input.charAt(pos.offset))) {
-              result2 = input.charAt(pos.offset);
-              advance(pos, 1);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("[^\"]");
-              }
-            }
-          }
-          if (result2 !== null) {
-            result1 = [result1, result2];
-          } else {
-            result1 = null;
-            pos = clone(pos2);
-          }
-        } else {
-          result1 = null;
-          pos = clone(pos2);
-        }
-        if (result1 !== null) {
-          result1 = (function(offset, line, column, c) {return c})(pos1.offset, pos1.line, pos1.column, result1[1]);
-        }
-        if (result1 === null) {
-          pos = clone(pos1);
-        }
-        if (result1 !== null) {
-          result0 = [];
-          while (result1 !== null) {
-            result0.push(result1);
-            pos1 = clone(pos);
-            pos2 = clone(pos);
-            pos3 = clone(pos);
-            reportFailures++;
-            result1 = parse_tag();
-            reportFailures--;
-            if (result1 === null) {
-              result1 = "";
-            } else {
-              result1 = null;
-              pos = clone(pos3);
-            }
-            if (result1 !== null) {
-              result2 = parse_esc();
-              if (result2 === null) {
-                if (/^[^"]/.test(input.charAt(pos.offset))) {
-                  result2 = input.charAt(pos.offset);
-                  advance(pos, 1);
-                } else {
-                  result2 = null;
-                  if (reportFailures === 0) {
-                    matchFailed("[^\"]");
-                  }
-                }
-              }
-              if (result2 !== null) {
-                result1 = [result1, result2];
-              } else {
-                result1 = null;
-                pos = clone(pos2);
-              }
-            } else {
-              result1 = null;
-              pos = clone(pos2);
-            }
-            if (result1 !== null) {
-              result1 = (function(offset, line, column, c) {return c})(pos1.offset, pos1.line, pos1.column, result1[1]);
-            }
-            if (result1 === null) {
-              pos = clone(pos1);
-            }
-          }
-        } else {
-          result0 = null;
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, b) { return b.join('') })(pos0.offset, pos0.line, pos0.column, result0);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("literal");
-        }
-        return result0;
-      }
-      
-      function parse_esc() {
-        var result0;
-        var pos0;
-        
-        pos0 = clone(pos);
-        if (input.substr(pos.offset, 2) === "\\\"") {
-          result0 = "\\\"";
-          advance(pos, 2);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"\\\\\\\"\"");
-          }
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column) { return '"' })(pos0.offset, pos0.line, pos0.column);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        return result0;
-      }
-      
-      function parse_raw() {
-        var result0, result1, result2, result3;
-        var pos0, pos1, pos2, pos3, pos4;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        if (input.substr(pos.offset, 2) === "{`") {
-          result0 = "{`";
-          advance(pos, 2);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"{`\"");
-          }
-        }
-        if (result0 !== null) {
-          result1 = [];
-          pos2 = clone(pos);
-          pos3 = clone(pos);
-          pos4 = clone(pos);
-          reportFailures++;
-          if (input.substr(pos.offset, 2) === "`}") {
-            result2 = "`}";
-            advance(pos, 2);
-          } else {
-            result2 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"`}\"");
-            }
-          }
-          reportFailures--;
-          if (result2 === null) {
-            result2 = "";
-          } else {
-            result2 = null;
-            pos = clone(pos4);
-          }
-          if (result2 !== null) {
-            if (input.length > pos.offset) {
-              result3 = input.charAt(pos.offset);
-              advance(pos, 1);
-            } else {
-              result3 = null;
-              if (reportFailures === 0) {
-                matchFailed("any character");
-              }
-            }
-            if (result3 !== null) {
-              result2 = [result2, result3];
-            } else {
-              result2 = null;
-              pos = clone(pos3);
-            }
-          } else {
-            result2 = null;
-            pos = clone(pos3);
-          }
-          if (result2 !== null) {
-            result2 = (function(offset, line, column, char) {return char})(pos2.offset, pos2.line, pos2.column, result2[1]);
-          }
-          if (result2 === null) {
-            pos = clone(pos2);
-          }
-          while (result2 !== null) {
-            result1.push(result2);
-            pos2 = clone(pos);
-            pos3 = clone(pos);
-            pos4 = clone(pos);
-            reportFailures++;
-            if (input.substr(pos.offset, 2) === "`}") {
-              result2 = "`}";
-              advance(pos, 2);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"`}\"");
-              }
-            }
-            reportFailures--;
-            if (result2 === null) {
-              result2 = "";
-            } else {
-              result2 = null;
-              pos = clone(pos4);
-            }
-            if (result2 !== null) {
-              if (input.length > pos.offset) {
-                result3 = input.charAt(pos.offset);
-                advance(pos, 1);
-              } else {
-                result3 = null;
-                if (reportFailures === 0) {
-                  matchFailed("any character");
-                }
-              }
-              if (result3 !== null) {
-                result2 = [result2, result3];
-              } else {
-                result2 = null;
-                pos = clone(pos3);
-              }
-            } else {
-              result2 = null;
-              pos = clone(pos3);
-            }
-            if (result2 !== null) {
-              result2 = (function(offset, line, column, char) {return char})(pos2.offset, pos2.line, pos2.column, result2[1]);
-            }
-            if (result2 === null) {
-              pos = clone(pos2);
-            }
-          }
-          if (result1 !== null) {
-            if (input.substr(pos.offset, 2) === "`}") {
-              result2 = "`}";
-              advance(pos, 2);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"`}\"");
-              }
-            }
-            if (result2 !== null) {
-              result0 = [result0, result1, result2];
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, rawText) { return ["raw", rawText.join('')].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("raw");
-        }
-        return result0;
-      }
-      
-      function parse_comment() {
-        var result0, result1, result2, result3;
-        var pos0, pos1, pos2, pos3, pos4;
-        
-        reportFailures++;
-        pos0 = clone(pos);
-        pos1 = clone(pos);
-        if (input.substr(pos.offset, 2) === "{!") {
-          result0 = "{!";
-          advance(pos, 2);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"{!\"");
-          }
-        }
-        if (result0 !== null) {
-          result1 = [];
-          pos2 = clone(pos);
-          pos3 = clone(pos);
-          pos4 = clone(pos);
-          reportFailures++;
-          if (input.substr(pos.offset, 2) === "!}") {
-            result2 = "!}";
-            advance(pos, 2);
-          } else {
-            result2 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"!}\"");
-            }
-          }
-          reportFailures--;
-          if (result2 === null) {
-            result2 = "";
-          } else {
-            result2 = null;
-            pos = clone(pos4);
-          }
-          if (result2 !== null) {
-            if (input.length > pos.offset) {
-              result3 = input.charAt(pos.offset);
-              advance(pos, 1);
-            } else {
-              result3 = null;
-              if (reportFailures === 0) {
-                matchFailed("any character");
-              }
-            }
-            if (result3 !== null) {
-              result2 = [result2, result3];
-            } else {
-              result2 = null;
-              pos = clone(pos3);
-            }
-          } else {
-            result2 = null;
-            pos = clone(pos3);
-          }
-          if (result2 !== null) {
-            result2 = (function(offset, line, column, c) {return c})(pos2.offset, pos2.line, pos2.column, result2[1]);
-          }
-          if (result2 === null) {
-            pos = clone(pos2);
-          }
-          while (result2 !== null) {
-            result1.push(result2);
-            pos2 = clone(pos);
-            pos3 = clone(pos);
-            pos4 = clone(pos);
-            reportFailures++;
-            if (input.substr(pos.offset, 2) === "!}") {
-              result2 = "!}";
-              advance(pos, 2);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"!}\"");
-              }
-            }
-            reportFailures--;
-            if (result2 === null) {
-              result2 = "";
-            } else {
-              result2 = null;
-              pos = clone(pos4);
-            }
-            if (result2 !== null) {
-              if (input.length > pos.offset) {
-                result3 = input.charAt(pos.offset);
-                advance(pos, 1);
-              } else {
-                result3 = null;
-                if (reportFailures === 0) {
-                  matchFailed("any character");
-                }
-              }
-              if (result3 !== null) {
-                result2 = [result2, result3];
-              } else {
-                result2 = null;
-                pos = clone(pos3);
-              }
-            } else {
-              result2 = null;
-              pos = clone(pos3);
-            }
-            if (result2 !== null) {
-              result2 = (function(offset, line, column, c) {return c})(pos2.offset, pos2.line, pos2.column, result2[1]);
-            }
-            if (result2 === null) {
-              pos = clone(pos2);
-            }
-          }
-          if (result1 !== null) {
-            if (input.substr(pos.offset, 2) === "!}") {
-              result2 = "!}";
-              advance(pos, 2);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"!}\"");
-              }
-            }
-            if (result2 !== null) {
-              result0 = [result0, result1, result2];
-            } else {
-              result0 = null;
-              pos = clone(pos1);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos1);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos1);
-        }
-        if (result0 !== null) {
-          result0 = (function(offset, line, column, c) { return ["comment", c.join('')].concat([['line', line], ['col', column]]) })(pos0.offset, pos0.line, pos0.column, result0[1]);
-        }
-        if (result0 === null) {
-          pos = clone(pos0);
-        }
-        reportFailures--;
-        if (reportFailures === 0 && result0 === null) {
-          matchFailed("comment");
-        }
-        return result0;
-      }
-      
-      function parse_tag() {
-        var result0, result1, result2, result3, result4, result5, result6, result7;
-        var pos0, pos1, pos2;
-        
-        pos0 = clone(pos);
-        result0 = parse_ld();
-        if (result0 !== null) {
-          result1 = [];
-          result2 = parse_ws();
-          while (result2 !== null) {
-            result1.push(result2);
-            result2 = parse_ws();
-          }
-          if (result1 !== null) {
-            if (/^[#?^><+%:@\/~%]/.test(input.charAt(pos.offset))) {
-              result2 = input.charAt(pos.offset);
-              advance(pos, 1);
-            } else {
-              result2 = null;
-              if (reportFailures === 0) {
-                matchFailed("[#?^><+%:@\\/~%]");
-              }
-            }
-            if (result2 !== null) {
-              result3 = [];
-              result4 = parse_ws();
-              while (result4 !== null) {
-                result3.push(result4);
-                result4 = parse_ws();
-              }
-              if (result3 !== null) {
-                pos1 = clone(pos);
-                pos2 = clone(pos);
-                reportFailures++;
-                result5 = parse_rd();
-                reportFailures--;
-                if (result5 === null) {
-                  result5 = "";
-                } else {
-                  result5 = null;
-                  pos = clone(pos2);
-                }
-                if (result5 !== null) {
-                  pos2 = clone(pos);
-                  reportFailures++;
-                  result6 = parse_eol();
-                  reportFailures--;
-                  if (result6 === null) {
-                    result6 = "";
-                  } else {
-                    result6 = null;
-                    pos = clone(pos2);
-                  }
-                  if (result6 !== null) {
-                    if (input.length > pos.offset) {
-                      result7 = input.charAt(pos.offset);
-                      advance(pos, 1);
-                    } else {
-                      result7 = null;
-                      if (reportFailures === 0) {
-                        matchFailed("any character");
-                      }
-                    }
-                    if (result7 !== null) {
-                      result5 = [result5, result6, result7];
-                    } else {
-                      result5 = null;
-                      pos = clone(pos1);
-                    }
-                  } else {
-                    result5 = null;
-                    pos = clone(pos1);
-                  }
-                } else {
-                  result5 = null;
-                  pos = clone(pos1);
-                }
-                if (result5 !== null) {
-                  result4 = [];
-                  while (result5 !== null) {
-                    result4.push(result5);
-                    pos1 = clone(pos);
-                    pos2 = clone(pos);
-                    reportFailures++;
-                    result5 = parse_rd();
-                    reportFailures--;
-                    if (result5 === null) {
-                      result5 = "";
-                    } else {
-                      result5 = null;
-                      pos = clone(pos2);
-                    }
-                    if (result5 !== null) {
-                      pos2 = clone(pos);
-                      reportFailures++;
-                      result6 = parse_eol();
-                      reportFailures--;
-                      if (result6 === null) {
-                        result6 = "";
-                      } else {
-                        result6 = null;
-                        pos = clone(pos2);
-                      }
-                      if (result6 !== null) {
-                        if (input.length > pos.offset) {
-                          result7 = input.charAt(pos.offset);
-                          advance(pos, 1);
-                        } else {
-                          result7 = null;
-                          if (reportFailures === 0) {
-                            matchFailed("any character");
-                          }
-                        }
-                        if (result7 !== null) {
-                          result5 = [result5, result6, result7];
-                        } else {
-                          result5 = null;
-                          pos = clone(pos1);
-                        }
-                      } else {
-                        result5 = null;
-                        pos = clone(pos1);
-                      }
-                    } else {
-                      result5 = null;
-                      pos = clone(pos1);
-                    }
-                  }
-                } else {
-                  result4 = null;
-                }
-                if (result4 !== null) {
-                  result5 = [];
-                  result6 = parse_ws();
-                  while (result6 !== null) {
-                    result5.push(result6);
-                    result6 = parse_ws();
-                  }
-                  if (result5 !== null) {
-                    result6 = parse_rd();
-                    if (result6 !== null) {
-                      result0 = [result0, result1, result2, result3, result4, result5, result6];
-                    } else {
-                      result0 = null;
-                      pos = clone(pos0);
-                    }
-                  } else {
-                    result0 = null;
-                    pos = clone(pos0);
-                  }
-                } else {
-                  result0 = null;
-                  pos = clone(pos0);
-                }
-              } else {
-                result0 = null;
-                pos = clone(pos0);
-              }
-            } else {
-              result0 = null;
-              pos = clone(pos0);
-            }
-          } else {
-            result0 = null;
-            pos = clone(pos0);
-          }
-        } else {
-          result0 = null;
-          pos = clone(pos0);
-        }
-        if (result0 === null) {
-          result0 = parse_reference();
-        }
-        return result0;
-      }
-      
-      function parse_ld() {
-        var result0;
-        
-        if (input.charCodeAt(pos.offset) === 123) {
-          result0 = "{";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"{\"");
-          }
-        }
-        return result0;
-      }
-      
-      function parse_rd() {
-        var result0;
-        
-        if (input.charCodeAt(pos.offset) === 125) {
-          result0 = "}";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"}\"");
-          }
-        }
-        return result0;
-      }
-      
-      function parse_lb() {
-        var result0;
-        
-        if (input.charCodeAt(pos.offset) === 91) {
-          result0 = "[";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"[\"");
-          }
-        }
-        return result0;
-      }
-      
-      function parse_rb() {
-        var result0;
-        
-        if (input.charCodeAt(pos.offset) === 93) {
-          result0 = "]";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"]\"");
-          }
-        }
-        return result0;
-      }
-      
-      function parse_eol() {
-        var result0;
-        
-        if (input.charCodeAt(pos.offset) === 10) {
-          result0 = "\n";
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("\"\\n\"");
-          }
-        }
-        if (result0 === null) {
-          if (input.substr(pos.offset, 2) === "\r\n") {
-            result0 = "\r\n";
-            advance(pos, 2);
-          } else {
-            result0 = null;
-            if (reportFailures === 0) {
-              matchFailed("\"\\r\\n\"");
-            }
-          }
-          if (result0 === null) {
-            if (input.charCodeAt(pos.offset) === 13) {
-              result0 = "\r";
-              advance(pos, 1);
-            } else {
-              result0 = null;
-              if (reportFailures === 0) {
-                matchFailed("\"\\r\"");
-              }
-            }
-            if (result0 === null) {
-              if (input.charCodeAt(pos.offset) === 8232) {
-                result0 = "\u2028";
-                advance(pos, 1);
-              } else {
-                result0 = null;
-                if (reportFailures === 0) {
-                  matchFailed("\"\\u2028\"");
-                }
-              }
-              if (result0 === null) {
-                if (input.charCodeAt(pos.offset) === 8233) {
-                  result0 = "\u2029";
-                  advance(pos, 1);
-                } else {
-                  result0 = null;
-                  if (reportFailures === 0) {
-                    matchFailed("\"\\u2029\"");
-                  }
-                }
-              }
-            }
-          }
-        }
-        return result0;
-      }
-      
-      function parse_ws() {
-        var result0;
-        
-        if (/^[\t\x0B\f \xA0\uFEFF]/.test(input.charAt(pos.offset))) {
-          result0 = input.charAt(pos.offset);
-          advance(pos, 1);
-        } else {
-          result0 = null;
-          if (reportFailures === 0) {
-            matchFailed("[\\t\\x0B\\f \\xA0\\uFEFF]");
-          }
-        }
-        if (result0 === null) {
-          result0 = parse_eol();
-        }
-        return result0;
-      }
-      
-      
-      function cleanupExpected(expected) {
-        expected.sort();
-        
-        var lastExpected = null;
-        var cleanExpected = [];
-        for (var i = 0; i < expected.length; i++) {
-          if (expected[i] !== lastExpected) {
-            cleanExpected.push(expected[i]);
-            lastExpected = expected[i];
-          }
-        }
-        return cleanExpected;
-      }
-      
-      
-      
-      var result = parseFunctions[startRule]();
-      
-      /*
-       * The parser is now in one of the following three states:
-       *
-       * 1. The parser successfully parsed the whole input.
-       *
-       *    - |result !== null|
-       *    - |pos.offset === input.length|
-       *    - |rightmostFailuresExpected| may or may not contain something
-       *
-       * 2. The parser successfully parsed only a part of the input.
-       *
-       *    - |result !== null|
-       *    - |pos.offset < input.length|
-       *    - |rightmostFailuresExpected| may or may not contain something
-       *
-       * 3. The parser did not successfully parse any part of the input.
-       *
-       *   - |result === null|
-       *   - |pos.offset === 0|
-       *   - |rightmostFailuresExpected| contains at least one failure
-       *
-       * All code following this comment (including called functions) must
-       * handle these states.
-       */
-      if (result === null || pos.offset !== input.length) {
-        var offset = Math.max(pos.offset, rightmostFailuresPos.offset);
-        var found = offset < input.length ? input.charAt(offset) : null;
-        var errorPosition = pos.offset > rightmostFailuresPos.offset ? pos : rightmostFailuresPos;
-        
-        throw new parser.SyntaxError(
-          cleanupExpected(rightmostFailuresExpected),
-          found,
-          offset,
-          errorPosition.line,
-          errorPosition.column
-        );
-      }
-      
-      return result;
-    },
-    
-    /* Returns the parser source code. */
-    toSource: function() { return this._source; }
-  };
-  
-  /* Thrown when a parser encounters a syntax error. */
-  
-  result.SyntaxError = function(expected, found, offset, line, column) {
-    function buildMessage(expected, found) {
-      var expectedHumanized, foundHumanized;
-      
-      switch (expected.length) {
-        case 0:
-          expectedHumanized = "end of input";
-          break;
-        case 1:
-          expectedHumanized = expected[0];
-          break;
-        default:
-          expectedHumanized = expected.slice(0, expected.length - 1).join(", ")
-            + " or "
-            + expected[expected.length - 1];
-      }
-      
-      foundHumanized = found ? quote(found) : "end of input";
-      
-      return "Expected " + expectedHumanized + " but " + foundHumanized + " found.";
-    }
-    
-    this.name = "SyntaxError";
-    this.expected = expected;
-    this.found = found;
-    this.message = buildMessage(expected, found);
-    this.offset = offset;
-    this.line = line;
-    this.column = column;
-  };
-  
-  result.SyntaxError.prototype = Error.prototype;
-  
-  return result;
-})();
-
-  // expose parser methods
-  dust.parse = parser.parse;
-
-  return parser;
-}));
-  
-
-
-},{"./dust":24}],26:[function(require,module,exports){
-(function (process){
-/*global process*/
-var path = require('path'),
-    vm = require('vm'),
-    dust = require('./dust'),
-    parser = require('./parser'),
-    compiler = require('./compiler');
-
-
-// use Node equivalents for some Dust methods
-var context = vm.createContext({dust: dust});
-dust.loadSource = function(source, path) {
-  return vm.runInContext(source, context, path);
-};
-
-dust.nextTick = process.nextTick;
-
-module.exports = dust;
-
-}).call(this,require("FWaASH"))
-},{"./compiler":23,"./dust":24,"./parser":25,"FWaASH":20,"path":19,"vm":21}],27:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 /*!
  * jQuery JavaScript Library v2.1.1
  * http://jquery.com/
@@ -17258,7 +14780,7 @@ return jQuery;
 
 }));
 
-},{}],28:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -24047,7 +21569,7 @@ return jQuery;
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 (function (Buffer){
 //     uuid.js
 //
@@ -24296,7 +21818,7 @@ return jQuery;
 }).call(this);
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":10,"crypto":14}],30:[function(require,module,exports){
+},{"buffer":10,"crypto":17}],35:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24305,7 +21827,7 @@ return jQuery;
 define(function (require) {
 
 	var makePromise = require('./makePromise');
-	var Scheduler = require('./scheduler');
+	var Scheduler = require('./Scheduler');
 	var async = require('./async');
 
 	return makePromise({
@@ -24315,7 +21837,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./async":33,"./makePromise":43,"./scheduler":44}],31:[function(require,module,exports){
+},{"./Scheduler":37,"./async":39,"./makePromise":49}],36:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24387,7 +21909,91 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],32:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
+/** @license MIT License (c) copyright 2010-2014 original author or authors */
+/** @author Brian Cavalier */
+/** @author John Hann */
+
+(function(define) { 'use strict';
+define(function(require) {
+
+	var Queue = require('./Queue');
+
+	// Credit to Twisol (https://github.com/Twisol) for suggesting
+	// this type of extensible queue + trampoline approach for next-tick conflation.
+
+	/**
+	 * Async task scheduler
+	 * @param {function} async function to schedule a single async function
+	 * @constructor
+	 */
+	function Scheduler(async) {
+		this._async = async;
+		this._queue = new Queue(15);
+		this._afterQueue = new Queue(5);
+		this._running = false;
+
+		var self = this;
+		this.drain = function() {
+			self._drain();
+		};
+	}
+
+	/**
+	 * Enqueue a task
+	 * @param {{ run:function }} task
+	 */
+	Scheduler.prototype.enqueue = function(task) {
+		this._add(this._queue, task);
+	};
+
+	/**
+	 * Enqueue a task to run after the main task queue
+	 * @param {{ run:function }} task
+	 */
+	Scheduler.prototype.afterQueue = function(task) {
+		this._add(this._afterQueue, task);
+	};
+
+	/**
+	 * Drain the handler queue entirely, and then the after queue
+	 */
+	Scheduler.prototype._drain = function() {
+		runQueue(this._queue);
+		this._running = false;
+		runQueue(this._afterQueue);
+	};
+
+	/**
+	 * Add a task to the q, and schedule drain if not already scheduled
+	 * @param {Queue} queue
+	 * @param {{run:function}} task
+	 * @private
+	 */
+	Scheduler.prototype._add = function(queue, task) {
+		queue.push(task);
+		if(!this._running) {
+			this._running = true;
+			this._async(this.drain);
+		}
+	};
+
+	/**
+	 * Run all the tasks in the q
+	 * @param queue
+	 */
+	function runQueue(queue) {
+		while(queue.length > 0) {
+			queue.shift().run();
+		}
+	}
+
+	return Scheduler;
+
+});
+}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
+
+},{"./Queue":36}],38:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24415,7 +22021,7 @@ define(function() {
 	return TimeoutError;
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
-},{}],33:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 (function (process){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
@@ -24461,10 +22067,20 @@ define(function(require) {
 
 	} else {
 		nextTick = (function(cjsRequire) {
+			var vertx;
 			try {
 				// vert.x 1.x || 2.x
-				return cjsRequire('vertx').runOnLoop || cjsRequire('vertx').runOnContext;
+				vertx = cjsRequire('vertx');
 			} catch (ignore) {}
+
+			if (vertx) {
+				if (typeof vertx.runOnLoop === 'function') {
+					return vertx.runOnLoop;
+				}
+				if (typeof vertx.runOnContext === 'function') {
+					return vertx.runOnContext;
+				}
+			}
 
 			// capture setTimeout to avoid being caught by fake timers
 			// used in time based tests
@@ -24480,7 +22096,7 @@ define(function(require) {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":20}],34:[function(require,module,exports){
+},{"FWaASH":28}],40:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24490,10 +22106,8 @@ define(function() {
 
 	return function array(Promise) {
 
-		var arrayMap = Array.prototype.map;
 		var arrayReduce = Array.prototype.reduce;
 		var arrayReduceRight = Array.prototype.reduceRight;
-		var arrayForEach = Array.prototype.forEach;
 
 		var toPromise = Promise.resolve;
 		var all = Promise.all;
@@ -24505,13 +22119,14 @@ define(function() {
 		Promise.settle = settle;
 
 		Promise.map = map;
+		Promise.filter = filter;
 		Promise.reduce = reduce;
 		Promise.reduceRight = reduceRight;
 
 		/**
 		 * When this promise fulfills with an array, do
 		 * onFulfilled.apply(void 0, array)
-		 * @param (function) onFulfilled function to apply
+		 * @param {function} onFulfilled function to apply
 		 * @returns {Promise} promise for the result of applying onFulfilled
 		 */
 		Promise.prototype.spread = function(onFulfilled) {
@@ -24532,16 +22147,11 @@ define(function() {
 		 */
 		function any(promises) {
 			return new Promise(function(resolve, reject) {
-				var pending = 0;
 				var errors = [];
-
-				arrayForEach.call(promises, function(p) {
-					++pending;
-					toPromise(p).then(resolve, handleReject);
-				});
+				var pending = initRace(promises, resolve, handleReject);
 
 				if(pending === 0) {
-					resolve();
+					reject(new RangeError('any() input must not be empty'));
 				}
 
 				function handleReject(e) {
@@ -24567,23 +22177,20 @@ define(function() {
 		 */
 		function some(promises, n) {
 			return new Promise(function(resolve, reject, notify) {
-				var nFulfill = 0;
-				var nReject;
 				var results = [];
 				var errors = [];
-
-				arrayForEach.call(promises, function(p) {
-					++nFulfill;
-					toPromise(p).then(handleResolve, handleReject, notify);
-				});
+				var nReject;
+				var nFulfill = initRace(promises, handleResolve, handleReject, notify);
 
 				n = Math.max(n, 0);
 				nReject = (nFulfill - n + 1);
 				nFulfill = Math.min(n, nFulfill);
 
-				if(nFulfill === 0) {
+				if(n > nFulfill) {
+					reject(new RangeError('some() input must contain at least '
+						+ n + ' element(s), but had ' + nFulfill));
+				} else if(nFulfill === 0) {
 					resolve(results);
-					return;
 				}
 
 				function handleResolve(x) {
@@ -24611,17 +22218,68 @@ define(function() {
 		}
 
 		/**
+		 * Initialize a race observing each promise in the input promises
+		 * @param {Array} promises
+		 * @param {function} resolve
+		 * @param {function} reject
+		 * @param {?function=} notify
+		 * @returns {Number} actual count of items being raced
+		 */
+		function initRace(promises, resolve, reject, notify) {
+			return arrayReduce.call(promises, function(pending, p) {
+				toPromise(p).then(resolve, reject, notify);
+				return pending + 1;
+			}, 0);
+		}
+
+		/**
 		 * Apply f to the value of each promise in a list of promises
 		 * and return a new list containing the results.
 		 * @param {array} promises
-		 * @param {function} f
-		 * @param {function} fallback
+		 * @param {function(x:*, index:Number):*} f mapping function
 		 * @returns {Promise}
 		 */
-		function map(promises, f, fallback) {
-			return all(arrayMap.call(promises, function(x) {
-				return toPromise(x).then(f, fallback);
-			}));
+		function map(promises, f) {
+			if(typeof promises !== 'object') {
+				return toPromise([]);
+			}
+
+			return all(mapArray(function(x, i) {
+				return toPromise(x).fold(mapWithIndex, i);
+			}, promises));
+
+			function mapWithIndex(k, x) {
+				return f(x, k);
+			}
+		}
+
+		/**
+		 * Filter the provided array of promises using the provided predicate.  Input may
+		 * contain promises and values
+		 * @param {Array} promises array of promises and values
+		 * @param {function(x:*, index:Number):boolean} predicate filtering predicate.
+		 *  Must return truthy (or promise for truthy) for items to retain.
+		 * @returns {Promise} promise that will fulfill with an array containing all items
+		 *  for which predicate returned truthy.
+		 */
+		function filter(promises, predicate) {
+			return all(promises).then(function(values) {
+				return all(mapArray(predicate, values)).then(function(results) {
+					var len = results.length;
+					var filtered = new Array(len);
+					for(var i=0, j= 0, x; i<len; ++i) {
+						x = results[i];
+						if(x === void 0 && !(i in results)) {
+							continue;
+						}
+						if(results[i]) {
+							filtered[j++] = values[i];
+						}
+					}
+					filtered.length = j;
+					return filtered;
+				});
+			});
 		}
 
 		/**
@@ -24629,53 +22287,75 @@ define(function() {
 		 * the outcome states of all input promises.  The returned promise
 		 * will never reject.
 		 * @param {array} promises
-		 * @returns {Promise}
+		 * @returns {Promise} promise for array of settled state descriptors
 		 */
 		function settle(promises) {
-			return all(arrayMap.call(promises, function(p) {
+			return all(mapArray(function(p) {
 				p = toPromise(p);
 				return p.then(inspect, inspect);
 
 				function inspect() {
 					return p.inspect();
 				}
-			}));
+			}, promises));
 		}
 
+		/**
+		 * Reduce an array of promises and values
+		 * @param {Array} promises
+		 * @param {function(accumulated:*, x:*, index:Number):*} f reduce function
+		 * @returns {Promise} promise for reduced value
+		 */
 		function reduce(promises, f) {
+			var reducer = makeReducer(f);
 			return arguments.length > 2
 				? arrayReduce.call(promises, reducer, arguments[2])
 				: arrayReduce.call(promises, reducer);
-
-			function reducer(result, x, i) {
-				return toPromise(result).then(function(r) {
-					return toPromise(x).then(function(x) {
-						return f(r, x, i);
-					});
-				});
-			}
 		}
 
+		/**
+		 * Reduce an array of promises and values from the right
+		 * @param {Array} promises
+		 * @param {function(accumulated:*, x:*, index:Number):*} f reduce function
+		 * @returns {Promise} promise for reduced value
+		 */
 		function reduceRight(promises, f) {
+			var reducer = makeReducer(f);
 			return arguments.length > 2
 				? arrayReduceRight.call(promises, reducer, arguments[2])
 				: arrayReduceRight.call(promises, reducer);
+		}
 
-			function reducer(result, x, i) {
+		function makeReducer(f) {
+			return function reducer(result, x, i) {
 				return toPromise(result).then(function(r) {
 					return toPromise(x).then(function(x) {
 						return f(r, x, i);
 					});
 				});
+			};
+		}
+
+		function mapArray(f, a) {
+			var l = a.length;
+			var b = new Array(l);
+			for(var i=0, x; i<l; ++i) {
+				x = a[i];
+				if(x === void 0 && !(i in a)) {
+					continue;
+				}
+				b[i] = f(a[i], i);
 			}
+			return b;
 		}
 	};
+
 
 
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],35:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24685,9 +22365,9 @@ define(function() {
 
 	return function flow(Promise) {
 
+		var resolve = Promise.resolve;
 		var reject = Promise.reject;
 		var origCatch = Promise.prototype['catch'];
-		var nil = Promise.nil;
 
 		/**
 		 * Handle the ultimate fulfillment value or rejection reason, and assume
@@ -24699,10 +22379,7 @@ define(function() {
 		 * @returns {undefined}
 		 */
 		Promise.prototype.done = function(onResult, onError) {
-			var h = this._handler;
-			h.when({ resolve: this._maybeFatal, notify: noop, context: this,
-				receiver: h.receiver, arg: nil, fulfilled: onResult, rejected: onError,
-				progress: void 0 });
+			this._handler.visit(this._handler.receiver, onResult, onError);
 		};
 
 		/**
@@ -24714,7 +22391,7 @@ define(function() {
 		 * @returns {*}
 		 */
 		Promise.prototype['catch'] = Promise.prototype.otherwise = function(onRejected) {
-			if (arguments.length === 1) {
+			if (arguments.length < 2) {
 				return origCatch.call(this, onRejected);
 			} else {
 				if(typeof onRejected !== 'function') {
@@ -24752,13 +22429,28 @@ define(function() {
 		 */
 		Promise.prototype['finally'] = Promise.prototype.ensure = function(handler) {
 			if(typeof handler !== 'function') {
-				// Optimization: result will not change, return same promise
 				return this;
 			}
 
-			handler = isolate(handler, this);
-			return this.then(handler, handler);
+			return this.then(function(x) {
+				return runSideEffect(handler, this, identity, x);
+			}, function(e) {
+				return runSideEffect(handler, this, reject, e);
+			});
 		};
+
+		function runSideEffect (handler, thisArg, propagate, value) {
+			var result = handler.call(thisArg);
+			return maybeThenable(result)
+				? propagateValue(result, propagate, value)
+				: propagate(value);
+		}
+
+		function propagateValue (result, propagate, x) {
+			return resolve(result).then(function () {
+				return propagate(x);
+			});
+		}
 
 		/**
 		 * Recover from a failure by returning a defaultValue.  If defaultValue
@@ -24814,20 +22506,18 @@ define(function() {
 			|| (predicate != null && predicate.prototype instanceof Error);
 	}
 
-	// prevent argument passing to f and ignore return value
-	function isolate(f, x) {
-		return function() {
-			f.call(this);
-			return x;
-		};
+	function maybeThenable(x) {
+		return (typeof x === 'object' || typeof x === 'function') && x !== null;
 	}
 
-	function noop() {}
+	function identity(x) {
+		return x;
+	}
 
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],36:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24838,9 +22528,15 @@ define(function() {
 
 	return function fold(Promise) {
 
-		Promise.prototype.fold = function(fn, arg) {
+		Promise.prototype.fold = function(f, z) {
 			var promise = this._beget();
-			this._handler.fold(promise._handler, fn, arg);
+
+			this._handler.fold(function(z, x, to) {
+				Promise._handler(z).fold(function(x, z, to) {
+					to.resolve(f.call(this, z, x));
+				}, x, this, to);
+			}, z, promise._handler.receiver, promise._handler);
+
 			return promise;
 		};
 
@@ -24850,7 +22546,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],37:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24858,11 +22554,25 @@ define(function() {
 (function(define) { 'use strict';
 define(function() {
 
-	return function inspect(Promise) {
+	return function inspection(Promise) {
 
 		Promise.prototype.inspect = function() {
-			return this._handler.inspect();
+			return inspect(Promise._handler(this));
 		};
+
+		function inspect(handler) {
+			var state = handler.state();
+
+			if(state === 0) {
+				return { state: 'pending' };
+			}
+
+			if(state > 0) {
+				return { state: 'fulfilled', value: handler.value };
+			}
+
+			return { state: 'rejected', reason: handler.value };
+		}
 
 		return Promise;
 	};
@@ -24870,7 +22580,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],38:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24935,7 +22645,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],39:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24960,7 +22670,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],40:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -24971,6 +22681,12 @@ define(function(require) {
 	var timer = require('../timer');
 	var TimeoutError = require('../TimeoutError');
 
+	function setTimeout(f, ms, x, y) {
+		return timer.set(function() {
+			f(x, y, ms);
+		}, ms);
+	}
+
 	return function timed(Promise) {
 		/**
 		 * Return a new promise whose fulfillment value is revealed only
@@ -24980,14 +22696,17 @@ define(function(require) {
 		 */
 		Promise.prototype.delay = function(ms) {
 			var p = this._beget();
-			var h = p._handler;
-
-			this._handler.chain(h, function delay(x) {
-					timer.set(function() { h.resolve(x); }, ms);
-				}, h.reject, h.notify);
-
+			this._handler.fold(handleDelay, ms, void 0, p._handler);
 			return p;
 		};
+
+		function handleDelay(ms, x, h) {
+			setTimeout(resolveDelay, ms, x, h);
+		}
+
+		function resolveDelay(x, h) {
+			h.resolve(x);
+		}
 
 		/**
 		 * Return a new promise that rejects after ms milliseconds unless
@@ -24995,34 +22714,35 @@ define(function(require) {
 		 * fulfills with the same value.
 		 * @param {number} ms milliseconds
 		 * @param {Error|*=} reason optional rejection reason to use, defaults
-		 *   to an Error if not provided
+		 *   to a TimeoutError if not provided
 		 * @returns {Promise}
 		 */
 		Promise.prototype.timeout = function(ms, reason) {
-			var hasReason = arguments.length > 1;
 			var p = this._beget();
 			var h = p._handler;
 
-			var t = timer.set(onTimeout, ms);
+			var t = setTimeout(onTimeout, ms, reason, p._handler);
 
-			this._handler.chain(h,
+			this._handler.visit(h,
 				function onFulfill(x) {
 					timer.clear(t);
-					this.resolve(x); // this = p._handler
+					this.resolve(x); // this = h
 				},
 				function onReject(x) {
 					timer.clear(t);
-					this.reject(x); // this = p._handler
+					this.reject(x); // this = h
 				},
 				h.notify);
 
 			return p;
-
-			function onTimeout() {
-				h.reject(hasReason
-					? reason : new TimeoutError('timed out after ' + ms + 'ms'));
-			}
 		};
+
+		function onTimeout(reason, h, ms) {
+			var e = typeof reason === 'undefined'
+				? new TimeoutError('timed out after ' + ms + 'ms')
+				: reason;
+			h.reject(e);
+		}
 
 		return Promise;
 	};
@@ -25030,7 +22750,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../TimeoutError":32,"../timer":45}],41:[function(require,module,exports){
+},{"../TimeoutError":38,"../timer":50}],47:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25040,70 +22760,80 @@ define(function(require) {
 
 	var timer = require('../timer');
 
-	var logError = (function() {
+	return function unhandledRejection(Promise) {
+		var logError = noop;
+		var logInfo = noop;
+
 		if(typeof console !== 'undefined') {
-			if(typeof console.error !== 'undefined') {
-				return function(e) {
-					console.error(e);
-				};
-			}
+			logError = typeof console.error !== 'undefined'
+				? function (e) { console.error(e); }
+				: function (e) { console.log(e); };
 
-			if(typeof console.log !== 'undefined') {
-				return function(e) {
-					console.log(e);
-				};
-			}
-		}
-
-		return noop;
-	}());
-
-	return function unhandledRejection(Promise, enqueue) {
-		var unhandledRejections = [];
-
-		if(typeof enqueue !== 'function') {
-			enqueue = function(f) {
-				timer.set(f, 0);
-			};
-		}
-
-		function reportUnhandledRejections() {
-			unhandledRejections.forEach(function (r) {
-				if(!r.handled) {
-					logError('Potentially unhandled rejection ' + formatError(r.value));
-				}
-			});
-			unhandledRejections = [];
+			logInfo = typeof console.info !== 'undefined'
+				? function (e) { console.info(e); }
+				: function (e) { console.log(e); };
 		}
 
 		Promise.onPotentiallyUnhandledRejection = function(rejection) {
-			if(unhandledRejections.length === 0) {
-				enqueue(reportUnhandledRejections);
-			}
-			unhandledRejections.push(rejection);
+			enqueue(report, rejection);
+		};
+
+		Promise.onPotentiallyUnhandledRejectionHandled = function(rejection) {
+			enqueue(unreport, rejection);
 		};
 
 		Promise.onFatalRejection = function(rejection) {
-			enqueue(function() {
-				throw rejection.value;
-			});
+			enqueue(throwit, rejection.value);
 		};
+
+		var tasks = [];
+		var reported = [];
+		var running = false;
+
+		function report(r) {
+			if(!r.handled) {
+				reported.push(r);
+				logError('Potentially unhandled rejection [' + r.id + '] ' + formatError(r.value));
+			}
+		}
+
+		function unreport(r) {
+			var i = reported.indexOf(r);
+			if(i >= 0) {
+				reported.splice(i, 1);
+				logInfo('Handled previous rejection [' + r.id + '] ' + formatObject(r.value));
+			}
+		}
+
+		function enqueue(f, x) {
+			tasks.push(f, x);
+			if(!running) {
+				running = true;
+				running = timer.set(flush, 0);
+			}
+		}
+
+		function flush() {
+			running = false;
+			while(tasks.length > 0) {
+				tasks.shift()(tasks.shift());
+			}
+		}
 
 		return Promise;
 	};
 
 	function formatError(e) {
-		var s;
-		if(typeof e === 'object' && e.stack) {
-			s = e.stack;
-		} else {
-			s = String(e);
-			if(s === '[object Object]' && typeof JSON !== 'undefined') {
-				s = tryStringify(e, s);
-			}
-		}
-
+		var s = typeof e === 'object' && e.stack ? e.stack : formatObject(e);
 		return e instanceof Error ? s : s + ' (WARNING: non-Error used)';
+	}
+
+	function formatObject(o) {
+		var s = String(o);
+		if(s === '[object Object]' && typeof JSON !== 'undefined') {
+			s = tryStringify(o, s);
+		}
+		return s;
 	}
 
 	function tryStringify(e, defaultValue) {
@@ -25115,12 +22845,16 @@ define(function(require) {
 		}
 	}
 
+	function throwit(e) {
+		throw e;
+	}
+
 	function noop() {}
 
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{"../timer":45}],42:[function(require,module,exports){
+},{"../timer":50}],48:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25131,21 +22865,27 @@ define(function() {
 	return function addWith(Promise) {
 		/**
 		 * Returns a promise whose handlers will be called with `this` set to
-		 * the supplied `thisArg`.  Subsequent promises derived from the
-		 * returned promise will also have their handlers called with `thisArg`.
-		 * Calling `with` with undefined or no arguments will return a promise
-		 * whose handlers will again be called in the usual Promises/A+ way (no `this`)
-		 * thus safely undoing any previous `with` in the promise chain.
+		 * the supplied receiver.  Subsequent promises derived from the
+		 * returned promise will also have their handlers called with receiver
+		 * as `this`. Calling `with` with undefined or no arguments will return
+		 * a promise whose handlers will again be called in the usual Promises/A+
+		 * way (no `this`) thus safely undoing any previous `with` in the
+		 * promise chain.
 		 *
 		 * WARNING: Promises returned from `with`/`withThis` are NOT Promises/A+
 		 * compliant, specifically violating 2.2.5 (http://promisesaplus.com/#point-41)
 		 *
-		 * @param {object} thisArg `this` value for all handlers attached to
+		 * @param {object} receiver `this` value for all handlers attached to
 		 *  the returned promise.
 		 * @returns {Promise}
 		 */
-		Promise.prototype['with'] = Promise.prototype.withThis
-			= Promise.prototype._bindContext;
+		Promise.prototype['with'] = Promise.prototype.withThis = function(receiver) {
+			var p = this._beget();
+			var child = p._handler;
+			child.receiver = receiver;
+			this._handler.chain(child, receiver);
+			return p;
+		};
 
 		return Promise;
 	};
@@ -25154,7 +22894,7 @@ define(function() {
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
 
-},{}],43:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -25179,18 +22919,17 @@ define(function() {
 		 * @returns {Promise} promise
 		 * @name Promise
 		 */
-		function Promise(resolver) {
-			this._handler = arguments.length === 0
-				? foreverPendingHandler : init(resolver);
+		function Promise(resolver, handler) {
+			this._handler = resolver === Handler ? handler : init(resolver);
 		}
 
 		/**
 		 * Run the supplied resolver
 		 * @param resolver
-		 * @returns {makePromise.DeferredHandler}
+		 * @returns {Pending}
 		 */
 		function init(resolver) {
-			var handler = new DeferredHandler();
+			var handler = new Pending();
 
 			try {
 				resolver(promiseResolve, promiseReject, promiseNotify);
@@ -25233,6 +22972,7 @@ define(function() {
 		Promise.never = never;
 
 		Promise._defer = defer;
+		Promise._handler = getHandler;
 
 		/**
 		 * Returns a trusted promise. If x is already a trusted promise, it is
@@ -25241,8 +22981,8 @@ define(function() {
 		 * @return {Promise} promise
 		 */
 		function resolve(x) {
-			return x instanceof Promise ? x
-				: promiseFromHandler(new AsyncHandler(getHandlerUnchecked(x)));
+			return isPromise(x) ? x
+				: new Promise(Handler, new Async(getHandler(x)));
 		}
 
 		/**
@@ -25251,7 +22991,7 @@ define(function() {
 		 * @returns {Promise} rejected promise
 		 */
 		function reject(x) {
-			return promiseFromHandler(new AsyncHandler(new RejectedHandler(x)));
+			return new Promise(Handler, new Async(new Rejected(x)));
 		}
 
 		/**
@@ -25268,22 +23008,7 @@ define(function() {
 		 * @returns {Promise}
 		 */
 		function defer() {
-			return promiseFromHandler(new DeferredHandler());
-		}
-
-		/**
-		 * Create a new promise with the supplied handler
-		 * @private
-		 * @param {object} handler
-		 * @returns {Promise}
-		 */
-		function promiseFromHandler(handler) {
-			return configurePromise(handler, new Promise());
-		}
-
-		function configurePromise(handler, p) {
-			p._handler = handler;
-			return p;
+			return new Promise(Handler, new Pending());
 		}
 
 		// Transformation and flow control
@@ -25300,24 +23025,19 @@ define(function() {
 		 */
 		Promise.prototype.then = function(onFulfilled, onRejected) {
 			var parent = this._handler;
+			var state = parent.join().state();
 
-			if (typeof onFulfilled !== 'function' && parent.join().state > 0) {
+			if ((typeof onFulfilled !== 'function' && state > 0) ||
+				(typeof onRejected !== 'function' && state < 0)) {
 				// Short circuit: value will not change, simply share handler
-				return promiseFromHandler(parent);
+				return new this.constructor(Handler, parent);
 			}
 
 			var p = this._beget();
 			var child = p._handler;
 
-			parent.when({
-				resolve: child.resolve,
-				notify: child.notify,
-				context: child,
-				receiver: parent.receiver,
-				fulfilled: onFulfilled,
-				rejected: onRejected,
-				progress: arguments.length > 2 ? arguments[2] : void 0
-			});
+			parent.chain(child, parent.receiver, onFulfilled, onRejected,
+					arguments.length > 2 ? arguments[2] : void 0);
 
 			return p;
 		};
@@ -25333,43 +23053,14 @@ define(function() {
 		};
 
 		/**
-		 * Private function to bind a thisArg for this promise's handlers
-		 * @private
-		 * @param {object} thisArg `this` value for all handlers attached to
-		 *  the returned promise.
-		 * @returns {Promise}
-		 */
-		Promise.prototype._bindContext = function(thisArg) {
-			return promiseFromHandler(new BoundHandler(this._handler, thisArg));
-		};
-
-		/**
 		 * Creates a new, pending promise of the same type as this promise
 		 * @private
 		 * @returns {Promise}
 		 */
 		Promise.prototype._beget = function() {
-			var p = new this.constructor();
 			var parent = this._handler;
-			var child = new DeferredHandler(parent.receiver, parent.join().context);
-			return configurePromise(child, p);
-		};
-
-		/**
-		 * Check if x is a rejected promise, and if so, delegate to handler._fatal
-		 * @private
-		 * @param {*} x
-		 */
-		Promise.prototype._maybeFatal = function(x) {
-			if(!maybeThenable(x)) {
-				return;
-			}
-
-			var handler = getHandlerUnchecked(x);
-			handler.context = this._handler.context;
-			handler.chain(handler, void 0, function() {
-				this._fatal(this.context);
-			});
+			var child = new Pending(parent.receiver, parent.join().context);
+			return new this.constructor(Handler, child);
 		};
 
 		// Array combinators
@@ -25386,11 +23077,11 @@ define(function() {
 		 */
 		function all(promises) {
 			/*jshint maxcomplexity:8*/
-			var resolver = new DeferredHandler();
+			var resolver = new Pending();
 			var pending = promises.length >>> 0;
 			var results = new Array(pending);
 
-			var i, h, x;
+			var i, h, x, s;
 			for (i = 0; i < promises.length; ++i) {
 				x = promises[i];
 
@@ -25400,17 +23091,17 @@ define(function() {
 				}
 
 				if (maybeThenable(x)) {
-					h = x instanceof Promise
-						? x._handler.join()
-						: getHandlerUntrusted(x);
+					h = getHandlerMaybeThenable(x);
 
-					if (h.state === 0) {
-						resolveOne(resolver, results, h, i);
-					} else if (h.state > 0) {
+					s = h.state();
+					if (s === 0) {
+						h.fold(settleAt, i, results, resolver);
+					} else if (s > 0) {
 						results[i] = h.value;
 						--pending;
 					} else {
-						resolver.reject(h.value);
+						unreportRemaining(promises, i+1, h);
+						resolver.become(h);
 						break;
 					}
 
@@ -25421,18 +23112,31 @@ define(function() {
 			}
 
 			if(pending === 0) {
-				resolver.resolve(results);
+				resolver.become(new Fulfilled(results));
 			}
 
-			return promiseFromHandler(resolver);
+			return new Promise(Handler, resolver);
 
-			function resolveOne(resolver, results, handler, i) {
-				handler.chain(resolver, function(x) {
-					results[i] = x;
-					if(--pending === 0) {
-						this.resolve(results);
+			function settleAt(i, x, resolver) {
+				/*jshint validthis:true*/
+				this[i] = x;
+				if(--pending === 0) {
+					resolver.become(new Fulfilled(this));
+				}
+			}
+		}
+
+		function unreportRemaining(promises, start, rejectedHandler) {
+			var i, h, x;
+			for(i=start; i<promises.length; ++i) {
+				x = promises[i];
+				if(maybeThenable(x)) {
+					h = getHandlerMaybeThenable(x);
+
+					if(h !== rejectedHandler) {
+						h.visit(h, void 0, h._unreport);
 					}
-				}, resolver.reject, resolver.notify);
+				}
 			}
 		}
 
@@ -25457,46 +23161,40 @@ define(function() {
 				return never();
 			}
 
-			var h = new DeferredHandler();
+			var h = new Pending();
 			var i, x;
 			for(i=0; i<promises.length; ++i) {
 				x = promises[i];
 				if (x !== void 0 && i in promises) {
-					getHandler(x).chain(h, h.resolve, h.reject);
+					getHandler(x).visit(h, h.resolve, h.reject);
 				}
 			}
-			return promiseFromHandler(h);
+			return new Promise(Handler, h);
 		}
 
 		// Promise internals
-
-		/**
-		 * Get an appropriate handler for x, checking for untrusted thenables
-		 * and promise graph cycles.
-		 * @private
-		 * @param {*} x
-		 * @param {object?} h optional handler to check for cycles
-		 * @returns {object} handler
-		 */
-		function getHandler(x, h) {
-			if(x instanceof Promise) {
-				var xh = x._handler.join();
-				return h === xh ? promiseCycleHandler() : xh;
-			}
-			return maybeThenable(x) ? getHandlerUntrusted(x) : new FulfilledHandler(x);
-		}
+		// Below this, everything is @private
 
 		/**
 		 * Get an appropriate handler for x, without checking for cycles
-		 * @private
 		 * @param {*} x
 		 * @returns {object} handler
 		 */
-		function getHandlerUnchecked(x) {
-			if(x instanceof Promise) {
+		function getHandler(x) {
+			if(isPromise(x)) {
 				return x._handler.join();
 			}
-			return maybeThenable(x) ? getHandlerUntrusted(x) : new FulfilledHandler(x);
+			return maybeThenable(x) ? getHandlerUntrusted(x) : new Fulfilled(x);
+		}
+
+		/**
+		 * Get a handler for thenable x.
+		 * NOTE: You must only call this if maybeThenable(x) == true
+		 * @param {object|function|Promise} x
+		 * @returns {object} handler
+		 */
+		function getHandlerMaybeThenable(x) {
+			return isPromise(x) ? x._handler.join() : getHandlerUntrusted(x);
 		}
 
 		/**
@@ -25508,112 +23206,129 @@ define(function() {
 			try {
 				var untrustedThen = x.then;
 				return typeof untrustedThen === 'function'
-					? new ThenableHandler(untrustedThen, x)
-					: new FulfilledHandler(x);
+					? new Thenable(untrustedThen, x)
+					: new Fulfilled(x);
 			} catch(e) {
-				return new RejectedHandler(e);
+				return new Rejected(e);
 			}
-		}
-
-		/**
-		 * Recursively collapse handler chain to find the handler
-		 * nearest to the fully resolved value.
-		 * @param {Handler} h
-		 * @returns {*}
-		 */
-		function join(h) {
-			while(h.handler !== void 0) {
-				h = h.handler;
-			}
-			return h;
 		}
 
 		/**
 		 * Handler for a promise that is pending forever
-		 * @private
 		 * @constructor
 		 */
-		function Handler() {
-			this.state = 0;
-		}
+		function Handler() {}
 
 		Handler.prototype.when
-			= Handler.prototype.resolve
-			= Handler.prototype.reject
+			= Handler.prototype.become
 			= Handler.prototype.notify
-			= Handler.prototype._fatal
-			= Handler.prototype._removeTrace
-			= Handler.prototype._reportTrace
+			= Handler.prototype.fail
+			= Handler.prototype._unreport
+			= Handler.prototype._report
 			= noop;
 
-		Handler.prototype.inspect = toPendingState;
+		Handler.prototype._state = 0;
 
-		Handler.prototype.join = function() { return join(this); };
+		Handler.prototype.state = function() {
+			return this._state;
+		};
 
-		Handler.prototype.chain = function(to, fulfilled, rejected, progress) {
+		/**
+		 * Recursively collapse handler chain to find the handler
+		 * nearest to the fully resolved value.
+		 * @returns {object} handler nearest the fully resolved value
+		 */
+		Handler.prototype.join = function() {
+			var h = this;
+			while(h.handler !== void 0) {
+				h = h.handler;
+			}
+			return h;
+		};
+
+		Handler.prototype.chain = function(to, receiver, fulfilled, rejected, progress) {
 			this.when({
-				resolve: noop,
-				notify: noop,
-				context: void 0,
-				receiver: to,
+				resolver: to,
+				receiver: receiver,
 				fulfilled: fulfilled,
 				rejected: rejected,
 				progress: progress
 			});
 		};
 
-		Handler.prototype.fold = function(to, f, z) {
-			join(this).chain(to, function(x) {
-				getHandler(z).chain(this, function(z) {
-					this.resolve(tryCatchReject2(f, z, x, this.receiver));
-				}, this.reject, this.notify);
+		Handler.prototype.visit = function(receiver, fulfilled, rejected, progress) {
+			this.chain(failIfRejected, receiver, fulfilled, rejected, progress);
+		};
+
+		Handler.prototype.fold = function(f, z, c, to) {
+			this.visit(to, function(x) {
+				f.call(c, z, x, this);
 			}, to.reject, to.notify);
 		};
 
 		/**
-		 * Handler that manages a queue of consumers waiting on a pending promise
-		 * @private
+		 * Handler that invokes fail() on any handler it becomes
 		 * @constructor
 		 */
-		function DeferredHandler(receiver, inheritedContext) {
+		function FailIfRejected() {}
+
+		inherit(Handler, FailIfRejected);
+
+		FailIfRejected.prototype.become = function(h) {
+			h.fail();
+		};
+
+		var failIfRejected = new FailIfRejected();
+
+		/**
+		 * Handler that manages a queue of consumers waiting on a pending promise
+		 * @constructor
+		 */
+		function Pending(receiver, inheritedContext) {
 			Promise.createContext(this, inheritedContext);
 
-			this.consumers = [];
+			this.consumers = void 0;
 			this.receiver = receiver;
 			this.handler = void 0;
 			this.resolved = false;
-			this.state = 0;
 		}
 
-		inherit(Handler, DeferredHandler);
+		inherit(Handler, Pending);
 
-		DeferredHandler.prototype.inspect = function() {
-			return this.resolved ? this.join().inspect() : toPendingState();
+		Pending.prototype._state = 0;
+
+		Pending.prototype.resolve = function(x) {
+			this.become(getHandler(x));
 		};
 
-		DeferredHandler.prototype.resolve = function(x) {
-			if(!this.resolved) {
-				this._resolve(getHandler(x, this));
+		Pending.prototype.reject = function(x) {
+			if(this.resolved) {
+				return;
 			}
+
+			this.become(new Rejected(x));
 		};
 
-		DeferredHandler.prototype.reject = function(x) {
-			if(!this.resolved) {
-				this._resolve(new RejectedHandler(x));
-			}
-		};
-
-		DeferredHandler.prototype.join = function() {
-			if (this.resolved) {
-				return this.handler = join(this.handler);
-			} else {
+		Pending.prototype.join = function() {
+			if (!this.resolved) {
 				return this;
 			}
+
+			var h = this;
+
+			while (h.handler !== void 0) {
+				h = h.handler;
+				if (h === this) {
+					return this.handler = cycle();
+				}
+			}
+
+			return h;
 		};
 
-		DeferredHandler.prototype.run = function() {
+		Pending.prototype.run = function() {
 			var q = this.consumers;
-			var handler = this.handler.join();
+			var handler = this.join();
 			this.consumers = void 0;
 
 			for (var i = 0; i < q.length; ++i) {
@@ -25621,231 +23336,177 @@ define(function() {
 			}
 		};
 
-		DeferredHandler.prototype._resolve = function(handler) {
+		Pending.prototype.become = function(handler) {
+			if(this.resolved) {
+				return;
+			}
+
 			this.resolved = true;
 			this.handler = handler;
-			tasks.enqueue(this);
+			if(this.consumers !== void 0) {
+				tasks.enqueue(this);
+			}
 
 			if(this.context !== void 0) {
-				handler._reportTrace(this.context);
+				handler._report(this.context);
 			}
 		};
 
-		DeferredHandler.prototype.when = function(continuation) {
+		Pending.prototype.when = function(continuation) {
 			if(this.resolved) {
 				tasks.enqueue(new ContinuationTask(continuation, this.handler));
 			} else {
-				this.consumers.push(continuation);
+				if(this.consumers === void 0) {
+					this.consumers = [continuation];
+				} else {
+					this.consumers.push(continuation);
+				}
 			}
 		};
 
-		DeferredHandler.prototype.notify = function(x) {
+		Pending.prototype.notify = function(x) {
 			if(!this.resolved) {
-				tasks.enqueue(new ProgressTask(this.consumers, x));
+				tasks.enqueue(new ProgressTask(x, this));
 			}
 		};
 
-		DeferredHandler.prototype._reportTrace = function(context) {
-			this.resolved && this.handler.join()._reportTrace(context);
-		};
-
-		DeferredHandler.prototype._removeTrace = function() {
-			this.resolved && this.handler.join()._removeTrace();
-		};
-
-		DeferredHandler.prototype._fatal = function(context) {
+		Pending.prototype.fail = function(context) {
 			var c = typeof context === 'undefined' ? this.context : context;
-			this.resolved && this.handler.join()._fatal(c);
+			this.resolved && this.handler.join().fail(c);
 		};
 
-		/**
-		 * Abstract base for handler that delegates to another handler
-		 * @private
-		 * @param {object} handler
-		 * @constructor
-		 */
-		function DelegateHandler(handler) {
-			this.handler = handler;
-			this.state = 0;
-		}
-
-		inherit(Handler, DelegateHandler);
-
-		DelegateHandler.prototype.inspect = function() {
-			return this.join().inspect();
+		Pending.prototype._report = function(context) {
+			this.resolved && this.handler.join()._report(context);
 		};
 
-		DelegateHandler.prototype._reportTrace = function(context) {
-			this.join()._reportTrace(context);
-		};
-
-		DelegateHandler.prototype._removeTrace = function() {
-			this.join()._removeTrace();
+		Pending.prototype._unreport = function() {
+			this.resolved && this.handler.join()._unreport();
 		};
 
 		/**
 		 * Wrap another handler and force it into a future stack
-		 * @private
 		 * @param {object} handler
 		 * @constructor
 		 */
-		function AsyncHandler(handler) {
-			DelegateHandler.call(this, handler);
+		function Async(handler) {
+			this.handler = handler;
 		}
 
-		inherit(DelegateHandler, AsyncHandler);
+		inherit(Handler, Async);
 
-		AsyncHandler.prototype.when = function(continuation) {
-			tasks.enqueue(new ContinuationTask(continuation, this.join()));
+		Async.prototype.when = function(continuation) {
+			tasks.enqueue(new ContinuationTask(continuation, this));
 		};
 
-		/**
-		 * Handler that follows another handler, injecting a receiver
-		 * @private
-		 * @param {object} handler another handler to follow
-		 * @param {object=undefined} receiver
-		 * @constructor
-		 */
-		function BoundHandler(handler, receiver) {
-			DelegateHandler.call(this, handler);
-			this.receiver = receiver;
-		}
+		Async.prototype._report = function(context) {
+			this.join()._report(context);
+		};
 
-		inherit(DelegateHandler, BoundHandler);
-
-		BoundHandler.prototype.when = function(continuation) {
-			// Because handlers are allowed to be shared among promises,
-			// each of which possibly having a different receiver, we have
-			// to insert our own receiver into the chain if it has been set
-			// so that callbacks (f, r, u) will be called using our receiver
-			if(this.receiver !== void 0) {
-				continuation.receiver = this.receiver;
-			}
-			this.join().when(continuation);
+		Async.prototype._unreport = function() {
+			this.join()._unreport();
 		};
 
 		/**
 		 * Handler that wraps an untrusted thenable and assimilates it in a future stack
-		 * @private
 		 * @param {function} then
 		 * @param {{then: function}} thenable
 		 * @constructor
 		 */
-		function ThenableHandler(then, thenable) {
-			DeferredHandler.call(this);
-			this.assimilated = false;
-			this.untrustedThen = then;
-			this.thenable = thenable;
+		function Thenable(then, thenable) {
+			Pending.call(this);
+			tasks.enqueue(new AssimilateTask(then, thenable, this));
 		}
 
-		inherit(DeferredHandler, ThenableHandler);
-
-		ThenableHandler.prototype.when = function(continuation) {
-			if(!this.assimilated) {
-				this.assimilated = true;
-				assimilate(this);
-			}
-			DeferredHandler.prototype.when.call(this, continuation);
-		};
-
-		function assimilate(h) {
-			tryAssimilate(h.untrustedThen, h.thenable, _resolve, _reject, _notify);
-
-			function _resolve(x) { h.resolve(x); }
-			function _reject(x)  { h.reject(x); }
-			function _notify(x)  { h.notify(x); }
-		}
-
-		function tryAssimilate(then, thenable, resolve, reject, notify) {
-			try {
-				then.call(thenable, resolve, reject, notify);
-			} catch (e) {
-				reject(e);
-			}
-		}
+		inherit(Pending, Thenable);
 
 		/**
 		 * Handler for a fulfilled promise
-		 * @private
 		 * @param {*} x fulfillment value
 		 * @constructor
 		 */
-		function FulfilledHandler(x) {
+		function Fulfilled(x) {
 			Promise.createContext(this);
-
 			this.value = x;
-			this.state = 1;
 		}
 
-		inherit(Handler, FulfilledHandler);
+		inherit(Handler, Fulfilled);
 
-		FulfilledHandler.prototype.inspect = function() {
-			return { state: 'fulfilled', value: this.value };
+		Fulfilled.prototype._state = 1;
+
+		Fulfilled.prototype.fold = function(f, z, c, to) {
+			runContinuation3(f, z, this, c, to);
 		};
 
-		FulfilledHandler.prototype.when = function(cont) {
-			var x;
-
-			if (typeof cont.fulfilled === 'function') {
-				Promise.enterContext(this);
-				x = tryCatchReject(cont.fulfilled, this.value, cont.receiver);
-				Promise.exitContext();
-			} else {
-				x = this.value;
-			}
-
-			cont.resolve.call(cont.context, x);
+		Fulfilled.prototype.when = function(cont) {
+			runContinuation1(cont.fulfilled, this, cont.receiver, cont.resolver);
 		};
+
+		var errorId = 0;
 
 		/**
 		 * Handler for a rejected promise
-		 * @private
 		 * @param {*} x rejection reason
 		 * @constructor
 		 */
-		function RejectedHandler(x) {
+		function Rejected(x) {
 			Promise.createContext(this);
 
+			this.id = ++errorId;
 			this.value = x;
-			this.state = -1;
 			this.handled = false;
+			this.reported = false;
 
-			this._reportTrace();
+			this._report();
 		}
 
-		inherit(Handler, RejectedHandler);
+		inherit(Handler, Rejected);
 
-		RejectedHandler.prototype.inspect = function() {
-			return { state: 'rejected', reason: this.value };
+		Rejected.prototype._state = -1;
+
+		Rejected.prototype.fold = function(f, z, c, to) {
+			to.become(this);
 		};
 
-		RejectedHandler.prototype.when = function(cont) {
-			var x;
-
-			if (typeof cont.rejected === 'function') {
-				this._removeTrace();
-				Promise.enterContext(this);
-				x = tryCatchReject(cont.rejected, this.value, cont.receiver);
-				Promise.exitContext();
-			} else {
-				x = promiseFromHandler(this);
+		Rejected.prototype.when = function(cont) {
+			if(typeof cont.rejected === 'function') {
+				this._unreport();
 			}
-
-
-			cont.resolve.call(cont.context, x);
+			runContinuation1(cont.rejected, this, cont.receiver, cont.resolver);
 		};
 
-		RejectedHandler.prototype._reportTrace = function(context) {
-			Promise.onPotentiallyUnhandledRejection(this, context);
+		Rejected.prototype._report = function(context) {
+			tasks.afterQueue(new ReportTask(this, context));
 		};
 
-		RejectedHandler.prototype._removeTrace = function() {
+		Rejected.prototype._unreport = function() {
 			this.handled = true;
-			Promise.onPotentiallyUnhandledRejectionHandled(this);
+			tasks.afterQueue(new UnreportTask(this));
 		};
 
-		RejectedHandler.prototype._fatal = function(context) {
-			Promise.onFatalRejection(this, context);
+		Rejected.prototype.fail = function(context) {
+			Promise.onFatalRejection(this, context === void 0 ? this.context : context);
+		};
+
+		function ReportTask(rejection, context) {
+			this.rejection = rejection;
+			this.context = context;
+		}
+
+		ReportTask.prototype.run = function() {
+			if(!this.rejection.handled) {
+				this.rejection.reported = true;
+				Promise.onPotentiallyUnhandledRejection(this.rejection, this.context);
+			}
+		};
+
+		function UnreportTask(rejection) {
+			this.rejection = rejection;
+		}
+
+		UnreportTask.prototype.run = function() {
+			if(this.rejection.reported) {
+				Promise.onPotentiallyUnhandledRejectionHandled(this.rejection);
+			}
 		};
 
 		// Unhandled rejection hooks
@@ -25863,28 +23524,16 @@ define(function() {
 		// Errors and singletons
 
 		var foreverPendingHandler = new Handler();
-		var foreverPendingPromise = promiseFromHandler(foreverPendingHandler);
+		var foreverPendingPromise = new Promise(Handler, foreverPendingHandler);
 
-		function promiseCycleHandler() {
-			return new RejectedHandler(new TypeError('Promise cycle'));
-		}
-
-		// Snapshot states
-
-		/**
-		 * Creates a pending state snapshot
-		 * @private
-		 * @returns {{state:'pending'}}
-		 */
-		function toPendingState() {
-			return { state: 'pending' };
+		function cycle() {
+			return new Rejected(new TypeError('Promise cycle'));
 		}
 
 		// Task runners
 
 		/**
 		 * Run a single consumer
-		 * @private
 		 * @constructor
 		 */
 		function ContinuationTask(continuation, handler) {
@@ -25898,74 +23547,136 @@ define(function() {
 
 		/**
 		 * Run a queue of progress handlers
-		 * @private
 		 * @constructor
 		 */
-		function ProgressTask(q, value) {
-			this.q = q;
+		function ProgressTask(value, handler) {
+			this.handler = handler;
 			this.value = value;
 		}
 
 		ProgressTask.prototype.run = function() {
-			var q = this.q;
-			// First progress handler is at index 1
-			for (var i = 0; i < q.length; ++i) {
-				this._notify(q[i]);
+			var q = this.handler.consumers;
+			if(q === void 0) {
+				return;
+			}
+
+			for (var c, i = 0; i < q.length; ++i) {
+				c = q[i];
+				runNotify(c.progress, this.value, this.handler, c.receiver, c.resolver);
 			}
 		};
 
-		ProgressTask.prototype._notify = function(continuation) {
-			var x = typeof continuation.progress === 'function'
-				? tryCatchReturn(continuation.progress, this.value, continuation.receiver)
-				: this.value;
+		/**
+		 * Assimilate a thenable, sending it's value to resolver
+		 * @param {function} then
+		 * @param {object|function} thenable
+		 * @param {object} resolver
+		 * @constructor
+		 */
+		function AssimilateTask(then, thenable, resolver) {
+			this._then = then;
+			this.thenable = thenable;
+			this.resolver = resolver;
+		}
 
-			continuation.notify.call(continuation.context, x);
+		AssimilateTask.prototype.run = function() {
+			var h = this.resolver;
+			tryAssimilate(this._then, this.thenable, _resolve, _reject, _notify);
+
+			function _resolve(x) { h.resolve(x); }
+			function _reject(x)  { h.reject(x); }
+			function _notify(x)  { h.notify(x); }
 		};
+
+		function tryAssimilate(then, thenable, resolve, reject, notify) {
+			try {
+				then.call(thenable, resolve, reject, notify);
+			} catch (e) {
+				reject(e);
+			}
+		}
 
 		// Other helpers
 
 		/**
 		 * @param {*} x
-		 * @returns {boolean} false iff x is guaranteed not to be a thenable
+		 * @returns {boolean} true iff x is a trusted Promise
+		 */
+		function isPromise(x) {
+			return x instanceof Promise;
+		}
+
+		/**
+		 * Test just enough to rule out primitives, in order to take faster
+		 * paths in some code
+		 * @param {*} x
+		 * @returns {boolean} false iff x is guaranteed *not* to be a thenable
 		 */
 		function maybeThenable(x) {
 			return (typeof x === 'object' || typeof x === 'function') && x !== null;
 		}
 
+		function runContinuation1(f, h, receiver, next) {
+			if(typeof f !== 'function') {
+				return next.become(h);
+			}
+
+			Promise.enterContext(h);
+			tryCatchReject(f, h.value, receiver, next);
+			Promise.exitContext();
+		}
+
+		function runContinuation3(f, x, h, receiver, next) {
+			if(typeof f !== 'function') {
+				return next.become(h);
+			}
+
+			Promise.enterContext(h);
+			tryCatchReject3(f, x, h.value, receiver, next);
+			Promise.exitContext();
+		}
+
+		function runNotify(f, x, h, receiver, next) {
+			if(typeof f !== 'function') {
+				return next.notify(x);
+			}
+
+			Promise.enterContext(h);
+			tryCatchReturn(f, x, receiver, next);
+			Promise.exitContext();
+		}
+
 		/**
 		 * Return f.call(thisArg, x), or if it throws return a rejected promise for
 		 * the thrown exception
-		 * @private
 		 */
-		function tryCatchReject(f, x, thisArg) {
+		function tryCatchReject(f, x, thisArg, next) {
 			try {
-				return f.call(thisArg, x);
+				next.become(getHandler(f.call(thisArg, x)));
 			} catch(e) {
-				return reject(e);
+				next.become(new Rejected(e));
 			}
 		}
 
 		/**
 		 * Same as above, but includes the extra argument parameter.
-		 * @private
 		 */
-		function tryCatchReject2(f, x, y, thisArg) {
+		function tryCatchReject3(f, x, y, thisArg, next) {
 			try {
-				return f.call(thisArg, x, y);
+				f.call(thisArg, x, y, next);
 			} catch(e) {
-				return reject(e);
+				next.become(new Rejected(e));
 			}
 		}
 
 		/**
 		 * Return f.call(thisArg, x), or if it throws, *return* the exception
-		 * @private
 		 */
-		function tryCatchReturn(f, x, thisArg) {
+		function tryCatchReturn(f, x, thisArg, next) {
 			try {
-				return f.call(thisArg, x);
+				next.notify(f.call(thisArg, x));
 			} catch(e) {
-				return e;
+				next.notify(e);
 			}
 		}
 
@@ -25981,59 +23692,7 @@ define(function() {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(); }));
 
-},{}],44:[function(require,module,exports){
-/** @license MIT License (c) copyright 2010-2014 original author or authors */
-/** @author Brian Cavalier */
-/** @author John Hann */
-
-(function(define) { 'use strict';
-define(function(require) {
-
-	var Queue = require('./Queue');
-
-	// Credit to Twisol (https://github.com/Twisol) for suggesting
-	// this type of extensible queue + trampoline approach for next-tick conflation.
-
-	function Scheduler(enqueue) {
-		this._enqueue = enqueue;
-		this._handlerQueue = new Queue(15);
-
-		var self = this;
-		this.drainQueue = function() {
-			self._drainQueue();
-		};
-	}
-
-	/**
-	 * Enqueue a task. If the queue is not currently scheduled to be
-	 * drained, schedule it.
-	 * @param {function} task
-	 */
-	Scheduler.prototype.enqueue = function(task) {
-		if(this._handlerQueue.length === 0) {
-			this._enqueue(this.drainQueue);
-		}
-		this._handlerQueue.push(task);
-	};
-
-	/**
-	 * Drain the handler queue entirely, being careful to allow the
-	 * queue to be extended while it is being processed, and to continue
-	 * processing until it is truly empty.
-	 */
-	Scheduler.prototype._drainQueue = function() {
-		var q = this._handlerQueue;
-		while(q.length > 0) {
-			q.shift().run();
-		}
-	};
-
-	return Scheduler;
-
-});
-}(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
-
-},{"./Queue":31}],45:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 /** @author Brian Cavalier */
 /** @author John Hann */
@@ -26047,10 +23706,15 @@ define(function(require) {
 
 	try {
 		vertx = cjsRequire('vertx');
+	} catch (e) { }
+
+	if (vertx && typeof vertx.setTimer === 'function') {
 		setTimer = function (f, ms) { return vertx.setTimer(ms, f); };
 		clearTimer = vertx.cancelTimer;
-	} catch (e) {
-		setTimer = function(f, ms) { return setTimeout(f, ms); };
+	} else {
+		// NOTE: Truncate decimals to workaround node 0.10.30 bug:
+		// https://github.com/joyent/node/issues/8167
+		setTimer = function(f, ms) { return setTimeout(f, ms|0); };
 		clearTimer = function(t) { return clearTimeout(t); };
 	}
 
@@ -26062,7 +23726,7 @@ define(function(require) {
 });
 }(typeof define === 'function' && define.amd ? define : function(factory) { module.exports = factory(require); }));
 
-},{}],46:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 /** @license MIT License (c) copyright 2010-2014 original author or authors */
 
 /**
@@ -26070,7 +23734,7 @@ define(function(require) {
  * when is part of the cujoJS family of libraries (http://cujojs.com/)
  * @author Brian Cavalier
  * @author John Hann
- * @version 3.2.1
+ * @version 3.4.6
  */
 (function(define) { 'use strict';
 define(function (require) {
@@ -26114,8 +23778,10 @@ define(function (require) {
 
 	when.any         = lift(Promise.any);    // One-winner race
 	when.some        = lift(Promise.some);   // Multi-winner race
+	when.race        = lift(Promise.race);   // First-to-settle race
 
 	when.map         = map;                  // Array.map() for promises
+	when.filter      = filter;               // Array.filter() for promises
 	when.reduce      = reduce;               // Array.reduce() for promises
 	when.reduceRight = reduceRight;          // Array.reduceRight() for promises
 
@@ -26137,8 +23803,8 @@ define(function (require) {
 	 *   will be invoked immediately.
 	 * @param {function?} onRejected callback to be called when x is
 	 *   rejected.
-	 * @deprecated @param {function?} onProgress callback to be called when progress updates
-	 *   are issued for x.
+	 * @param {function?} onProgress callback to be called when progress updates
+	 *   are issued for x. @deprecated
 	 * @returns {Promise} a new promise that will fulfill with the return
 	 *   value of callback or errback or the completion value of promiseOrValue if
 	 *   callback and/or errback is not supplied.
@@ -26257,7 +23923,7 @@ define(function (require) {
 	 * the outcome states of all input promises.  The returned promise
 	 * will only reject if `promises` itself is a rejected promise.
 	 * @param {array|Promise} promises array (or promise for an array) of promises
-	 * @returns {Promise}
+	 * @returns {Promise} promise for array of settled state descriptors
 	 */
 	function settle(promises) {
 		return when(promises, Promise.settle);
@@ -26267,7 +23933,8 @@ define(function (require) {
 	 * Promise-aware array map function, similar to `Array.prototype.map()`,
 	 * but input array may contain promises or values.
 	 * @param {Array|Promise} promises array of anything, may contain promises and values
-	 * @param {function} mapFunc map function which may return a promise or value
+	 * @param {function(x:*, index:Number):*} mapFunc map function which may
+	 *  return a promise or value
 	 * @returns {Promise} promise that will fulfill with an array of mapped values
 	 *  or reject if any input promise rejects.
 	 */
@@ -26278,14 +23945,28 @@ define(function (require) {
 	}
 
 	/**
+	 * Filter the provided array of promises using the provided predicate.  Input may
+	 * contain promises and values
+	 * @param {Array|Promise} promises array of promises and values
+	 * @param {function(x:*, index:Number):boolean} predicate filtering predicate.
+	 *  Must return truthy (or promise for truthy) for items to retain.
+	 * @returns {Promise} promise that will fulfill with an array containing all items
+	 *  for which predicate returned truthy.
+	 */
+	function filter(promises, predicate) {
+		return when(promises, function(promises) {
+			return Promise.filter(promises, predicate);
+		});
+	}
+
+	/**
 	 * Traditional reduce function, similar to `Array.prototype.reduce()`, but
 	 * input may contain promises and/or values, and reduceFunc
 	 * may return either a value or a promise, *and* initialValue may
 	 * be a promise for the starting value.
-	 *
 	 * @param {Array|Promise} promises array or promise for an array of anything,
 	 *      may contain a mix of promises and values.
-	 * @param {function} f reduce function reduce(currentValue, nextValue, index)
+	 * @param {function(accumulated:*, x:*, index:Number):*} f reduce function
 	 * @returns {Promise} that will resolve to the final reduced value
 	 */
 	function reduce(promises, f /*, initialValue */) {
@@ -26302,10 +23983,9 @@ define(function (require) {
 	 * input may contain promises and/or values, and reduceFunc
 	 * may return either a value or a promise, *and* initialValue may
 	 * be a promise for the starting value.
-	 *
 	 * @param {Array|Promise} promises array or promise for an array of anything,
 	 *      may contain a mix of promises and values.
-	 * @param {function} f reduce function reduce(currentValue, nextValue, index)
+	 * @param {function(accumulated:*, x:*, index:Number):*} f reduce function
 	 * @returns {Promise} that will resolve to the final reduced value
 	 */
 	function reduceRight(promises, f /*, initialValue */) {
@@ -26321,7 +24001,7 @@ define(function (require) {
 });
 })(typeof define === 'function' && define.amd ? define : function (factory) { module.exports = factory(require); });
 
-},{"./lib/Promise":30,"./lib/TimeoutError":32,"./lib/decorators/array":34,"./lib/decorators/flow":35,"./lib/decorators/fold":36,"./lib/decorators/inspect":37,"./lib/decorators/iterate":38,"./lib/decorators/progress":39,"./lib/decorators/timed":40,"./lib/decorators/unhandledRejection":41,"./lib/decorators/with":42}],"dust":[function(require,module,exports){
+},{"./lib/Promise":35,"./lib/TimeoutError":38,"./lib/decorators/array":40,"./lib/decorators/flow":41,"./lib/decorators/fold":42,"./lib/decorators/inspect":43,"./lib/decorators/iterate":44,"./lib/decorators/progress":45,"./lib/decorators/timed":46,"./lib/decorators/unhandledRejection":47,"./lib/decorators/with":48}],"dust":[function(require,module,exports){
 module.exports=require('RzcaG4');
 },{}],"RzcaG4":[function(require,module,exports){
 (function (process){
@@ -26987,4 +24667,4 @@ if (typeof exports !== "undefined") {
 }
 
 }).call(this,require("FWaASH"))
-},{"FWaASH":20}]},{},["Focm2+"])
+},{"FWaASH":28}]},{},["Focm2+"]);

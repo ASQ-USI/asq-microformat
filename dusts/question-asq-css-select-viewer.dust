@@ -3,8 +3,7 @@ Authors of questions are responsible!}
 {body|s}
 
 <div class="asq-css-select-code">
-  <pre><code>
-  </code>{code}</pre>
+  <pre><code>{code}</code></pre>
 </div>
 
 <label class="control-label" for="inputText">Selector</label>
