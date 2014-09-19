@@ -17,7 +17,7 @@
     "brace": "^0.2.1",
     "cheerio": "^0.15.0",
     "dustjs-helpers": "^1.2.0",
-    "dustjs-linkedin": "~2.3.5",
+    "dustjs-linkedin": "~2.4.0",
     "eventemitter2": "^0.4.14",
     "jquery": "~2.1.0",
     "lodash": "~2.4.1",
