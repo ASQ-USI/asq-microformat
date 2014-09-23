@@ -1274,8 +1274,8 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     var question = {
-      stem : getOuterHTML($el.find('.stem')),
-      stemText: $el.find('.stem').html(),
+      stem : getOuterHTML($el.find('.asq-stem')),
+      stemText: $el.find('.asq-stem').html(),
       htmlId: $el.attr('id'),
       slideHtmlId : parentSlideId,
       questionType: 'multi-choice',
@@ -1295,10 +1295,10 @@ var Parser = module.exports = function(loggerInstance){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
 
-    var $stem =$el.find('.stem')
+    var $stem =$el.find('.asq-stem')
       , answer = $stem.attr('data-correct-answer');
     var clone = $el.clone();
-    clone.find('.stem').remove();
+    clone.find('.asq-stem').remove();
 
     var question = {
         stem : getOuterHTML($stem),
@@ -1323,10 +1323,10 @@ var Parser = module.exports = function(loggerInstance){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
 
-    var $stem =$el.find('.stem')
+    var $stem =$el.find('.asq-stem')
       , answer = $stem.attr('data-correct-answer');
     var clone = $el.clone();
-    clone.find('.stem').remove();
+    clone.find('.asq-stem').remove();
 
     var question = {
         stem : getOuterHTML($stem),
@@ -1350,7 +1350,7 @@ var Parser = module.exports = function(loggerInstance){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
 
-    var $stem =$el.find('.stem')
+    var $stem =$el.find('.asq-stem')
       , answer = $stem.attr('data-correct-answer')
       , question = {
         stem : getOuterHTML($stem),
@@ -1397,7 +1397,7 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     //Stem
-    var $stem = $rubric.find('.stem');
+    var $stem = $rubric.find('.asq-stem');
     rubric.stem     = getOuterHTML($stem);
     rubric.stemText = $stem.html();
 

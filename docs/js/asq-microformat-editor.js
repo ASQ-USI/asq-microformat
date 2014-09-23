@@ -149,7 +149,7 @@ function injectHtmltoIframe(iframeEl, html){
 
 module.exports = {
   'multiple-choice-radio' :'<article class="asq-question multi-choice choose-1" id="mc-1">\n\
-  <h3 class="stem">Lugano is located in...</h3>\n\
+  <h3 class="asq-stem">Lugano is located in...</h3>\n\
   <ol class="asq-options">\n\
     <li class="asq-option" data-correct="true">\n\
       Switzerland\n\
@@ -166,7 +166,7 @@ module.exports = {
   </ol>\n\
 </article>',
   'multiple-choice-checkbox' :'<article class="asq-question multi-choice choose-0-n" id="mc-1">\n\
-  <h3 class="stem">In Switzerland official languages include...</h3>\n\
+  <h3 class="asq-stem">In Switzerland official languages include...</h3>\n\
   <ol class="asq-options">\n\
     <li class="asq-option" data-correct="true">\n\
       German\n\
@@ -183,10 +183,10 @@ module.exports = {
   </ol>\n\
 </article>',
 'text-input': '<article class="asq-question text-input" id="ti-1">\n\
-  <h3 class="stem" data-correct-answer="3">What is the square root of 9?</h3>\n\
+  <h3 class="asq-stem" data-correct-answer="3">What is the square root of 9?</h3>\n\
 </article>',
 'code-input': '<article class="asq-question code-input" data-asq-syntax="javascript"  data-asq-theme="monokai" id="ci-1">\n\
-  <h3 class="stem">Code an infinite loop</h3>\n\
+  <h3 class="asq-stem">Code an infinite loop</h3>\n\
 </article>',
 'css-select': '<article class="asq-question asq-css-select"  data-asq-code="<ul>\n\
   <li class=\'daclass\'>\n\
@@ -205,7 +205,7 @@ module.exports = {
     </div>\n\
   </li>\n\
 </ul>" id="cs-1">\n \
-  <h3 class="stem">Select the innermost li elements</h3>\n\
+  <h3 class="asq-stem">Select the innermost li elements</h3>\n\
 </article>'
 }
 
@@ -1484,8 +1484,8 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     var question = {
-      stem : getOuterHTML($el.find('.stem')),
-      stemText: $el.find('.stem').html(),
+      stem : getOuterHTML($el.find('.asq-stem')),
+      stemText: $el.find('.asq-stem').html(),
       htmlId: $el.attr('id'),
       slideHtmlId : parentSlideId,
       questionType: 'multi-choice',
@@ -1505,10 +1505,10 @@ var Parser = module.exports = function(loggerInstance){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
 
-    var $stem =$el.find('.stem')
+    var $stem =$el.find('.asq-stem')
       , answer = $stem.attr('data-correct-answer');
     var clone = $el.clone();
-    clone.find('.stem').remove();
+    clone.find('.asq-stem').remove();
 
     var question = {
         stem : getOuterHTML($stem),
@@ -1533,10 +1533,10 @@ var Parser = module.exports = function(loggerInstance){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
 
-    var $stem =$el.find('.stem')
+    var $stem =$el.find('.asq-stem')
       , answer = $stem.attr('data-correct-answer');
     var clone = $el.clone();
-    clone.find('.stem').remove();
+    clone.find('.asq-stem').remove();
 
     var question = {
         stem : getOuterHTML($stem),
@@ -1560,7 +1560,7 @@ var Parser = module.exports = function(loggerInstance){
       parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
     }
 
-    var $stem =$el.find('.stem')
+    var $stem =$el.find('.asq-stem')
       , answer = $stem.attr('data-correct-answer')
       , question = {
         stem : getOuterHTML($stem),
@@ -1607,7 +1607,7 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     //Stem
-    var $stem = $rubric.find('.stem');
+    var $stem = $rubric.find('.asq-stem');
     rubric.stem     = getOuterHTML($stem);
     rubric.stemText = $stem.html();
 
