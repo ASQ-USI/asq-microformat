@@ -740,3 +740,40 @@ lesshat-selector {
 .correct-answer.list-group-item > .correct-btn {
   color: #5cb85c;
 }
+.asq-js-function-body div.asq-code-input {
+  border-style: dashed;
+  min-height: 6em;
+  height: auto;
+  background: transparent;
+  color: #FCFCFC;
+  font-size: inherit;
+}
+.asq-js-function-body .asq-code-input:focus {
+  border-style: solid;
+}
+.asq-js-function-body pre.asq-evaluate {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  color: #333;
+  border: none;
+}
+.asq-js-function-body .asq-result {
+  white-space: pre;
+}
+.asq-js-function-body .asq-result-wrapper {
+  position: relative;
+}
+.asq-js-function-body .asq-result-wrapper.asq-correct {
+  background-color: #dff0d8;
+}
+.asq-js-function-body .asq-correct-ok {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  opacity: 0;
+}
+.asq-js-function-body .asq-correct .asq-correct-ok {
+  color: #5cb85c;
+  opacity: 1;
+}

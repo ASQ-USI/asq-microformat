@@ -1,6 +1,6 @@
-{! This is dangerous, body should be escaped and filter for Javscript. 
+{! This is dangerous, body should be escaped and filter for Javascript. 
 Authors of questions are responsible!}
 {body|s}
-<label class="control-label" for="inputText">Your solution:</label>
+{!<label class="control-label" for="inputText">Your solution:</label>!}
 {! TODO The id here seems wrong, this should be changed !}
 <input type="text" class="" id="inputText" placeholder="Your solution"{?submission}value="{.submission}" disabled{/submission}/>

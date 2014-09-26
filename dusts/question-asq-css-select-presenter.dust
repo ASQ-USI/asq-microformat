@@ -1,4 +1,4 @@
-{! This is dangerous, body should be escaped and filter for Javscript. 
+{! This is dangerous, body should be escaped and filter for Javascript. 
 Authors of questions are responsible!}
 {body|s}
 

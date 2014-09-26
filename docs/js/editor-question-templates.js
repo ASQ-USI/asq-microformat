@@ -35,7 +35,7 @@ module.exports = {
   </ol>\n\
 </article>',
 'text-input': '<article class="asq-question text-input" id="ti-1">\n\
-  <h3 class="asq-stem" data-correct-answer="3">What is the square root of 9?</h3>\n\
+  <h3 class="asq-stem" data-asq-correct-answer="3">What is the square root of 9?</h3>\n\
 </article>',
 'code-input': '<article class="asq-question code-input" data-asq-syntax="javascript"  data-asq-theme="monokai" id="ci-1">\n\
   <h3 class="asq-stem">Code an infinite loop</h3>\n\
@@ -58,6 +58,11 @@ module.exports = {
   </li>\n\
 </ul>" id="cs-1">\n \
   <h3 class="asq-stem">Select the innermost li elements</h3>\n\
+</article>',
+'js-function-body': '<article class="asq-question asq-js-function-body" id="jfb-1"\n\
+data-asq-code-header="function wrap(str, tagName){" data-asq-code-footer="} //function ends here"\n\
+data-asq-eval-command="wrap(\'hello World\', \'div\');" data-asq-correct-output=\'"<div>hello World</div>"\'> \n\
+   <h3 class="stem small">Implement a function that wraps a given string with an HTML tag</h3>\n\
 </article>'
 }
 

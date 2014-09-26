@@ -17,10 +17,14 @@ module.exports = function (dust) {
 	(function(){dust.register("question-asq-css-select-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div class=\"asq-css-select-code\"><pre><code>").reference(ctx.get("code"),ctx,"h").write("</code></pre></div><label class=\"control-label\" for=\"inputText\">Selector</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
 	 // question-asq-css-select-viewer.dust
 	(function(){dust.register("question-asq-css-select-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div class=\"asq-css-select-code\"><pre><code>").reference(ctx.get("code"),ctx,"h").write("</code></pre></div><label class=\"control-label\" for=\"inputText\">Selector</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
+	 // question-asq-js-function-body-presenter.dust
+	(function(){dust.register("question-asq-js-function-body-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div><pre><code><span class=\"asq-code-header\">").reference(ctx.get("codeHeader"),ctx,"h").write("</span><div class=\"form-control asq-code-input\" id=\"inputText\" contenteditable=true>").reference(ctx.get("submission"),ctx,"h").write("</div><span class=\"asq-code-footer\">").reference(ctx.get("codeFooter"),ctx,"h").write("</span></code></pre></div><h4>Test command</h4><kbd class=\"asq-command-line\"><i class=\"fa fa-chevron-right\"></i> <span class=\"asq-evaluate\">").reference(ctx.get("evalCommand"),ctx,"h").write("</span></kbd><br><strong>Result:</strong><br><div class=\"well asq-result-wrapper\"><i class=\"asq-correct-ok glyphicon glyphicon-ok\"></i><samp class=\"asq-result\"><samp></div>");}return body_0;})();
+	 // question-asq-js-function-body-viewer.dust
+	(function(){dust.register("question-asq-js-function-body-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<div><pre><code><span class=\"asq-code-header\">").reference(ctx.get("codeHeader"),ctx,"h").write("</span><div class=\"form-control asq-code-input\" id=\"inputText\" contenteditable=true>").reference(ctx.get("submission"),ctx,"h").write("</div><span class=\"asq-code-footer\">").reference(ctx.get("codeFooter"),ctx,"h").write("</span></code></pre></div><h4>Test command</h4><kbd class=\"asq-command-line\"><i class=\"fa fa-chevron-right\"></i> <span class=\"asq-evaluate\">").reference(ctx.get("evalCommand"),ctx,"h").write("</span></kbd><br><strong>Result:</strong><br><div class=\"well asq-result-wrapper\"><i class=\"asq-correct-ok glyphicon glyphicon-ok\"></i><samp class=\"asq-result\"><samp></div>");}return body_0;})();
 	 // question-code-input-presenter.dust
-	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.get("id"),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\" >").reference(ctx.get("body"),ctx,"h").write("</div>");}return body_0;})();
+	(function(){dust.register("question-code-input-presenter",body_0);function body_0(chk,ctx){return chk.write("<div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\" >").reference(ctx.get("body"),ctx,"h").write("</div>");}return body_0;})();
 	 // question-code-input-viewer.dust
-	(function(){dust.register("question-code-input-viewer",body_0);function body_0(chk,ctx){return chk.write("<label class=\"control-label\" for=\"editor-").reference(ctx.get("id"),ctx,"h").write("\">Your solution:</label><div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\">").exists(ctx.get("submission"),ctx,{"else":body_1,"block":body_2},null).write("</div>");}function body_1(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h");}function body_2(chk,ctx){return chk.reference(ctx.getPath(false,["submission","0"]),ctx,"h");}return body_0;})();
+	(function(){dust.register("question-code-input-viewer",body_0);function body_0(chk,ctx){return chk.write("<div id=\"code-editor-").reference(ctx.get("id"),ctx,"h").write("\" class=\"asq-code-editor\">").exists(ctx.get("submission"),ctx,{"else":body_1,"block":body_2},null).write("</div>");}function body_1(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h");}function body_2(chk,ctx){return chk.reference(ctx.getPath(false,["submission","0"]),ctx,"h");}return body_0;})();
 	 // question-multi-choice-presenter.dust
 	(function(){dust.register("question-multi-choice-presenter",body_0);function body_0(chk,ctx){return chk.write("<ol>").section(ctx.get("questionOptions"),ctx,{"block":body_1},null).write("</ol>");}function body_1(chk,ctx){return chk.write("<li class=\"").reference(ctx.get("classList"),ctx,"h").write("\" >").reference(ctx.get("text"),ctx,"h",["s"]).write("</li>\n");}return body_0;})();
 	 // question-multi-choice-stats.dust
@@ -30,9 +34,9 @@ module.exports = function (dust) {
 	 // question-presenter.dust
 	(function(){dust.register("question-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("stem"),ctx,"h",["s"]).partial(body_1,ctx,null).write(" ");}function body_1(chk,ctx){return chk.write("question-").reference(ctx.get("questionType"),ctx,"h").write("-presenter");}return body_0;})();
 	 // question-text-input-presenter.dust
-	(function(){dust.register("question-text-input-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<label class=\"control-label\" for=\"inputText\">Your solution:</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\">");}return body_0;})();
+	(function(){dust.register("question-text-input-presenter",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\">");}return body_0;})();
 	 // question-text-input-viewer.dust
-	(function(){dust.register("question-text-input-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<label class=\"control-label\" for=\"inputText\">Your solution:</label><input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
+	(function(){dust.register("question-text-input-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("body"),ctx,"h",["s"]).write("<input type=\"text\" class=\"\" id=\"inputText\" placeholder=\"Your solution\"").exists(ctx.get("submission"),ctx,{"block":body_1},null).write("/>");}function body_1(chk,ctx){return chk.write("value=\"").reference(ctx.getPath(true,["submission"]),ctx,"h").write("\" disabled");}return body_0;})();
 	 // question-viewer.dust
 	(function(){dust.register("question-viewer",body_0);function body_0(chk,ctx){return chk.reference(ctx.get("stem"),ctx,"h",["s"]).partial(body_1,ctx,null).write(" <input type=\"hidden\" name=\"question-id\" value=").reference(ctx.get("id"),ctx,"h").write("><p class=\"text-right\"><span class=\"asq-rating-widget\"><span class=\"asq-confidence-label\">Confidence:</span>").exists(ctx.get("confidence"),ctx,{"else":body_2,"block":body_4},null).write("</span></p>");}function body_1(chk,ctx){return chk.write("question-").reference(ctx.get("questionType"),ctx,"h").write("-viewer");}function body_2(chk,ctx){return chk.partial("rating",ctx,{"rated":body_3,"val":0});}function body_3(chk,ctx){return chk.reference(ctx.get("id"),ctx,"h");}function body_4(chk,ctx){return chk.partial("rating",ctx,{"rated":body_5,"val":ctx.get("confidence")});}function body_5(chk,ctx){return chk.reference(ctx.get("id"),ctx,"h");}return body_0;})();
 	 // rating.dust
@@ -375,11 +379,13 @@ if('undefined' !== typeof window){
    // initCodeEditors();
     initAssessmentGrids(eventBus);
     initCSSSelect(eventBus);
+    initJSFunctionBody(eventBus);
   } 
 
   var configurureViewer = function(eventBus){
    // initCodeEditors();
    initCSSSelect(eventBus);
+   initJSFunctionBody(eventBus);
   } 
 
   // var ace = require('brace');
@@ -515,6 +521,60 @@ if('undefined' !== typeof window){
   }
 
 
+  var initJSFunctionBody = function(eventBus){
+    $(function(){
+      var interval = 150;
+      $('.asq-js-function-body').each(function(){
+        var $root = $(this);
+        var header = $root.find('.asq-code-header').text();
+        var footer = $root.find('.asq-code-footer').text();
+        var testCommand = $root.find('.asq-evaluate').text();
+        var $codeInput = $root.find('.asq-code-input');
+        var $asqResult = $root.find('.asq-result');
+        var $asqResultWrapper = $root.find('.asq-result-wrapper')
+        var solution= $root.attr('data-asq-correct-output');
+        var timer;
+        
+        var getSubmittedCode = function (){
+          var submission = header;
+          submission += $codeInput.text();
+          submission += footer;
+          submission += ';\n' + testCommand;
+          
+          return submission;
+        }
+
+        var evalInput = function(expr){
+          var result;
+          try{
+              result = eval(expr);
+          }catch(err){
+              result = err.toString();
+          }    
+          return JSON.stringify(result, undefined, 2);
+        }
+        
+        var update = function (){
+          var submission = getSubmittedCode();
+          var result = evalInput(submission);
+          $asqResult.text(result);
+          if("undefined" == typeof solution) return;
+          if(result === solution){
+             $asqResultWrapper.addClass('asq-correct');
+          }else{
+             $asqResultWrapper.removeClass('asq-correct');
+          }        
+        }
+        
+        $codeInput.on('input', function(evt){
+          clearInterval(timer);
+          timer = setTimeout(update, interval);
+        }); 
+      });
+    })
+  }
+
+
  roles.presenter = configurePresenter;
  roles.viewer = configurureViewer;
 
@@ -616,6 +676,10 @@ var MarkupGenerator = module.exports = function(dustInstance){
       'asq-css-select' : {
         'presenter' : 'question-asq-css-select-presenter',
         'viewer'    : 'question-asq-css-select-viewer'
+      },
+      'asq-js-function-body' : {
+        'presenter' : 'question-asq-js-function-body-presenter',
+        'viewer'    : 'question-asq-js-function-body-viewer'
       },
       'multi-choice' : {
         'presenter' : 'question-multi-choice-presenter',
@@ -1012,8 +1076,9 @@ var Parser = module.exports = function(loggerInstance){
     //TODO                  : test this
     defaultMultiChoiceInput : 'checkbox',
     questionSelectors       : {
-      multiChoice : 'multi-choice',
-      cssSelect   : 'asq-css-select',
+      multiChoice    : 'multi-choice',
+      cssSelect      : 'asq-css-select',
+      jsFunctionBody : 'asq-js-function-body',
       codeInput   : 'code-input',
       textInput   : 'text-input',
       highlight   : 'highlight'
@@ -1229,6 +1294,10 @@ var Parser = module.exports = function(loggerInstance){
         question = this.parseCssSelect($, $el, opts);
         break;
 
+      case opts.questionSelectors.jsFunctionBody :
+        question = this.parseJsFunctionBody($, $el, opts);
+        break;
+
       case opts.questionSelectors.multiChoice :
         question = this.parseMultiChoice($, $el, opts);
         question.statTypes = ['correctness']; //Horrible hack to add correctness stats to MCQ...
@@ -1300,7 +1369,7 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     var $stem =$el.find('.asq-stem')
-      , answer = $stem.attr('data-correct-answer');
+      , answer = $stem.attr('data-asq-correct-answer');
     var clone = $el.clone();
     clone.find('.asq-stem').remove();
 
@@ -1318,6 +1387,36 @@ var Parser = module.exports = function(loggerInstance){
     return question;
   }
 
+  this.parseJsFunctionBody = function ($, $el, opts) {
+    // find parent slide id
+    var parentSlideId
+      , $slideParent = $el.parents('.step');
+
+    if($slideParent.length>0){
+      parentSlideId = $slideParent.attr('id') ? $slideParent.attr('id'):'';
+    }
+
+    var $stem =$el.find('.asq-stem')
+      , output = $el.attr('data-asq-correct-output');
+    var clone = $el.clone();
+    clone.find('.asq-stem').remove();
+
+    var question = {
+        stem : getOuterHTML($stem),
+        stemText: $stem.html(),
+        htmlId: $el.attr('id'),
+        body: clone.html(),
+        codeHeader: $el.attr('data-asq-code-header'),
+        codeFooter: $el.attr('data-asq-code-footer'),
+        evalCommand: $el.attr('data-asq-eval-command'),
+        slideHtmlId : parentSlideId,
+        questionType: 'asq-js-function-body',
+        output : typeof clone === 'undefined' ? null : output
+      };
+
+    return question;
+  }
+
   this.parseTextInput = function ($, $el, opts) {
     // find parent slide id
     var parentSlideId
@@ -1328,7 +1427,7 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     var $stem =$el.find('.asq-stem')
-      , answer = $stem.attr('data-correct-answer');
+      , answer = $stem.attr('data-asq-correct-answer');
     var clone = $el.clone();
     clone.find('.asq-stem').remove();
 
@@ -1355,7 +1454,7 @@ var Parser = module.exports = function(loggerInstance){
     }
 
     var $stem =$el.find('.asq-stem')
-      , answer = $stem.attr('data-correct-answer')
+      , answer = $stem.attr('data-asq-correct-answer')
       , question = {
         stem : getOuterHTML($stem),
         stemText: $stem.html(),
