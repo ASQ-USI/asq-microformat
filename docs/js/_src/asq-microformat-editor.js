@@ -37,7 +37,6 @@ function init(){
    $( "#asq-editor" ).resizable({
       handles: "se",
       resize: function( event, ui ) {
-        console.log("called")
         editor.resize();
       }
     });

@@ -38,7 +38,6 @@ function init(){
    $( "#asq-editor" ).resizable({
       handles: "se",
       resize: function( event, ui ) {
-        console.log("called")
         editor.resize();
       }
     });
@@ -788,8 +787,11 @@ if('undefined' !== typeof window){
               result = eval(expr);
           }catch(err){
               result = err.toString();
-          }    
-          return JSON.stringify(result, undefined, 2);
+          } 
+          result = (result === undefined) 
+            ? '<span class="undefined">undefined</span>' 
+            : JSON.stringify(result, undefined, 2);
+          return result;
         }
         
         var update = function (){
