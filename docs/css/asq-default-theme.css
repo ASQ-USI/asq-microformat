@@ -29,11 +29,17 @@
 .answersolutions ol {
   padding-left: 60px;
 }
+.asq-correct-light {
+  background-color: #dff0d8;
+}
 .asq-correct {
   background-color: #5cb85c;
 }
-.asq-wrong {
+.asq-wrong-light {
   background-color: #f2dede;
+}
+.asq-wrong {
+  background-color: #a94442;
 }
 /*------------ Submit answers ------------*/
 .asq-submit-label {
