@@ -52,7 +52,7 @@ module.exports = function (dust) {
 	 // welcomeScreen-presenter.dust
 	(function(){dust.register("welcomeScreen-presenter",body_0);function body_0(chk,ctx){return chk.write("<p><strong>Join this presentation:</strong></p><h3 class=\"slideshow-url\">").reference(ctx.get("presenterLiveUrl"),ctx,"h").write("</h3><div class=\"connected-viewers-icons\"></div><p class=\"connected-viewers-number\">Waiting for viewers</p>");}return body_0;})();
 	 // welcomeScreen-viewer.dust
-	(function(){dust.register("welcomeScreen-viewer",body_0);function body_0(chk,ctx){return chk.write("<h4>Connecting to http://").reference(ctx.get("host"),ctx,"h").write(":").reference(ctx.get("port"),ctx,"h").write("/live/").reference(ctx.get("user"),ctx,"h").write("/</h4>");}return body_0;})();
+	(function(){dust.register("welcomeScreen-viewer",body_0);function body_0(chk,ctx){return chk.write("<h4>Connecting to ").reference(ctx.get("presentationViewUrl"),ctx,"h").write("</h4>");}return body_0;})();
 	// Returning object for nodejs
 	return dust;
 };
@@ -804,6 +804,7 @@ var MarkupGenerator = module.exports = function(dustInstance){
           $('body').attr('data-asq-port', '{port}');
           $('body').attr('data-asq-session-id', '{id}');
           $('body').attr('data-asq-socket-mode', '{mode}');
+          $('body').attr('data-asq-socket-token', '{token}');
 
           //remove black-listed scripts
           $('script').each(function(){
@@ -1138,7 +1139,7 @@ var Parser = module.exports = function(loggerInstance){
     var wrappedHtml = '<div>' + html + '</div>';
 
     //configure dom selector lib implementation
-    $ = isBrowser ? jQuery : cheerio.load(wrappedHtml);
+    $ = isBrowser ? jQuery : cheerio.load(wrappedHtml, {decodeEntities: false});
     $root = isBrowser ? $(wrappedHtml) : $('div').eq(0);
 
     var opts    = this.options
@@ -1186,6 +1187,8 @@ var Parser = module.exports = function(loggerInstance){
     } else {
       errors = this.errors;
     }
+
+    console.log(data.html)
     return returnData(errors, data, logger, start);
   }
 
