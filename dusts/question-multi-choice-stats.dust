@@ -1,5 +1,5 @@
 <form>
-  <ol>
+  <ol class='asq-options'>
   {#question.questionOptions formButtonType=question.formButtonType htmlId=question.htmlId}
     <li class="{classList}" >
       <label class="{formButtonType}">

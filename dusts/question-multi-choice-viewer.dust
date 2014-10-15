@@ -1,4 +1,4 @@
-<ol>
+<ol class='asq-options'>
   {#questionOptions}
     <li class="{classList}" >
       <label class="{formButtonType}">{~n}
