@@ -805,6 +805,8 @@ var MarkupGenerator = module.exports = function(dustInstance){
           $('body').attr('data-asq-session-id', '{id}');
           $('body').attr('data-asq-socket-mode', '{mode}');
           $('body').attr('data-asq-socket-token', '{token}');
+          $('body').attr('data-asq-user-session-id', '{userSessionId}');
+
 
           //remove black-listed scripts
           $('script').each(function(){
@@ -1188,7 +1190,6 @@ var Parser = module.exports = function(loggerInstance){
       errors = this.errors;
     }
 
-    console.log(data.html)
     return returnData(errors, data, logger, start);
   }
 
